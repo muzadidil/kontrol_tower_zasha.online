@@ -11,7 +11,7 @@ class Order extends Model
     protected $fillable = [
         'id', 'pelanggan_id', 'mitra_id', 'tipe_waktu', 'jadwal_pelaksanaan', 
         'status', 'metode_pembayaran', 'durasi_kerja', 'total_biaya', 
-        'komisi_zasha', 'keterangan_kerja'
+        'komisi_zasha', 'keterangan_kerja', 'link_briefing', 'link_referensi', 'link_hasil_kerja', 'deadline', 'kuantitas'
     ];
 
     protected static function booted()

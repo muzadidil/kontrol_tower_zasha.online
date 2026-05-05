@@ -8,6 +8,11 @@
             <p><strong>Status:</strong> {{ $order->status }}</p>
 
             @if($order->status == 'Menunggu Konfirmasi')
+                @if($order->mitra->is_wfh && $order->link_hasil_kerja)
+                    <div class="alert alert-info">
+                        <strong>Hasil Kerja:</strong> <a href="{{ $order->link_hasil_kerja }}" target="_blank">Download/Lihat Hasil Kerja</a>
+                    </div>
+                @endif
                 <form action="{{ route('orders.konfirmasiSelesai', $order->id) }}" method="POST">
                     @csrf
                     @method('PATCH')
