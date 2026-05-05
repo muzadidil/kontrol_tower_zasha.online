@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->string('order_id');
             $table->string('nama_barang');
             $table->string('lokasi_beli');
             $table->decimal('harga_perkiraan', 12, 2);
             $table->decimal('harga_asli', 12, 2)->default(0);
             $table->boolean('status_beli')->default(false);
             $table->timestamps();
+
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
         });
     }
 

@@ -21,6 +21,21 @@ class MitraController extends Controller
         return view('admin.mitra.dashboard', compact('activeOrder'));
     }
 
+    public function tambahItemService(Request $request, $order_id)
+    {
+        \App\Models\OrderItem::create([
+            'order_id' => $order_id,
+            'nama_barang' => $request->nama_barang,
+            'lokasi_beli' => 'Service',
+            'harga_perkiraan' => $request->harga_asli,
+            'harga_asli' => $request->harga_asli,
+            'status_beli' => true,
+            'tipe_item' => $request->tipe_item,
+        ]);
+
+        return back()->with('success', 'Item service berhasil ditambahkan.');
+    }
+
     public function index()
     {
         return view('admin.mitra.index');

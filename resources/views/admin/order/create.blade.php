@@ -40,7 +40,43 @@
                 <option value="Saldo">Saldo</option>
             </select>
         </div>
+        <div class="mb-3">
+            <label>Kategori</label>
+            <select name="kategori" id="kategori" class="form-control" onchange="toggleJastip()">
+                <option value="Reguler">Reguler</option>
+                <option value="Jastip">Jastip</option>
+            </select>
+        </div>
+        
+        <div id="jastipSection" style="display:none;">
+            <h4>Daftar Belanja Jastip</h4>
+            <div id="itemsContainer">
+                <div class="row mb-2 item-row">
+                    <div class="col"><input type="text" name="items[0][nama]" class="form-control" placeholder="Nama Barang"></div>
+                    <div class="col"><input type="number" name="items[0][harga]" class="form-control" placeholder="Harga Perkiraan"></div>
+                    <div class="col"><input type="text" name="items[0][lokasi]" class="form-control" placeholder="Lokasi Beli"></div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary mb-3" onclick="addItem()">+ Tambah Barang</button>
+        </div>
+
         <button type="submit" class="btn btn-primary">Simpan Order</button>
     </form>
 </div>
+
+<script>
+function toggleJastip() {
+    document.getElementById('jastipSection').style.display = document.getElementById('kategori').value == 'Jastip' ? 'block' : 'none';
+}
+function addItem() {
+    let container = document.getElementById('itemsContainer');
+    let index = container.children.length;
+    let div = document.createElement('div');
+    div.className = 'row mb-2 item-row';
+    div.innerHTML = `<div class="col"><input type="text" name="items[${index}][nama]" class="form-control" placeholder="Nama Barang"></div>` +
+                    `<div class="col"><input type="number" name="items[${index}][harga]" class="form-control" placeholder="Harga Perkiraan"></div>` +
+                    `<div class="col"><input type="text" name="items[${index}][lokasi]" class="form-control" placeholder="Lokasi Beli"></div>`;
+    container.appendChild(div);
+}
+</script>
 @endsection

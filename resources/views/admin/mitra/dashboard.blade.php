@@ -4,6 +4,10 @@
 <div class="container">
     <h1>Dashboard Mitra</h1>
     
+    <div class="mb-4">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ppobModal">PPOB / Pulsa & Listrik</button>
+    </div>
+
     @foreach($orders as $order)
         @if($order->status != 'Selesai')
             <div class="card my-3">
@@ -11,37 +15,48 @@
                     <h3>Order #{{ $order->id }}</h3>
                     
                     @if($order->kategori == 'Jastip')
-                        <h5>Daftar Belanja:</h5>
+                        {{-- ... --}}
+                    @elseif($order->mitra->is_wfh)
+                        {{-- ... --}}
+                    @else
+                        <h5>Daftar Item Service:</h5>
                         <ul class="list-group mb-3">
                             @foreach($order->items as $item)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ $item->nama_barang }} (Lokasi: {{ $item->lokasi_beli }}) - Est: Rp{{ number_format($item->harga_perkiraan) }}
-                                    <form action="{{ route('mitra.updateItem', $item->id) }}" method="POST">
-                                        @csrf
-                                        <input type="number" name="harga_asli" value="{{ $item->harga_asli }}" placeholder="Harga Asli">
-                                        <button type="submit" class="btn btn-sm btn-{{ $item->status_beli ? 'success' : 'outline-primary' }}">
-                                            {{ $item->status_beli ? '✓' : 'Checklist' }}
-                                        </button>
-                                    </form>
-                                </li>
+                                <li class="list-group-item">{{ $item->nama_barang }} ({{ $item->tipe_item }}) - Rp{{ number_format($item->harga_asli) }}</li>
                             @endforeach
                         </ul>
-                    @elseif($order->mitra->is_wfh)
-                        <p>Tipe: WFH</p>
-                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#briefingModal">Lihat Briefing</button>
-                        
-                        <form action="{{ route('mitra.updateHasilKerja', $order->id) }}" method="POST" class="mt-3">
+                        <form action="{{ route('mitra.tambahItemService', $order->id) }}" method="POST">
                             @csrf
-                            <input type="text" name="link_hasil_kerja" id="link_hasil_kerja" class="form-control" placeholder="URL Google Drive/DropBox" required oninput="checkLink()">
-                            <button type="submit" id="btnSelesai" class="btn btn-success mt-2" disabled>SELESAI</button>
+                            <input type="text" name="nama_barang" placeholder="Nama Item" required>
+                            <input type="number" name="harga_asli" placeholder="Harga" required>
+                            <select name="tipe_item">
+                                <option value="jasa">Jasa</option>
+                                <option value="sparepart">Sparepart</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-primary">Tambah Item</button>
                         </form>
-                    @else
-                        <button class="btn btn-primary">Maps</button>
                     @endif
                 </div>
             </div>
         @endif
     @endforeach
+</div>
+
+<div class="modal fade" id="ppobModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>PPOB</h5></div>
+            <div class="modal-body">
+                <form action="{{ route('ppob.transaction') }}" method="POST">
+                    @csrf
+                    <input type="text" name="sku" class="form-control mb-2" placeholder="SKU Produk" required>
+                    <input type="text" name="target_number" class="form-control mb-2" placeholder="Nomor Tujuan" required>
+                    <input type="number" name="selling_price" class="form-control mb-2" placeholder="Harga" required>
+                    <button type="submit" class="btn btn-primary">Beli Sekarang</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>

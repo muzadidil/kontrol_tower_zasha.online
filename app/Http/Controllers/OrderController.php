@@ -24,7 +24,25 @@ class OrderController extends Controller
             return back()->withErrors(['metode_pembayaran' => 'Jasa WFH hanya mendukung pembayaran non-tunai/saldo']);
         }
 
-        // ... existing store logic (assumed to exist) ...
+        $jarak_km = $request->jarak_km ?? 0;
+        $biaya_bensin = $jarak_km > 5 ? ($jarak_km - 5) * $mitra->tarif_bensin_per_km_service : 0;
+        
+        $total_biaya = $mitra->biaya_service_standar + $biaya_bensin;
+
+        $order = Order::create([
+            'pelanggan_id' => $request->pelanggan_id,
+            'mitra_id' => $request->mitra_id,
+            'status' => 'Pending',
+            'metode_pembayaran' => $request->metode_pembayaran,
+            'total_biaya' => $total_biaya,
+            'durasi_kerja' => $request->durasi_kerja ?? 0,
+            'komisi_zasha' => 0,
+            'jarak_km' => $jarak_km,
+            'biaya_bensin_service' => $biaya_bensin,
+            'tipe_waktu' => 'Instan',
+        ]);
+
+        return redirect()->back()->with('success', 'Order created.');
     }
 
     public function updateItem(Request $request, $id)
@@ -54,6 +72,13 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $mitra = Mitra::findOrFail($order->mitra_id);
 
+        $total_jasa = $order->items()->where('tipe_item', 'jasa')->sum('harga_asli');
+        $komisi_zasha = ($total_jasa + $order->biaya_bensin_service) * 0.05;
+
+        if ($order->metode_pembayaran == 'COD' && $komisi_zasha > $mitra->saldo_mitra) {
+            return back()->withErrors(['error' => 'Saldo tidak cukup, mohon gunakan pembayaran Transfer/Cashless.']);
+        }
+
         if ($order->kategori == 'Jastip') {
             // Validasi saldo untuk Jastip COD
             if ($order->metode_pembayaran == 'COD') {
@@ -72,14 +97,15 @@ class OrderController extends Controller
             $mitra->saldo_mitra += $pendapatan_mitra;
             $mitra->save();
         } else {
-            // ... (existing)
+            // New logic for Service Module
             if ($order->metode_pembayaran == 'COD') {
-                $mitra->saldo_mitra -= $order->komisi_zasha;
+                $mitra->saldo_mitra -= $komisi_zasha;
                 $mitra->save();
             }
         }
 
         $order->status = 'Selesai';
+        $order->komisi_zasha = $komisi_zasha;
         $order->save();
 
         return back()->with('success', 'Pesanan selesai.');

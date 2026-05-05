@@ -12,7 +12,7 @@ class Order extends Model
         'id', 'pelanggan_id', 'mitra_id', 'tipe_waktu', 'jadwal_pelaksanaan', 
         'status', 'metode_pembayaran', 'durasi_kerja', 'total_biaya', 
         'komisi_zasha', 'keterangan_kerja', 'link_briefing', 'link_referensi', 'link_hasil_kerja', 'deadline', 'kuantitas',
-        'total_harga_barang', 'ongkos_jastip', 'jarak_km', 'jumlah_titik'
+        'total_harga_barang', 'ongkos_jastip', 'jarak_km', 'jumlah_titik', 'biaya_bensin_service'
     ];
 
     public function items()

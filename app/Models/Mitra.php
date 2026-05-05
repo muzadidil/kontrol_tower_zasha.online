@@ -9,7 +9,7 @@ class Mitra extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['id', 'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat', 'nomor_wa', 'saldo_mitra', 'tarif_per_jam', 'tarif_per_hari', 'status', 'portfolio_link', 'is_wfh', 'tarif_per_km'];
+    protected $fillable = ['id', 'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat', 'nomor_wa', 'saldo_mitra', 'tarif_per_jam', 'tarif_per_hari', 'status', 'portfolio_link', 'is_wfh', 'tarif_per_km', 'biaya_service_standar', 'tarif_bensin_per_km_service'];
 
     protected static function booted()
     {

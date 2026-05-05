@@ -6,6 +6,17 @@
     <div class="card mt-3">
         <div class="card-body">
             <p><strong>Status:</strong> {{ $order->status }}</p>
+            
+            @if($order->kategori == 'Jastip')
+                <h5>Daftar Belanja:</h5>
+                <ul class="list-group mb-3">
+                    @foreach($order->items as $item)
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ $item->nama_barang }} - {{ $item->status_beli ? 'Sudah Dibeli' : 'Belum' }}
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
 
             @if($order->status == 'Menunggu Konfirmasi')
                 @if($order->mitra->is_wfh && $order->link_hasil_kerja)
