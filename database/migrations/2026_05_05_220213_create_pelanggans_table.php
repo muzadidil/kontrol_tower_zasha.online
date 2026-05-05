@@ -15,9 +15,8 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->string('nama_lengkap');
             $table->string('nomor_wa');
-            $table->string('email')->unique();
             $table->text('alamat_utama');
-            $table->integer('total_poin')->default(0);
+            $table->decimal('saldo_pelanggan', 15, 2)->default(0);
             $table->timestamps();
         });
     }

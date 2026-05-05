@@ -2,24 +2,34 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Mitra;
+use App\Models\Pelanggan;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        Pelanggan::create([
+            'nama_lengkap' => 'Budi Santoso',
+            'nomor_wa' => '081234567890',
+            'alamat_utama' => 'Jl. Merdeka No. 1, Jakarta',
+            'saldo_pelanggan' => 100000
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        Mitra::create([
+            'nama_panggilan' => 'Pak Asep',
+            'usia' => 35,
+            'kategori' => 'Teknisi',
+            'deskripsi_singkat' => 'Ahli servis AC dan kulkas',
+            'nomor_wa' => '089876543210',
+            'saldo_mitra' => 50000,
+            'tarif_per_jam' => 50000,
+            'tarif_per_hari' => 300000,
+            'status' => 'Aktif'
         ]);
     }
 }

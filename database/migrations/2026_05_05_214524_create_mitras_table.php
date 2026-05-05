@@ -13,11 +13,15 @@ return new class extends Migration
     {
         Schema::create('mitras', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->string('nama_mitra');
-            $table->enum('kategori', ['Kurir', 'Teknisi', 'Jasa']);
-            $table->text('alamat');
+            $table->string('nama_panggilan');
+            $table->integer('usia');
+            $table->enum('kategori', ['Kuli', 'Teknisi', 'Jasa']);
+            $table->text('deskripsi_singkat');
             $table->string('nomor_wa');
-            $table->string('status')->default('aktif');
+            $table->decimal('saldo_mitra', 15, 2)->default(0);
+            $table->decimal('tarif_per_jam', 15, 2);
+            $table->decimal('tarif_per_hari', 15, 2);
+            $table->enum('status', ['Aktif', 'Non-aktif']);
             $table->timestamps();
         });
     }

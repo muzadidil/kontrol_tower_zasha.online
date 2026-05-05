@@ -8,12 +8,10 @@ class Pelanggan extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['id', 'nama_lengkap', 'nomor_wa', 'email', 'alamat_utama', 'total_poin'];
+    protected $fillable = ['id', 'nama_lengkap', 'nomor_wa', 'alamat_utama', 'saldo_pelanggan'];
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
-
         static::creating(function ($model) {
             $latest = self::latest('id')->first();
             $number = $latest ? (int) substr($latest->id, -4) + 1 : 1;

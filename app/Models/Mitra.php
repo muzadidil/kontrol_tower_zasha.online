@@ -9,12 +9,10 @@ class Mitra extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['id', 'nama_mitra', 'kategori', 'alamat', 'nomor_wa', 'status'];
+    protected $fillable = ['id', 'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat', 'nomor_wa', 'saldo_mitra', 'tarif_per_jam', 'tarif_per_hari', 'status'];
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
-
         static::creating(function ($model) {
             $latest = self::latest('id')->first();
             $number = $latest ? (int) substr($latest->id, -4) + 1 : 1;
