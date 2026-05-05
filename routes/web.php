@@ -9,7 +9,8 @@ Route::get('/', function () {
     return view('admin.dashboard');
 });
 
+Route::get('/admin/mitra/dashboard', [MitraController::class, 'dashboard'])->name('admin.mitra.dashboard');
 Route::get('/admin/mitra', [MitraController::class, 'index']);
 Route::get('/admin/order/create', [OrderController::class, 'create'])->name('admin.order.create');
 Route::post('/admin/order', [OrderController::class, 'store'])->name('admin.order.store');
-Route::get('/admin/order', function() { return "List Order"; })->name('admin.order.index');
+Route::post('/admin/order/{id}/update-status', [OrderController::class, 'updateStatus'])->name('admin.order.updateStatus');

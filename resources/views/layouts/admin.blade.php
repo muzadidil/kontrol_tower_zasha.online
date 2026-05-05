@@ -14,9 +14,40 @@
         #sidebar .nav-link { color: #ccc; }
         #sidebar .nav-link:hover { color: #fff; background: #495057; }
         #sidebar .active { color: #fff; background: #0d6efd; }
+        
+        .lock-screen-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
     </style>
 </head>
 <body>
+    @if(isset($activeOrder))
+    <div class="lock-screen-overlay">
+        <div class="text-center">
+            <h2>Order Sedang Berjalan</h2>
+            <p>Status: {{ $activeOrder->status }}</p>
+            <div class="d-grid gap-3">
+                <a href="#" class="btn btn-primary btn-lg">Buka Maps</a>
+                <a href="#" class="btn btn-success btn-lg">Chat WA</a>
+                @if($activeOrder->status == 'Pending')
+                <form action="{{ route('admin.order.updateStatus', $activeOrder->id) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="status" value="Menuju Lokasi">
+                    <button type="submit" class="btn btn-warning btn-lg">SAYA MENUJU LOKASI</button>
+                </form>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div id="sidebar" class="p-3">
         <h4 class="text-white text-center">Zasha Tower</h4>
         <hr>
