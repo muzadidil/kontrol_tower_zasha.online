@@ -19,7 +19,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Menuju Lokasi,Selesai,Dibatalkan',
+            'status' => 'required|in:Menuju Lokasi,Dikerjakan,Menunggu Konfirmasi,Selesai,Dibatalkan',
         ]);
 
         $order = Order::findOrFail($id);
@@ -27,6 +27,27 @@ class OrderController extends Controller
         $order->save();
 
         return back()->with('success', 'Status order berhasil diupdate.');
+    }
+
+    public function tracker($id)
+    {
+        $order = Order::findOrFail($id);
+        return view('admin.pelanggan.tracker', compact('order'));
+    }
+
+    public function konfirmasiSelesai($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->status = 'Selesai';
+        $order->save();
+
+        if ($order->metode_pembayaran == 'COD') {
+            $mitra = Mitra::findOrFail($order->mitra_id);
+            $mitra->saldo_mitra -= $order->komisi_zasha;
+            $mitra->save();
+        }
+
+        return back()->with('success', 'Pesanan selesai dan saldo mitra telah diperbarui.');
     }
 }
 
