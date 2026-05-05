@@ -11,8 +11,14 @@ class Order extends Model
     protected $fillable = [
         'id', 'pelanggan_id', 'mitra_id', 'tipe_waktu', 'jadwal_pelaksanaan', 
         'status', 'metode_pembayaran', 'durasi_kerja', 'total_biaya', 
-        'komisi_zasha', 'keterangan_kerja', 'link_briefing', 'link_referensi', 'link_hasil_kerja', 'deadline', 'kuantitas'
+        'komisi_zasha', 'keterangan_kerja', 'link_briefing', 'link_referensi', 'link_hasil_kerja', 'deadline', 'kuantitas',
+        'total_harga_barang', 'ongkos_jastip', 'jarak_km', 'jumlah_titik'
     ];
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 
     protected static function booted()
     {

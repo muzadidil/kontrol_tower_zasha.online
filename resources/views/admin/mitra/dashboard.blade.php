@@ -10,7 +10,23 @@
                 <div class="card-body">
                     <h3>Order #{{ $order->id }}</h3>
                     
-                    @if($order->mitra->is_wfh)
+                    @if($order->kategori == 'Jastip')
+                        <h5>Daftar Belanja:</h5>
+                        <ul class="list-group mb-3">
+                            @foreach($order->items as $item)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ $item->nama_barang }} (Lokasi: {{ $item->lokasi_beli }}) - Est: Rp{{ number_format($item->harga_perkiraan) }}
+                                    <form action="{{ route('mitra.updateItem', $item->id) }}" method="POST">
+                                        @csrf
+                                        <input type="number" name="harga_asli" value="{{ $item->harga_asli }}" placeholder="Harga Asli">
+                                        <button type="submit" class="btn btn-sm btn-{{ $item->status_beli ? 'success' : 'outline-primary' }}">
+                                            {{ $item->status_beli ? '✓' : 'Checklist' }}
+                                        </button>
+                                    </form>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @elseif($order->mitra->is_wfh)
                         <p>Tipe: WFH</p>
                         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#briefingModal">Lihat Briefing</button>
                         

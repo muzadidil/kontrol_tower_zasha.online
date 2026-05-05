@@ -27,9 +27,20 @@ class OrderController extends Controller
         // ... existing store logic (assumed to exist) ...
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateItem(Request $request, $id)
     {
-        // ... (existing)
+        $item = \App\Models\OrderItem::findOrFail($id);
+        $order = \App\Models\Order::findOrFail($item->order_id);
+
+        $item->harga_asli = $request->harga_asli;
+        $item->status_beli = true;
+        $item->save();
+
+        // Update total_harga_barang di orders
+        $order->total_harga_barang = $order->items()->sum('harga_asli');
+        $order->save();
+
+        return back()->with('success', 'Barang berhasil di-update.');
     }
 
     public function tracker($id)
@@ -43,19 +54,25 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $mitra = Mitra::findOrFail($order->mitra_id);
 
-        if ($mitra->is_wfh) {
+        if ($order->kategori == 'Jastip') {
+            // Validasi saldo untuk Jastip COD
+            if ($order->metode_pembayaran == 'COD') {
+                $komisi = $order->ongkos_jastip * 0.05;
+                if ($mitra->saldo_mitra < $komisi) {
+                    return back()->withErrors(['error' => 'Saldo mitra tidak cukup untuk membayar komisi Jastip.']);
+                }
+                // Potong saldo mitra sebesar 5% dari ongkos jastip
+                $mitra->saldo_mitra -= $komisi;
+                $mitra->save();
+            }
+        } elseif ($mitra->is_wfh) {
             // Escrow: 95% ke mitra, 5% ke platform
             $pendapatan_mitra = $order->total_biaya * 0.95;
-            $pendapatan_platform = $order->total_biaya * 0.05;
-
+            // ... (pendapatan platform logic)
             $mitra->saldo_mitra += $pendapatan_mitra;
             $mitra->save();
-            
-            // Logika platform income bisa ditambahkan di sini jika ada model Keuangan
         } else {
-            $order->status = 'Selesai';
-            $order->save();
-
+            // ... (existing)
             if ($order->metode_pembayaran == 'COD') {
                 $mitra->saldo_mitra -= $order->komisi_zasha;
                 $mitra->save();
