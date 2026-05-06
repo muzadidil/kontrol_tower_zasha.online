@@ -8,7 +8,7 @@ class Pelanggan extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['id', 'nama_lengkap', 'nomor_wa', 'alamat_utama', 'saldo_pelanggan'];
+    protected $fillable = ['id', 'nama_lengkap', 'nomor_wa', 'alamat_utama', 'saldo'];
 
     protected static function booted()
     {
