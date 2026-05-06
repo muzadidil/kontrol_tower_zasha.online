@@ -2,14 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PpobController;
 
-Route::get('/', function () {
-    return view('admin.dashboard');
-});
+Route::get('/', [DashboardController::class, 'index']);
 
 Route::get('/admin/mitra/dashboard', [MitraController::class, 'dashboard'])->name('admin.mitra.dashboard');
 Route::get('/admin/mitra', [MitraController::class, 'index']);
