@@ -10,8 +10,12 @@ use App\Http\Controllers\PpobController;
 
 Route::get('/', [DashboardController::class, 'index']);
 
-Route::get('/admin/mitra/dashboard', [MitraController::class, 'dashboard'])->name('admin.mitra.dashboard');
-Route::get('/admin/mitra', [MitraController::class, 'index']);
+// Mitra Routes
+Route::prefix('admin/mitra')->name('mitra.')->group(function () {
+    Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
+    Route::resource('/', MitraController::class)->parameters(['' => 'mitra']);
+});
+
 Route::get('/admin/order/create', [OrderController::class, 'create'])->name('admin.order.create');
 Route::post('/admin/order', [OrderController::class, 'store'])->name('admin.order.store');
 Route::post('/admin/order/{id}/update-status', [OrderController::class, 'updateStatus'])->name('admin.order.updateStatus');
@@ -24,4 +28,3 @@ Route::post('/ppob/transaction', [PpobController::class, 'createTransaction'])->
 Route::get('/admin/dashboard/finance', [FinanceController::class, 'index'])->name('admin.finance.dashboard');
 Route::get('/admin/finance/deposit', [FinanceController::class, 'deposit'])->name('admin.finance.deposit');
 Route::post('/admin/finance/deposit', [FinanceController::class, 'storeDeposit'])->name('admin.finance.storeDeposit');
-

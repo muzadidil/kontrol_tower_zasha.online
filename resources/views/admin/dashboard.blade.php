@@ -2,96 +2,85 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <h1 class="h3 mb-4 text-gray-800">Main Command Center</h1>
+    <h2 class="mb-4 fw-bold text-dark">Main Command Center</h2>
 
     <!-- Quick Stats -->
-    <div class="row">
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Mitra</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalMitra }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div>
+    <div class="row g-4">
+        <div class="col-xl-4 col-md-6">
+            <div class="card p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-uppercase text-muted fw-bold small mb-1">Total Mitra</div>
+                        <div class="h3 fw-bold text-dark mb-0">{{ $totalMitra }}</div>
                     </div>
+                    <div class="text-primary fs-3"><i class="fas fa-users"></i></div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Pelanggan</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalPelanggan }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-user-friends fa-2x text-gray-300"></i></div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-uppercase text-muted fw-bold small mb-1">Total Pelanggan</div>
+                        <div class="h3 fw-bold text-dark mb-0">{{ $totalPelanggan }}</div>
                     </div>
+                    <div class="text-success fs-3"><i class="fas fa-user-friends"></i></div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Order Aktif</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalOrderAktif }}</div>
-                        </div>
-                        <div class="col-auto"><i class="fas fa-shopping-cart fa-2x text-gray-300"></i></div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-uppercase text-muted fw-bold small mb-1">Order Aktif</div>
+                        <div class="h3 fw-bold text-dark mb-0">{{ $totalOrderAktif }}</div>
                     </div>
+                    <div class="text-warning fs-3"><i class="fas fa-shopping-cart"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="row mb-4">
+    <div class="row g-3 my-4">
         <div class="col-md-3">
-            <a href="{{ route('admin.finance.dashboard') }}" class="btn btn-primary btn-lg btn-block">💰 Buku Kas</a>
+            <a href="{{ route('admin.finance.dashboard') }}" class="btn btn-primary btn-lg w-100 py-3 fw-bold">💰 Buku Kas</a>
         </div>
         <div class="col-md-3">
-            <a href="{{ route('admin.order.create') }}" class="btn btn-success btn-lg btn-block">➕ Order Baru</a>
+            <a href="{{ route('admin.order.create') }}" class="btn btn-success btn-lg w-100 py-3 fw-bold">➕ Order Baru</a>
         </div>
         <div class="col-md-3">
-            <a href="#" class="btn btn-warning btn-lg btn-block text-white">⚡ PPOB Digiflazz</a>
+            <a href="{{ route('mitra.dashboard') }}" class="btn btn-warning btn-lg w-100 py-3 fw-bold text-white">⚡ PPOB Digiflazz</a>
         </div>
         <div class="col-md-3">
-            <a href="{{ url('/admin/mitra') }}" class="btn btn-info btn-lg btn-block">👥 Manajemen Mitra</a>
+            <a href="{{ url('/admin/mitra') }}" class="btn btn-info btn-lg w-100 py-3 fw-bold text-white">👥 Manajemen Mitra</a>
         </div>
     </div>
 
     <!-- Latest Orders -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">5 Order Terakhir</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Pelanggan</th>
-                            <th>Status</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($latestOrders as $order)
-                        <tr>
-                            <td>{{ $order->id }}</td>
-                            <td>{{ $order->pelanggan_id }}</td>
-                            <td>{{ $order->status }}</td>
-                            <td>{{ number_format($order->total_harga, 0, ',', '.') }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+    <div class="card p-4">
+        <h5 class="fw-bold text-dark mb-4">5 Order Terakhir</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Pelanggan</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($latestOrders as $order)
+                    <tr>
+                        <td class="fw-bold">#{{ $order->id }}</td>
+                        <td>{{ $order->pelanggan_id }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ $order->status }}</span></td>
+                        <td class="fw-bold">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
