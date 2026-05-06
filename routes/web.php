@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PpobController;
@@ -21,4 +22,7 @@ Route::post('/admin/order-item/{id}/update', [OrderController::class, 'updateIte
 Route::post('/admin/order/{order_id}/tambah-item-service', [MitraController::class, 'tambahItemService'])->name('mitra.tambahItemService');
 
 Route::post('/ppob/transaction', [PpobController::class, 'createTransaction'])->name('ppob.transaction');
-Route::post('/api/ppob/webhook', [PpobController::class, 'webhook'])->name('ppob.webhook');
+Route::get('/admin/dashboard/finance', [FinanceController::class, 'index'])->name('admin.finance.dashboard');
+Route::get('/admin/finance/deposit', [FinanceController::class, 'deposit'])->name('admin.finance.deposit');
+Route::post('/admin/finance/deposit', [FinanceController::class, 'storeDeposit'])->name('admin.finance.storeDeposit');
+

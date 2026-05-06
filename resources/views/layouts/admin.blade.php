@@ -63,10 +63,16 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="nav-link">
-                    <i class="fas fa-file-alt me-2"></i> Laporan
+                <a href="{{ route('admin.finance.dashboard') }}" class="nav-link {{ request()->is('admin/dashboard/finance') ? 'active' : '' }}">
+                    <i class="fas fa-wallet me-2"></i> Keuangan
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.finance.deposit') }}" class="nav-link {{ request()->is('admin/finance/deposit') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle me-2"></i> Deposit Manual
+                </a>
+            </li>
+
         </ul>
     </div>
 
