@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\OrderController;
@@ -10,7 +10,7 @@ use App\Http\Controllers\PpobController;
 use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\WithdrawalController;
 
-Route::get('/', [DashboardController::class, 'index']);
+Route::get('/', [PelangganController::class, 'index']);
 
 // Mitra Routes
 Route::prefix('admin/mitra')->name('mitra.')->group(function () {
