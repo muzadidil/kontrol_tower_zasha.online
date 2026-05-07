@@ -9,15 +9,23 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PpobController;
 use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\WithdrawalController;
+use App\Http\Controllers\RiwayatController;
 
 // Pelanggan Routes
 Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
 Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
-Route::get('/pesanan', function () { return "Halaman Pesanan"; })->name('pelanggan.pesanan');
+Route::get('/pesanan', function () { return redirect()->route('pelanggan.riwayat.index'); })->name('pelanggan.pesanan');
 Route::get('/dompet', function () { return "Halaman Dompet"; })->name('pelanggan.dompet');
 Route::get('/profil', function () { return "Halaman Profil"; })->name('pelanggan.profil');
 Route::get('/topup', function () { return "Halaman Topup"; })->name('pelanggan.topup');
 Route::get('/katalog/{id_kategori}', function ($id) { return "Halaman Katalog ID: " . $id; })->name('pelanggan.katalog');
+
+// Fitur Riwayat
+Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
+    Route::get('/', [RiwayatController::class, 'index'])->name('index');
+    Route::get('/update-status', [RiwayatController::class, 'updateStatus'])->name('update');
+    Route::post('/ulasan', [RiwayatController::class, 'kirimUlasan'])->name('ulasan');
+});
 
 // Admin & Mitra Routes
 Route::prefix('admin')->group(function () {

@@ -1,9 +1,9 @@
 <nav class="navbar fixed-bottom nav-bottom shadow-lg" id="bottom-nav">
     <div class="container-fluid d-flex justify-content-around px-0">
-        <a href="{{ url('/') }}" class="nav-link-custom {{ request()->is('/') ? 'active' : '' }} text-center flex-grow-1">
+        <a href="{{ route('pelanggan.dashboard') }}" class="nav-link-custom {{ request()->is('/') ? 'active' : '' }} text-center flex-grow-1">
             <i class="bi bi-house-door-fill fs-5 d-block mb-1"></i>Beranda
         </a>
-        <a href="{{ route('pelanggan.pesanan') }}" class="nav-link-custom {{ request()->is('pesanan*') ? 'active' : '' }} text-center flex-grow-1">
+        <a href="{{ route('pelanggan.riwayat.index') }}" class="nav-link-custom {{ request()->is('riwayat*') ? 'active' : '' }} text-center flex-grow-1">
             <i class="bi bi-receipt fs-5 d-block mb-1"></i>Pesanan
         </a>
         <a href="{{ route('pelanggan.dompet') }}" class="nav-link-custom {{ request()->is('dompet*') ? 'active' : '' }} text-center flex-grow-1">

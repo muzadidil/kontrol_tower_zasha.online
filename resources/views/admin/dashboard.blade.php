@@ -1,87 +1,163 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-fluid">
-    <h2 class="mb-4 fw-bold text-dark">Main Command Center</h2>
-
-    <!-- Quick Stats -->
-    <div class="row g-4">
-        <div class="col-xl-4 col-md-6">
-            <div class="card p-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-uppercase text-muted fw-bold small mb-1">Total Mitra</div>
-                        <div class="h3 fw-bold text-dark mb-0">{{ $totalMitra }}</div>
-                    </div>
-                    <div class="text-primary fs-3"><i class="fas fa-users"></i></div>
+<div class="row g-4 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-zasha p-3 border-start border-primary border-4">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-3">
+                    <i class="fa-solid fa-wallet fs-4 text-primary"></i>
                 </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-md-6">
-            <div class="card p-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-uppercase text-muted fw-bold small mb-1">Total Pelanggan</div>
-                        <div class="h3 fw-bold text-dark mb-0">{{ $totalPelanggan }}</div>
-                    </div>
-                    <div class="text-success fs-3"><i class="fas fa-user-friends"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-md-6">
-            <div class="card p-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="text-uppercase text-muted fw-bold small mb-1">Order Aktif</div>
-                        <div class="h3 fw-bold text-dark mb-0">{{ $totalOrderAktif }}</div>
-                    </div>
-                    <div class="text-warning fs-3"><i class="fas fa-shopping-cart"></i></div>
+                <div class="flex-grow-1 ms-3">
+                    <p class="text-muted small mb-1 fw-bold">Total Omzet</p>
+                    <h5 class="mb-0 fw-bold">Rp 12.540.000</h5>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row g-3 my-4">
-        <div class="col-md-3">
-            <a href="{{ route('admin.finance.dashboard') }}" class="btn btn-primary btn-lg w-100 py-3 fw-bold">💰 Buku Kas</a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ route('admin.order.create') }}" class="btn btn-success btn-lg w-100 py-3 fw-bold">➕ Order Baru</a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ route('mitra.dashboard') }}" class="btn btn-warning btn-lg w-100 py-3 fw-bold text-white">⚡ PPOB Digiflazz</a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url('/admin/mitra') }}" class="btn btn-info btn-lg w-100 py-3 fw-bold text-white">👥 Manajemen Mitra</a>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-zasha p-3 border-start border-success border-4">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded-3">
+                    <i class="fa-solid fa-users fs-4 text-success"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <p class="text-muted small mb-1 fw-bold">Mitra Aktif</p>
+                    <h5 class="mb-0 fw-bold">84 Orang</h5>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Latest Orders -->
-    <div class="card p-4">
-        <h5 class="fw-bold text-dark mb-4">5 Order Terakhir</h5>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Pelanggan</th>
-                        <th>Status</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($latestOrders as $order)
-                    <tr>
-                        <td class="fw-bold">#{{ $order->id }}</td>
-                        <td>{{ $order->pelanggan_id }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ $order->status }}</span></td>
-                        <td class="fw-bold">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-zasha p-3 border-start border-warning border-4">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded-3">
+                    <i class="fa-solid fa-clock-rotate-left fs-4 text-warning"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <p class="text-muted small mb-1 fw-bold">Pending Order</p>
+                    <h5 class="mb-0 fw-bold">12 Pesanan</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card card-zasha p-3 border-start border-info border-4">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 bg-info bg-opacity-10 p-3 rounded-3">
+                    <i class="fa-solid fa-chart-line fs-4 text-info"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <p class="text-muted small mb-1 fw-bold">Profit (Bulan Ini)</p>
+                    <h5 class="mb-0 fw-bold">Rp 3.200.000</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-xl-8">
+        <div class="card card-zasha p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-bold mb-0">Tren Pesanan Mingguan</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Mei 2026
+                    </button>
+                </div>
+            </div>
+            <canvas id="orderChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-4">
+        <div class="card card-zasha p-4 h-100">
+            <h6 class="fw-bold mb-4">Aktivitas Terakhir</h6>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item px-0 border-0 mb-3">
+                    <div class="d-flex align-items-center">
+                        <img src="https://ui-avatars.com/api/?name=BU&background=random" class="rounded-circle me-3" width="40">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 small fw-bold">Budi Utomo</h6>
+                            <small class="text-muted">Order Jastip Food • 2m ago</small>
+                        </div>
+                        <span class="badge bg-light text-primary rounded-pill">Rp 45k</span>
+                    </div>
+                </div>
+                <div class="list-group-item px-0 border-0 mb-3">
+                    <div class="d-flex align-items-center">
+                        <img src="https://ui-avatars.com/api/?name=AM&background=random" class="rounded-circle me-3" width="40">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 small fw-bold">Anisa Maharani</h6>
+                            <small class="text-muted">Service AC • 15m ago</small>
+                        </div>
+                        <span class="badge bg-light text-primary rounded-pill">Rp 150k</span>
+                    </div>
+                </div>
+                <div class="list-group-item px-0 border-0">
+                    <div class="d-flex align-items-center">
+                        <img src="https://ui-avatars.com/api/?name=RK&background=random" class="rounded-circle me-3" width="40">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 small fw-bold">Rizky Perdana</h6>
+                            <small class="text-muted">PPOB Listrik • 1h ago</small>
+                        </div>
+                        <span class="badge bg-light text-primary rounded-pill">Rp 200k</span>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ route('pelanggan.riwayat.index') }}" class="btn btn-light w-100 mt-4 fw-bold small rounded-pill">Lihat Semua</a>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('orderChart').getContext('2d');
+    
+    // Gradasi Warna untuk Area Chart
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(0, 90, 169, 0.2)');
+    gradient.addColorStop(1, 'rgba(0, 90, 169, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            datasets: [{
+                label: 'Jumlah Pesanan',
+                data: [12, 19, 15, 25, 22, 30, 28],
+                borderColor: '#005aa9',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#005aa9'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [5, 5], color: '#e0e0e0', drawBorder: false }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+@endpush

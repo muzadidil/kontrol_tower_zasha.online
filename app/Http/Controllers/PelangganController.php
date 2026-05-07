@@ -10,23 +10,24 @@ class PelangganController extends Controller
 {
     public function index()
     {
-        // Mengambil data user yang login, jika tidak ada gunakan data dummy agar tidak error undefined variable
+        // LOGIKA BYPASS: Selalu sediakan data user dummy agar fitur tidak crash
         $user = Auth::user() ?? (object) [
-            'name' => 'muzadidil',
-            'foto' => 'https://ui-avatars.com/api/?name=Ricky+Akbar&background=002d72&color=fff',
+            'name' => 'Muzadidil Fuad',
+            'foto' => null,
             'kode_zasha' => 'ZSH-001',
-            'saldo' => 0,
-            'is_verif' => 1
+            'saldo' => 75000,
+            'is_verif' => 1 // Set 1 agar gembok layanan terbuka
         ];
 
-        // Mengambil data kategori dari database, gunakan try-catch agar tidak crash jika tabel belum ada
+        $nama_panggilan = explode(' ', trim($user->name))[0];
+        $foto_user = 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=002d72&color=fff';
+
         try {
             $categories = KategoriPekerjaan::orderBy('id_kategori', 'asc')->get();
         } catch (\Exception $e) {
-            $categories = collect([]);
+            $categories = collect([]); // Balikkan koleksi kosong jika tabel belum ada
         }
 
-        // Mengarahkan ke resources/views/pelanggan/dashboard.blade.php
-        return view('pelanggan.dashboard', compact('user', 'categories'));
+        return view('pelanggan.dashboard', compact('user', 'nama_panggilan', 'foto_user', 'categories'));
     }
 }

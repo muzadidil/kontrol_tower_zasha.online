@@ -1,8 +1,7 @@
 <div id="sidebar" class="d-flex flex-column py-4">
-    <h4 class="px-4 mb-4 fw-bold text-primary">Zasha Tower</h4>
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
-            <a href="{{ route('admin.finance.dashboard') }}" class="nav-link {{ request()->is('admin/dashboard/finance') ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
             </a>
         </li>
