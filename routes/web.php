@@ -10,31 +10,54 @@ use App\Http\Controllers\PpobController;
 use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\WithdrawalController;
 
-Route::get('/', [PelangganController::class, 'index']);
+// Pelanggan Routes
+Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
+Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
+Route::get('/pesanan', function () { return "Halaman Pesanan"; })->name('pelanggan.pesanan');
+Route::get('/dompet', function () { return "Halaman Dompet"; })->name('pelanggan.dompet');
+Route::get('/profil', function () { return "Halaman Profil"; })->name('pelanggan.profil');
+Route::get('/topup', function () { return "Halaman Topup"; })->name('pelanggan.topup');
+Route::get('/katalog/{id_kategori}', function ($id) { return "Halaman Katalog ID: " . $id; })->name('pelanggan.katalog');
 
-// Mitra Routes
-Route::prefix('admin/mitra')->name('mitra.')->group(function () {
-    Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
-    Route::resource('/', MitraController::class)->parameters(['' => 'mitra']);
+// Admin & Mitra Routes
+Route::prefix('admin')->group(function () {
+    // Dashboard Alias for Sidebar
+    Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
+    
+    // Mitra Management
+    Route::prefix('mitra')->name('mitra.')->group(function () {
+        Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
+        Route::resource('/', MitraController::class)->parameters(['' => 'mitra'])->names([
+            'index' => 'index',
+            'create' => 'create',
+            'store' => 'store',
+            'show' => 'show',
+            'edit' => 'edit',
+            'update' => 'update',
+            'destroy' => 'destroy',
+        ]);
+    });
+
+    // Order Management
+    Route::get('/order/create', [OrderController::class, 'create'])->name('admin.order.create');
+    Route::post('/order', [OrderController::class, 'store'])->name('admin.order.store');
+    Route::post('/order/{id}/update-status', [OrderController::class, 'updateStatus'])->name('admin.order.updateStatus');
+    Route::get('/pelanggan/tracker/{id}', [OrderController::class, 'tracker'])->name('orders.tracker');
+    Route::patch('/order/{id}/konfirmasi-selesai', [OrderController::class, 'konfirmasiSelesai'])->name('orders.konfirmasiSelesai');
+    Route::post('/order-item/{id}/update', [OrderController::class, 'updateItem'])->name('mitra.updateItem');
+    Route::post('/order/{order_id}/tambah-item-service', [MitraController::class, 'tambahItemService'])->name('mitra.tambahItemService');
+
+    // Finance Management
+    Route::get('/dashboard/finance', [FinanceController::class, 'index'])->name('admin.finance.dashboard');
+    Route::get('/finance/deposit', [FinanceController::class, 'deposit'])->name('admin.finance.deposit');
+    Route::post('/finance/deposit', [FinanceController::class, 'storeDeposit'])->name('admin.finance.storeDeposit');
+    Route::get('/finance/withdrawal', [WithdrawalController::class, 'adminIndex'])->name('admin.finance.withdrawal');
+    Route::post('/finance/withdrawal/{id}/approve', [WithdrawalController::class, 'approve'])->name('admin.finance.withdrawal.approve');
+    Route::post('/finance/withdrawal/{id}/reject', [WithdrawalController::class, 'reject'])->name('admin.finance.withdrawal.reject');
 });
 
-Route::get('/admin/order/create', [OrderController::class, 'create'])->name('admin.order.create');
-Route::post('/admin/order', [OrderController::class, 'store'])->name('admin.order.store');
-Route::post('/admin/order/{id}/update-status', [OrderController::class, 'updateStatus'])->name('admin.order.updateStatus');
-Route::get('/admin/pelanggan/tracker/{id}', [OrderController::class, 'tracker'])->name('orders.tracker');
-Route::patch('/admin/order/{id}/konfirmasi-selesai', [OrderController::class, 'konfirmasiSelesai'])->name('orders.konfirmasiSelesai');
-Route::post('/admin/order-item/{id}/update', [OrderController::class, 'updateItem'])->name('mitra.updateItem');
-Route::post('/admin/order/{order_id}/tambah-item-service', [MitraController::class, 'tambahItemService'])->name('mitra.tambahItemService');
-
+// PPOB & Wallet
 Route::post('/ppob/transaction', [PpobController::class, 'createTransaction'])->name('ppob.transaction');
-Route::get('/admin/dashboard/finance', [FinanceController::class, 'index'])->name('admin.finance.dashboard');
-Route::get('/admin/finance/deposit', [FinanceController::class, 'deposit'])->name('admin.finance.deposit');
-Route::post('/admin/finance/deposit', [FinanceController::class, 'storeDeposit'])->name('admin.finance.storeDeposit');
-
-// Wallet & Withdrawal Routes
 Route::post('/mitra/transfer', [WalletTransferController::class, 'transfer'])->name('mitra.transfer');
 Route::get('/mitra/withdrawal', [WithdrawalController::class, 'index'])->name('mitra.withdrawal');
 Route::post('/mitra/withdrawal', [WithdrawalController::class, 'request'])->name('mitra.withdrawal.request');
-Route::get('/admin/finance/withdrawal', [WithdrawalController::class, 'adminIndex'])->name('admin.finance.withdrawal');
-Route::post('/admin/finance/withdrawal/{id}/approve', [WithdrawalController::class, 'approve'])->name('admin.finance.withdrawal.approve');
-Route::post('/admin/finance/withdrawal/{id}/reject', [WithdrawalController::class, 'reject'])->name('admin.finance.withdrawal.reject');
