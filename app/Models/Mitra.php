@@ -19,4 +19,19 @@ class Mitra extends Model
             $model->id = 'ZSH-MTR-' . str_pad($number, 4, '0', STR_PAD_LEFT);
         });
     }
+
+    public function walletTransfersSent()
+    {
+        return $this->hasMany(WalletTransfer::class, 'sender_mitra_id');
+    }
+
+    public function walletTransfersReceived()
+    {
+        return $this->hasMany(WalletTransfer::class, 'receiver_mitra_id');
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class, 'mitra_id');
+    }
 }

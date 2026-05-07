@@ -7,6 +7,8 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PpobController;
+use App\Http\Controllers\WalletTransferController;
+use App\Http\Controllers\WithdrawalController;
 
 Route::get('/', [DashboardController::class, 'index']);
 
@@ -28,3 +30,11 @@ Route::post('/ppob/transaction', [PpobController::class, 'createTransaction'])->
 Route::get('/admin/dashboard/finance', [FinanceController::class, 'index'])->name('admin.finance.dashboard');
 Route::get('/admin/finance/deposit', [FinanceController::class, 'deposit'])->name('admin.finance.deposit');
 Route::post('/admin/finance/deposit', [FinanceController::class, 'storeDeposit'])->name('admin.finance.storeDeposit');
+
+// Wallet & Withdrawal Routes
+Route::post('/mitra/transfer', [WalletTransferController::class, 'transfer'])->name('mitra.transfer');
+Route::get('/mitra/withdrawal', [WithdrawalController::class, 'index'])->name('mitra.withdrawal');
+Route::post('/mitra/withdrawal', [WithdrawalController::class, 'request'])->name('mitra.withdrawal.request');
+Route::get('/admin/finance/withdrawal', [WithdrawalController::class, 'adminIndex'])->name('admin.finance.withdrawal');
+Route::post('/admin/finance/withdrawal/{id}/approve', [WithdrawalController::class, 'approve'])->name('admin.finance.withdrawal.approve');
+Route::post('/admin/finance/withdrawal/{id}/reject', [WithdrawalController::class, 'reject'])->name('admin.finance.withdrawal.reject');

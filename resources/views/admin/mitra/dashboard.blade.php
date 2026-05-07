@@ -6,6 +6,8 @@
     
     <div class="mb-4">
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ppobModal">PPOB / Pulsa & Listrik</button>
+        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#transferModal">Transfer Saldo</button>
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#withdrawalModal">Tarik Dana</button>
     </div>
 
     @foreach($orders as $order)
@@ -53,6 +55,41 @@
                     <input type="text" name="target_number" class="form-control mb-2" placeholder="Nomor Tujuan" required>
                     <input type="number" name="selling_price" class="form-control mb-2" placeholder="Harga" required>
                     <button type="submit" class="btn btn-primary">Beli Sekarang</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transferModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>Transfer Saldo</h5></div>
+            <div class="modal-body">
+                <form action="{{ route('mitra.transfer') }}" method="POST">
+                    @csrf
+                    <input type="text" name="receiver_id" class="form-control mb-2" placeholder="ID Mitra Penerima" required>
+                    <input type="number" name="amount" class="form-control mb-2" placeholder="Jumlah" required>
+                    <textarea name="description" class="form-control mb-2" placeholder="Deskripsi"></textarea>
+                    <button type="submit" class="btn btn-primary">Transfer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="withdrawalModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>Tarik Dana</h5></div>
+            <div class="modal-body">
+                <form action="{{ route('mitra.withdrawal.request') }}" method="POST">
+                    @csrf
+                    <input type="text" name="bank_name" class="form-control mb-2" placeholder="Nama Bank/E-Wallet" required>
+                    <input type="text" name="account_number" class="form-control mb-2" placeholder="Nomor Rekening" required>
+                    <input type="text" name="account_name" class="form-control mb-2" placeholder="Nama Pemilik" required>
+                    <input type="number" name="nominal" class="form-control mb-2" placeholder="Nominal (Min. 50.000)" required>
+                    <button type="submit" class="btn btn-primary">Request Tarik Dana</button>
                 </form>
             </div>
         </div>
