@@ -10,6 +10,7 @@ use App\Http\Controllers\PpobController;
 use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\AdminJastipController;
 // --- TAMBAHAN BARU: Import Controller Admin Monitor ---
 use App\Http\Controllers\AdminMonitorController; 
 
@@ -33,6 +34,7 @@ Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
 Route::prefix('admin')->group(function () {
     // Dashboard Alias for Sidebar
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
+    Route::get('/jastip', [AdminJastipController::class, 'index'])->name('admin.jastip');
     
     // --- TAMBAHAN BARU: Admin Monitor (Radar Mitra) ---
     Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
