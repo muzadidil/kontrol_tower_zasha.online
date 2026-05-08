@@ -11,8 +11,18 @@
             </a>
         </li>
         <li>
-            <a href="{{ route('admin.kategori.index') }}" class="nav-link {{ request()->is('admin/kategori*') ? 'active' : '' }}">
+            <a href="{{ route('admin.verification.index') }}" class="nav-link {{ request()->is('admin/verification*') ? 'active' : '' }}">
+                <i class="fas fa-user-check me-2"></i> Verifikasi Akun
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.kategori.index') }}" class="nav-link {{ request()->is('admin/kategori') ? 'active' : '' }}">
                 <i class="fas fa-tags me-2"></i> Manajemen Kategori
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.master.kategori') }}" class="nav-link {{ request()->is('admin/master-kategori*') ? 'active' : '' }}">
+                <i class="fas fa-layer-group me-2"></i> Master Satuan & Jastip
             </a>
         </li>
         <li>
@@ -20,9 +30,17 @@
                 <i class="fas fa-broadcast-tower me-2"></i> Radar Mitra
             </a>
         </li>
+        
+        <li class="sidebar-divider">Keuangan</li>
         <li>
             <a href="{{ route('admin.finance.dashboard') }}" class="nav-link {{ request()->is('admin/dashboard/finance') ? 'active' : '' }}">
-                <i class="fas fa-wallet me-2"></i> Keuangan
+                <i class="fas fa-wallet me-2"></i> Ringkasan Keuangan
+            </a>
+        </li>
+        <!-- MENU BARU: Konfirmasi Topup -->
+        <li>
+            <a href="{{ route('admin.finance.topup.index') }}" class="nav-link {{ request()->is('admin/finance/topup*') ? 'active' : '' }}">
+                <i class="fas fa-cash-register me-2"></i> Konfirmasi Topup
             </a>
         </li>
         <li>
@@ -42,7 +60,6 @@
                 <i class="fas fa-receipt me-2"></i> Global Monitoring
             </a>
         </li>
-        <!-- MENU BARU: Arsip Pesanan -->
         <li>
             <a href="{{ route('admin.orders.arsip') }}" class="nav-link {{ request()->is('admin/orders/arsip*') ? 'active' : '' }}">
                 <i class="fas fa-archive me-2"></i> Arsip Pesanan
