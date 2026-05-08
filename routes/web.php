@@ -23,10 +23,16 @@ use App\Http\Controllers\AdminTopupController;
 Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
 Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
 Route::get('/pesanan', function () { return redirect()->route('pelanggan.riwayat.index'); })->name('pelanggan.pesanan');
-Route::get('/dompet', function () { return "Halaman Dompet"; })->name('pelanggan.dompet');
 Route::get('/profil', function () { return "Halaman Profil"; })->name('pelanggan.profil');
+Route::get('/alamat', [PelangganController::class, 'alamat'])->name('pelanggan.alamat');
+Route::get('/review/{id_order}', [PelangganController::class, 'review'])->name('pelanggan.review');
+Route::post('/review/kirim', [PelangganController::class, 'kirimReview'])->name('pelanggan.review.kirim');
+Route::get('/dompet', [PelangganController::class, 'dompet'])->name('pelanggan.dompet');
+Route::post('/dompet/topup', [PelangganController::class, 'topup'])->name('pelanggan.dompet.topup');
+Route::get('/invoice/{id}', [PelangganController::class, 'invoice'])->name('pelanggan.invoice');
+Route::get('/invoice/cek-status/{id}', [PelangganController::class, 'cekStatus']);
+Route::get('/katalog/{id_kategori}', [PelangganController::class, 'katalog'])->name('pelanggan.katalog');
 Route::get('/topup', function () { return "Halaman Topup"; })->name('pelanggan.topup');
-Route::get('/katalog/{id_kategori}', function ($id) { return "Halaman Katalog ID: " . $id; })->name('pelanggan.katalog');
 
 // Fitur Riwayat
 Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
