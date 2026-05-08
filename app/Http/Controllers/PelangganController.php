@@ -10,7 +10,21 @@ class PelangganController extends Controller
 {
     public function index()
     {
-        return view('pelanggan.dashboard');
+        // Dummy Data User untuk Dashboard
+        $user = new \stdClass();
+        $user->name = 'Muzadidil Akbar'; 
+        $user->foto = ''; 
+        $user->kode_zasha = 'ZSH-001';
+        $user->is_verif = 1; 
+        $user->saldo = 150000;
+
+        // Dummy Data Kategori
+        $cat1 = new \stdClass(); $cat1->id_kategori = 1; $cat1->nama_kategori = 'Jastip Pasar'; $cat1->svg_kategori = '<i class="bi bi-bag-check-fill fs-3 text-primary"></i>';
+        $cat2 = new \stdClass(); $cat2->id_kategori = 2; $cat2->nama_kategori = 'Servis AC'; $cat2->svg_kategori = '<i class="bi bi-tools fs-3 text-info"></i>';
+
+        $categories = [$cat1, $cat2];
+
+        return view('pelanggan.dashboard', compact('user', 'categories'));
     }
 
     public function alamat()
@@ -18,33 +32,6 @@ class PelangganController extends Controller
         $id_cust = Auth::id() ?? session('id_pelanggan'); 
         $alamat = DB::table('alamat')->where('id_pelanggan', $id_cust)->orderBy('is_utama', 'desc')->get();
         return view('alamat', compact('alamat'));
-    }
-
-    public function review($id_order)
-    {
-        $order = DB::table('orders as o')
-            ->join('mitra as m', 'o.id_mitra', '=', 'm.id_mitra')
-            ->select('o.*', 'm.nama_mitra')
-            ->where('o.id_order', $id_order)
-            ->first();
-        if (!$order) return redirect()->back()->with('error', 'Order tidak ditemukan.');
-        return view('review', compact('order'));
-    }
-
-    public function kirimReview(Request $request)
-    {
-        $id_pelanggan = Auth::id() ?? session('id_pelanggan');
-        DB::table('review_mitra')->insert([
-            'id_mitra' => $request->id_mitra,
-            'id_pelanggan' => $id_pelanggan,
-            'id_order' => $request->id_order,
-            'bintang' => $request->rating,
-            'komentar' => $request->komentar,
-            'created_at' => now()
-        ]);
-        $new_avg = DB::table('review_mitra')->where('id_mitra', $request->id_mitra)->avg('bintang');
-        DB::table('mitra')->where('id_mitra', $request->id_mitra)->update(['rating_avg' => $new_avg]);
-        return redirect()->route('pelanggan.profil')->with('success', 'Ulasan terkirim!');
     }
 
     public function dompet()
@@ -55,24 +42,6 @@ class PelangganController extends Controller
         return view('dompet', compact('pelanggan', 'riwayat'));
     }
 
-    public function topup(Request $request)
-    {
-        $id_p = Auth::id() ?? session('id_pelanggan');
-        $kode_unik = rand(100, 999);
-        $total_transfer = $request->nominal + $kode_unik;
-        DB::table('dompet_pelanggan')->insert([
-            'id_pelanggan' => $id_p,
-            'nominal_asli' => $request->nominal,
-            'kode_unik' => $kode_unik,
-            'total_transfer' => $total_transfer,
-            'nomor_rekening' => $request->nomor_rekening,
-            'bank_tujuan' => $request->bank_tujuan,
-            'status' => 'pending',
-            'waktu_request' => now()
-        ]);
-        return redirect()->route('pelanggan.dompet')->with(['notif_topup' => 'sukses', 'data_transfer' => $total_transfer, 'data_bank' => $request->bank_tujuan]);
-    }
-
     public function invoice($id)
     {
         $d = DB::table('pesanan as p')
@@ -81,54 +50,23 @@ class PelangganController extends Controller
             ->select('p.*', 'm.nama_mitra', 'pl.nama_pelanggan')
             ->where('p.id_pesanan', $id)
             ->first();
-        if (!$d) return "Pesanan tidak ditemukan.";
         return view('invoice', compact('d'));
     }
 
-    public function cekStatus($id)
+    public function simpanPesanan(Request $request)
     {
-        $status = DB::table('pesanan')->where('id_pesanan', $id)->value('status_pesanan');
-        return response()->json(['status' => $status]);
-    }
+        $id_pelanggan = Auth::id() ?? session('id_pelanggan');
+        $mitra = DB::table('mitra')->where('id_mitra', $request->id_mitra)->first();
+        
+        $id_pesanan = DB::table('pesanan')->insertGetId([
+            'id_pelanggan' => $id_pelanggan,
+            'id_mitra' => $request->id_mitra,
+            'id_kategori' => $mitra->id_kategori,
+            'tanggal_pesanan' => now(),
+            'total_pesanan' => ($mitra->tarif_per_jam * $request->durasi) + 5000 + rand(111,999),
+            'status_pesanan' => 'Pending'
+        ]);
 
-    // --- FITUR KATALOG MITRA ---
-    public function katalog(Request $request, $id_kategori)
-    {
-        $sort = $request->query('sort', 'jarak');
-        $id_p = Auth::id() ?? session('id_pelanggan');
-
-        // 1. Ambil Nama Kategori
-        $kat = DB::table('kategori_pekerjaan')->where('id_kategori', $id_kategori)->first();
-        $nama_kat = $kat->nama_kategori ?? 'Pilih Mitra';
-
-        // 2. Ambil Koordinat Pelanggan
-        $addr = DB::table('alamat_pelanggan')->where('id_pelanggan', $id_p)->orderBy('id_alamat', 'desc')->first();
-        $lat_p = $addr->lat ?? -8.184486;
-        $lng_p = $addr->lng ?? 113.668075;
-
-        // 3. Tentukan Order By
-        $order_by = "status_tampil DESC, jarak ASC";
-        if ($sort == 'bintang') $order_by = "status_tampil DESC, rating_rata DESC, jarak ASC";
-        elseif ($sort == 'orderan') $order_by = "status_tampil DESC, total_order DESC, jarak ASC";
-
-        // 4. Query Berdasarkan Tipe Kategori
-        $is_jastip = (strpos(strtolower($nama_kat), 'jastip') !== false);
-
-        if ($is_jastip) {
-            $sql = "SELECT id_driver AS id_mitra, nama_driver AS nama_mitra, foto_driver AS foto_mitra, status_kerja AS status_mitra,
-                    'Driver Jastip Terverifikasi' AS keahlian_singkat, rating_rata, total_selesai AS total_order,
-                    IF(status_kerja = 'aktif', 1, 0) AS status_tampil,
-                    (6371 * acos(cos(radians($lat_p)) * cos(radians(lat)) * cos(radians(lng) - radians($lng_p)) + sin(radians($lat_p)) * sin(radians(lat)))) AS jarak
-                    FROM mitra_jastip ORDER BY $order_by";
-        } else {
-            $sql = "SELECT m.*, m.nama_panggilan AS nama_mitra, m.rating_avg AS rating_rata, m.total_order,
-                    IF(m.status_mitra = 'aktif', 1, 0) AS status_tampil,
-                    (6371 * acos(cos(radians($lat_p)) * cos(radians(m.lat_mitra)) * cos(radians(m.lng_mitra) - radians($lng_p)) + sin(radians($lat_p)) * sin(radians(m.lat_mitra)))) AS jarak
-                    FROM mitra m WHERE m.id_kategori = '$id_kategori' ORDER BY $order_by";
-        }
-
-        $mitras = DB::select($sql);
-
-        return view('katalog', compact('mitras', 'nama_kat', 'id_kategori', 'sort', 'is_jastip'));
+        return redirect()->route('pelanggan.invoice', $id_pesanan);
     }
 }

@@ -33,6 +33,7 @@ Route::get('/invoice/{id}', [PelangganController::class, 'invoice'])->name('pela
 Route::get('/invoice/cek-status/{id}', [PelangganController::class, 'cekStatus']);
 Route::get('/katalog/{id_kategori}', [PelangganController::class, 'katalog'])->name('pelanggan.katalog');
 Route::get('/topup', function () { return "Halaman Topup"; })->name('pelanggan.topup');
+Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
 
 // Fitur Riwayat
 Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
