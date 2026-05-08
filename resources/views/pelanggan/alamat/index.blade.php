@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/pelanggan/alamat.css') }}">
+@endsection
+
 @section('content')
 <div class="container my-4 animate-in">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -8,7 +12,7 @@
     </div>
 
     <div class="row g-3">
-        @forelse($alamat as $a)
+        @forelse($alamats as $a)
         <div class="col-md-6">
             <div class="card card-zasha p-3 {{ $a->is_utama ? 'border-primary shadow-sm' : '' }}">
                 <div class="d-flex justify-content-between align-items-start">
@@ -31,7 +35,9 @@
         @endforelse
     </div>
 </div>
+@endsection
 
-{{-- Script maps tetap bisa ditaruh di stack atau push --}}
+@section('scripts')
+<script src="{{ asset('js/pelanggan/alamat.js') }}"></script>
 <script src="{{ asset('assets/js/maps.js') }}"></script>
 @endsection

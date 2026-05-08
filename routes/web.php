@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MitraController;
@@ -23,8 +25,12 @@ use App\Http\Controllers\AdminTopupController;
 Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
 Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
 Route::get('/pesanan', function () { return redirect()->route('pelanggan.riwayat.index'); })->name('pelanggan.pesanan');
-Route::get('/profil', function () { return "Halaman Profil"; })->name('pelanggan.profil');
-Route::get('/alamat', [PelangganController::class, 'alamat'])->name('pelanggan.alamat');
+Route::get('/profil', [ProfilController::class, 'index'])->name('pelanggan.profil');
+Route::post('/profil/update', [ProfilController::class, 'updateProfil'])->name('profil.update');
+Route::post('/profil/foto', [ProfilController::class, 'uploadFoto'])->name('profil.foto');
+Route::post('/profil/alamat', [ProfilController::class, 'storeAlamat'])->name('profil.alamat.store');
+// Route::get('/alamat', [PelangganController::class, 'alamat'])->name('pelanggan.alamat');
+Route::get('/alamat', [AlamatController::class, 'index'])->name('pelanggan.alamat');
 Route::get('/review/{id_order}', [PelangganController::class, 'review'])->name('pelanggan.review');
 Route::post('/review/kirim', [PelangganController::class, 'kirimReview'])->name('pelanggan.review.kirim');
 Route::get('/dompet', [PelangganController::class, 'dompet'])->name('pelanggan.dompet');

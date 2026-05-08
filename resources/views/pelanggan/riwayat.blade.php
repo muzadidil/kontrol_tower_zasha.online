@@ -1,17 +1,6 @@
 @extends('layouts.pelanggan')
 
 @section('content')
-@php
-    if (!function_exists('getBadgeColor')) {
-        function getBadgeColor($status) {
-            $s = strtolower(trim($status));
-            if (in_array($s, ['menunggu', 'pending'])) return 'bg-warning text-dark';
-            if (in_array($s, ['proses', 'berjalan', 'aktif', 'diterima', 'belanja', 'pengiriman'])) return 'bg-primary text-white';
-            if ($s == 'selesai') return 'bg-success text-white';
-            return 'bg-secondary text-white';
-        }
-    }
-@endphp
 
 <style>
     :root { --zasha-blue: #002d72; }
@@ -24,7 +13,7 @@
     .card-riwayat { border: none; border-radius: 20px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 15px; padding: 18px; position: relative; }
     .img-mitra { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; }
     .label-type { font-size: 0.6rem; font-weight: 800; padding: 3px 10px; border-radius: 5px; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
-    .label-jastip { background: #e0f2fe; color: #0369a1; }
+    .label-jastip { background: #e0f2fe; color: #036991; }
     .label-jasa { background: #f1f5f9; color: #475569; }
     .status-badge { font-size: 0.65rem; font-weight: 800; border-radius: 50px; padding: 5px 12px; }
     .star-rating { color: #eee; cursor: pointer; font-size: 2.2rem; transition: 0.2s; }
@@ -38,7 +27,7 @@
 
     <div class="scroll-nav shadow-sm mb-3">
         @foreach(['semua', 'Menunggu', 'Proses', 'Selesai'] as $nav_status)
-            <a href="{{ route('pelanggan.riwayat', ['status' => $nav_status]) }}" 
+            <a href="{{ route('pelanggan.riwayat.index', ['status' => $nav_status]) }}" 
                class="nav-pill-custom {{ (strtolower($status_filter) == strtolower($nav_status)) ? 'active' : '' }}">
                 {{ $nav_status == 'Proses' ? 'Berjalan' : $nav_status }}
             </a>
@@ -55,7 +44,7 @@
                         <span class="label-type label-jastip">JASTIP HUNTER</span>
                         <h6 class="fw-bold m-0 small">#{{ $rj->id_jastip }}</h6>
                     </div>
-                    <span class="badge status-badge {{ getBadgeColor($rj->status_jastip) }}">{{ strtoupper($rj->status_jastip) }}</span>
+                    <span class="badge status-badge {{ $getBadgeColor($rj->status_jastip) }}">{{ strtoupper($rj->status_jastip) }}</span>
                 </div>
                 
                 <div class="d-flex align-items-center mb-3">
@@ -64,7 +53,6 @@
                         <h6 class="fw-bold mb-0 small">{{ $rj->nama_driver }}</h6>
                         <small class="text-muted d-block text-truncate" style="max-width: 180px;"><i class="bi bi-shop me-1"></i>{{ $rj->lokasi_asal }}</small>
                     </div>
-                    <a href="#" class="btn btn-light btn-sm rounded-pill px-3 fw-bold border" style="font-size: 0.7rem;">Detail</a>
                 </div>
 
                 <div class="border-top pt-3 mt-1">
@@ -90,7 +78,7 @@
                         <span class="label-type label-jasa">LAYANAN JASA</span>
                         <h6 class="fw-bold m-0 small">ID #{{ $r->id_pesanan }}</h6>
                     </div>
-                    <span class="badge status-badge {{ getBadgeColor($r->status_pesanan) }}">{{ strtoupper($r->status_pesanan) }}</span>
+                    <span class="badge status-badge {{ $getBadgeColor($r->status_pesanan) }}">{{ strtoupper($r->status_pesanan) }}</span>
                 </div>
                 
                 <div class="d-flex align-items-center mb-3">

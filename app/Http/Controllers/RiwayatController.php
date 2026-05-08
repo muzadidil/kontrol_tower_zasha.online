@@ -8,10 +8,18 @@ use Illuminate\Support\Facades\Auth;
 
 class RiwayatController extends Controller
 {
+    private function getBadgeColor($status)
+    {
+        $s = strtolower(trim($status));
+        if (in_array($s, ['menunggu', 'pending'])) return 'bg-warning text-dark';
+        if (in_array($s, ['proses', 'berjalan', 'aktif', 'diterima', 'belanja', 'pengiriman'])) return 'bg-primary text-white';
+        if ($s == 'selesai') return 'bg-success text-white';
+        return 'bg-secondary text-white';
+    }
+
     public function index(Request $request)
     {
-        // Bypass login - Gunakan ID 1 jika tidak ada session
-        $id_pelanggan = Auth::id() ?? 1;
+        $id_pelanggan = Auth::id(); // Menggunakan Auth::id()
         $status_filter = $request->get('status', 'semua');
 
         // Query Jasa (Pesanan Mitra)
@@ -37,12 +45,17 @@ class RiwayatController extends Controller
             ->orderBy('pj.id_jastip', 'desc')
             ->get();
 
-        return view('pelanggan.riwayat', compact('query_jasa', 'query_jastip', 'status_filter'));
+        return view('pelanggan.riwayat', [
+            'query_jasa' => $query_jasa,
+            'query_jastip' => $query_jastip,
+            'status_filter' => $status_filter,
+            'getBadgeColor' => fn($status) => $this->getBadgeColor($status)
+        ]);
     }
 
     public function updateStatus(Request $request)
     {
-        $id_pelanggan = Auth::id() ?? 1;
+        $id_pelanggan = Auth::id();
         $id_o = $request->id_order;
         $aksi = $request->aksi;
         $type = $request->get('type', 'jasa');
@@ -65,12 +78,12 @@ class RiwayatController extends Controller
             }
         }
 
-        return redirect()->route('pelanggan.riwayat');
+        return redirect()->route('pelanggan.riwayat.index');
     }
 
     public function kirimUlasan(Request $request)
     {
-        $id_pelanggan = Auth::id() ?? 1;
+        $id_pelanggan = Auth::id();
         
         DB::table('pesanan_mitra')
             ->where('id_pesanan', $request->id_order)
@@ -80,6 +93,6 @@ class RiwayatController extends Controller
                 'ulasan' => $request->ulasan_teks
             ]);
 
-        return redirect()->route('pelanggan.riwayat');
+        return redirect()->route('pelanggan.riwayat.index');
     }
 }
