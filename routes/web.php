@@ -11,8 +11,10 @@ use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\AdminJastipController;
-// --- TAMBAHAN BARU: Import Controller Admin Monitor ---
-use App\Http\Controllers\AdminMonitorController; 
+use App\Http\Controllers\AdminMonitorController;
+use App\Http\Controllers\KategoriPekerjaanController;
+use App\Http\Controllers\AdminOrderMonitoringController;
+use App\Http\Controllers\AdminArsipPesananController;
 
 // Pelanggan Routes
 Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
@@ -32,30 +34,31 @@ Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
 
 // Admin & Mitra Routes
 Route::prefix('admin')->group(function () {
-    // Dashboard Alias for Sidebar
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
-    Route::get('/jastip', [AdminJastipController::class, 'index'])->name('admin.jastip');
     
-    // --- TAMBAHAN BARU: Admin Monitor (Radar Mitra) ---
+    // Monitoring Global
+    Route::get('/orders', [AdminOrderMonitoringController::class, 'index'])->name('admin.orders.index');
+    Route::post('/orders/update-status', [AdminOrderMonitoringController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+    
+    // Arsip Pesanan (YANG BARU)
+    Route::get('/orders/arsip', [AdminArsipPesananController::class, 'index'])->name('admin.orders.arsip');
+    Route::post('/orders/arsip/update', [AdminArsipPesananController::class, 'updateStatus'])->name('admin.orders.arsip.update');
+
+    Route::get('/jastip', [AdminJastipController::class, 'index'])->name('admin.jastip');
+    Route::get('/kategori', [KategoriPekerjaanController::class, 'index'])->name('admin.kategori.index');
+    Route::post('/kategori', [KategoriPekerjaanController::class, 'store'])->name('admin.kategori.store');
+    Route::delete('/kategori/{id}', [KategoriPekerjaanController::class, 'destroy'])->name('admin.kategori.destroy');
     Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
     Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
-    // --------------------------------------------------
 
-    // Mitra Management
     Route::prefix('mitra')->name('mitra.')->group(function () {
         Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
         Route::resource('/', MitraController::class)->parameters(['' => 'mitra'])->names([
-            'index' => 'index',
-            'create' => 'create',
-            'store' => 'store',
-            'show' => 'show',
-            'edit' => 'edit',
-            'update' => 'update',
-            'destroy' => 'destroy',
+            'index' => 'index', 'create' => 'create', 'store' => 'store', 
+            'show' => 'show', 'edit' => 'edit', 'update' => 'update', 'destroy' => 'destroy',
         ]);
     });
 
-    // Order Management
     Route::get('/order/create', [OrderController::class, 'create'])->name('admin.order.create');
     Route::post('/order', [OrderController::class, 'store'])->name('admin.order.store');
     Route::post('/order/{id}/update-status', [OrderController::class, 'updateStatus'])->name('admin.order.updateStatus');
@@ -64,7 +67,6 @@ Route::prefix('admin')->group(function () {
     Route::post('/order-item/{id}/update', [OrderController::class, 'updateItem'])->name('mitra.updateItem');
     Route::post('/order/{order_id}/tambah-item-service', [MitraController::class, 'tambahItemService'])->name('mitra.tambahItemService');
 
-    // Finance Management
     Route::get('/dashboard/finance', [FinanceController::class, 'index'])->name('admin.finance.dashboard');
     Route::get('/finance/deposit', [FinanceController::class, 'deposit'])->name('admin.finance.deposit');
     Route::post('/finance/deposit', [FinanceController::class, 'storeDeposit'])->name('admin.finance.storeDeposit');
@@ -73,7 +75,6 @@ Route::prefix('admin')->group(function () {
     Route::post('/finance/withdrawal/{id}/reject', [WithdrawalController::class, 'reject'])->name('admin.finance.withdrawal.reject');
 });
 
-// PPOB & Wallet
 Route::post('/ppob/transaction', [PpobController::class, 'createTransaction'])->name('ppob.transaction');
 Route::post('/mitra/transfer', [WalletTransferController::class, 'transfer'])->name('mitra.transfer');
 Route::get('/mitra/withdrawal', [WithdrawalController::class, 'index'])->name('mitra.withdrawal');

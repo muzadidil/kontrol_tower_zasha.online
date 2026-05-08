@@ -11,6 +11,11 @@
             </a>
         </li>
         <li>
+            <a href="{{ route('admin.kategori.index') }}" class="nav-link {{ request()->is('admin/kategori*') ? 'active' : '' }}">
+                <i class="fas fa-tags me-2"></i> Manajemen Kategori
+            </a>
+        </li>
+        <li>
             <a href="{{ route('admin.monitor') }}" class="nav-link {{ request()->is('admin/monitor') ? 'active' : '' }}">
                 <i class="fas fa-broadcast-tower me-2"></i> Radar Mitra
             </a>
@@ -31,6 +36,19 @@
             </a>
         </li>
         
+        <li class="sidebar-divider">Operasional & Order</li>
+        <li>
+            <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->is('admin/orders') ? 'active' : '' }}">
+                <i class="fas fa-receipt me-2"></i> Global Monitoring
+            </a>
+        </li>
+        <!-- MENU BARU: Arsip Pesanan -->
+        <li>
+            <a href="{{ route('admin.orders.arsip') }}" class="nav-link {{ request()->is('admin/orders/arsip*') ? 'active' : '' }}">
+                <i class="fas fa-archive me-2"></i> Arsip Pesanan
+            </a>
+        </li>
+
         <li class="sidebar-divider">Sistem Logika</li>
         <li>
             <a href="{{ route('admin.jastip') }}" class="nav-link {{ request()->is('admin/jastip') ? 'active' : '' }}">
