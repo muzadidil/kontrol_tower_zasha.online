@@ -10,6 +10,8 @@ use App\Http\Controllers\PpobController;
 use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\RiwayatController;
+// --- TAMBAHAN BARU: Import Controller Admin Monitor ---
+use App\Http\Controllers\AdminMonitorController; 
 
 // Pelanggan Routes
 Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
@@ -32,6 +34,11 @@ Route::prefix('admin')->group(function () {
     // Dashboard Alias for Sidebar
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
     
+    // --- TAMBAHAN BARU: Admin Monitor (Radar Mitra) ---
+    Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
+    Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
+    // --------------------------------------------------
+
     // Mitra Management
     Route::prefix('mitra')->name('mitra.')->group(function () {
         Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
