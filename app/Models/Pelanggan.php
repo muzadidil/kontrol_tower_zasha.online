@@ -11,7 +11,24 @@ class Pelanggan extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'pelanggans';
-    protected $fillable = ['nama_pelanggan', 'email', 'foto', 'is_verif', 'kode_zasha', 'saldo'];
+    protected $primaryKey = 'id_pelanggan';
+
+    protected $fillable = [
+        'nama_pelanggan',
+        'email',
+        'password',
+        'no_wa',
+        'tgl_lahir',
+        'foto',
+        'kode_zasha',
+        'saldo',
+        'status_verifikasi'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     public function alamats()
     {

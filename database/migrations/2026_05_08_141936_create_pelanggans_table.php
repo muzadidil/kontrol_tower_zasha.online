@@ -12,23 +12,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pelanggans', function (Blueprint $table) {
-            // ID Utama
-            $table->id('id_pelanggan');
+            // ID Utama - Jika menggunakan nama custom, pastikan di Model diset $primaryKey
+            $table->id('id_pelanggan'); 
             
             // Identitas Login (Multi-Auth)
             $table->string('nama_pelanggan');
             $table->string('email')->unique();
             $table->string('password');
             
-            // Informasi Kontak & Profil
-            $table->string('no_hp')->unique()->nullable();
-            $table->text('alamat')->nullable();
-            $table->string('foto_profil')->nullable();
+            // Informasi Kontak & Profil - Disinkronkan dengan Konsep Lama Bapak
+            $table->string('no_wa')->unique()->nullable(); // Sebelumnya no_hp, saya ubah ke no_wa sesuai kodingan profil Bapak
+            $table->date('tgl_lahir')->nullable();         // Ditambahkan karena ada di logika validasi umur 18+ Bapak
+            $table->string('foto')->nullable();            // Sebelumnya foto_profil, saya singkat foto sesuai kodingan profil Bapak
             
             // Fitur Khusus Zasha
-            $table->string('kode_zasha')->unique(); // Contoh: ZSH-2024-001
-            $table->integer('is_verif')->default(0); // 0: Belum, 1: Sudah
-            $table->decimal('saldo', 12, 2)->default(0); // Dompet Pelanggan
+            $table->string('kode_zasha')->unique();        // Contoh: ZSH-2026-001
+            $table->decimal('saldo', 12, 2)->default(0);   // Dompet Pelanggan
+            
+            /** 
+             * Status Verifikasi:
+             * Bapak sempat bilang "tidak ada verifikasi", tapi di kodingan profil ada logika 
+             * "Satpam Otomatis" untuk cek kelengkapan data. Jadi kolom ini tetap berguna 
+             * sebagai penanda profil sudah lengkap (1) atau belum (0).
+             */
+            $table->integer('status_verifikasi')->default(0); 
             
             // Pengaturan Laravel
             $table->rememberToken();

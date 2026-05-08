@@ -1,0 +1,26 @@
+/* Styles for login page */
+
+body {
+    background-color: #f4f7fe;
+    color: #1c1c1e;
+}
+
+.card-zasha {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.form-label {
+    font-weight: 600;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
