@@ -1,21 +1,12 @@
-{{-- 1. INTEGRASI TEMPLATE & HTMX --}}
-{{-- Jika BUKAN request dari HTMX, extend layout utama (header & sidebar) --}}
-@if(!request()->header('HX-Request'))
-    @extends('layouts.admin') {{-- Sesuaikan dengan nama file layout master Anda --}}
+@extends('layouts.admin') {{-- Sesuaikan dengan nama file layout master Anda --}}
     
-    @section('content')
-@endif
+@section('content')
 
 {{-- Asset bisa ditaruh di sini atau di push ke stack layout --}}
 <link rel="stylesheet" href="{{ asset('assets/css/admin_monitor.css') }}">
 <script src="{{ asset('assets/js/admin_monitor.js') }}" defer></script>
 
-<div id="monitor-wrapper" 
-     hx-get="{{ route('admin.monitor') }}" 
-     hx-trigger="every 60s" 
-     hx-select="#monitor-wrapper" 
-     hx-swap="outerHTML" 
-     class="animate-in">
+<div id="monitor-wrapper" class="animate-in">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -129,12 +120,9 @@
     <div class="mt-4 text-center">
         <div class="scan-indicator shadow-sm">
             <span class="spinner-grow spinner-grow-sm text-primary me-2" role="status"></span>
-            <small>Auto-Scanning Aktif (60s)</small>
+            <small>Radar Status Aktif</small>
         </div>
     </div>
 </div>
 
-{{-- Tutup section jika bukan dari HTMX --}}
-@if(!request()->header('HX-Request'))
-    @endsection
-@endif
+@endsection

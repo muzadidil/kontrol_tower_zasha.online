@@ -1,14 +1,16 @@
+<?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminMonitorController extends Controller
 {
     public function index(Request $request)
     {
         // 1. Ambil data mitra
-        // Jika Anda sudah punya Model Mitra, bisa pakai: Mitra::orderBy('last_ping', 'desc')->get();
         $mitras = DB::table('mitra')
             ->orderBy('last_ping', 'desc')
             ->get();

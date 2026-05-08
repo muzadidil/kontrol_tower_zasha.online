@@ -10,6 +10,13 @@
                 <i class="fas fa-users me-2"></i> Manajemen Mitra
             </a>
         </li>
+        <!-- TAMBAHAN BARU: RADAR MITRA -->
+        <li>
+            <a href="{{ route('admin.monitor') }}" class="nav-link {{ request()->is('admin/monitor') ? 'active' : '' }}">
+                <i class="fas fa-broadcast-tower me-2"></i> Radar Mitra
+            </a>
+        </li>
+        <!-- END TAMBAHAN BARU -->
         <li>
             <a href="{{ route('admin.finance.dashboard') }}" class="nav-link {{ request()->is('admin/dashboard/finance') ? 'active' : '' }}">
                 <i class="fas fa-wallet me-2"></i> Keuangan
