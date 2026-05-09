@@ -9,7 +9,9 @@ class PelangganController extends Controller
 {
     public function index()
     {
-        $user       = auth('pelanggan')->user();
+        $user = auth('pelanggan')->user();
+        if (!$user) return redirect()->route('login');
+
         $categories = DB::table('kategori_pekerjaan')->orderBy('nama_kategori')->get();
 
         return view('pelanggan.dashboard', compact('user', 'categories'));
