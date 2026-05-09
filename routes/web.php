@@ -116,6 +116,8 @@ Route::prefix('admin')->group(function () {
     // Others
     Route::get('/jastip', [AdminJastipController::class, 'index'])->name('admin.jastip');
     Route::get('/kategori', [KategoriPekerjaanController::class, 'index'])->name('admin.kategori.index');
+    Route::post('/kategori', [KategoriPekerjaanController::class, 'store'])->name('admin.kategori.store');
+    Route::delete('/kategori/{id}', [KategoriPekerjaanController::class, 'destroy'])->name('admin.kategori.destroy');
     Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
     Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
 
