@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.pelanggan')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/pelanggan/alamat.css') }}">

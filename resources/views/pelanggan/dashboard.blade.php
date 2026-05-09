@@ -35,7 +35,7 @@
                 <small class="text-muted fw-bold d-block mb-1" style="font-size: 10px;">DOMPET ZASHA</small>
                 <h5 class="fw-bold mb-0 text-primary allow-select">Rp {{ number_format($user->saldo, 0, ',', '.') }}</h5>
             </div>
-            <a href="{{ route('pelanggan.topup') }}" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
+            <a href="{{ route('pelanggan.dompet') }}" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
                 <i class="bi bi-plus-lg me-1"></i>Isi Saldo
             </a>
         </div>

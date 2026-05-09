@@ -12,20 +12,23 @@ class ProfilController extends Controller
 {
     public function index()
     {
-        $pelanggan = Auth::guard('pelanggan')->user();
-        $alamat = Alamat::where('id_pelanggan', $pelanggan->id)->get();
-        return view('pelanggan.profil', compact('pelanggan', 'alamat'));
+        $user    = Auth::guard('pelanggan')->user();
+        $alamats = Alamat::where('id_pelanggan', $user->id_pelanggan)->orderBy('is_utama', 'desc')->get();
+        return view('pelanggan.profil', compact('user', 'alamats'));
     }
 
     public function updateProfil(Request $request)
     {
         $request->validate([
             'nama_pelanggan' => 'required|string|max:255',
-            'email' => 'required|email',
+            'no_wa'          => 'required|string|max:20',
         ]);
 
         $pelanggan = Auth::guard('pelanggan')->user();
-        $pelanggan->update($request->only(['nama_pelanggan', 'email']));
+        $pelanggan->update([
+            'nama_pelanggan' => $request->nama_pelanggan,
+            'no_wa'          => '62' . ltrim($request->no_wa, '0'),
+        ]);
 
         return back()->with('success', 'Profil berhasil diupdate');
     }

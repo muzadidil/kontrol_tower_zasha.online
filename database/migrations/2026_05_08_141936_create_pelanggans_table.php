@@ -11,7 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Hapus tabel lama (dibuat migration 2026_05_05) sebelum buat ulang dengan schema yang benar
+        Schema::disableForeignKeyConstraints();
+
+        // Drop FK lama di tabel orders yang referensi pelanggans.id (skema lama varchar)
+        if (Schema::hasTable('orders')) {
+            Schema::table('orders', function ($table) {
+                try { $table->dropForeign(['pelanggan_id']); } catch (\Exception $e) {}
+            });
+        }
+
         Schema::dropIfExists('pelanggans');
 
         Schema::create('pelanggans', function (Blueprint $table) {
@@ -44,6 +52,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

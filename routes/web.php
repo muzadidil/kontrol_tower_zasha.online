@@ -35,8 +35,8 @@ Route::middleware('auth:pelanggan')->group(function () {
     Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
     Route::get('/pesanan', function () { return redirect()->route('pelanggan.riwayat.index'); })->name('pelanggan.pesanan');
     Route::get('/profil', [ProfilController::class, 'index'])->name('pelanggan.profil');
-    Route::post('/profil/update', [ProfilController::class, 'updateProfil'])->name('profil.update');
-    Route::post('/profil/foto', [ProfilController::class, 'uploadFoto'])->name('profil.foto');
+    Route::post('/profil/update', [ProfilController::class, 'updateProfil'])->name('pelanggan.profil.update');
+    Route::post('/profil/foto', [ProfilController::class, 'uploadFoto'])->name('pelanggan.profil.foto');
     Route::post('/profil/alamat', [ProfilController::class, 'storeAlamat'])->name('profil.alamat.store');
     // Buku Alamat
     Route::get('/alamat', [AlamatController::class, 'index'])->name('pelanggan.alamat');
@@ -46,12 +46,9 @@ Route::middleware('auth:pelanggan')->group(function () {
     Route::post('/alamat/{id}/utama', [AlamatController::class, 'setUtama'])->name('pelanggan.alamat.utama');
 
     // Katalog & Detail Mitra
-    Route::get('/detail/mitra/{id}', function ($id) {
-        return view('pelanggan.detail-mitra', ['id' => $id]);
-    })->name('pelanggan.detail.mitra');
-    Route::get('/detail/jastip/{id}', function ($id) {
-        return view('pelanggan.detail-jastip', ['id' => $id]);
-    })->name('pelanggan.detail.jastip');
+    Route::get('/detail/mitra/{id}', [PelangganController::class, 'detailMitra'])->name('pelanggan.detail.mitra');
+    Route::get('/detail/jastip/{id}', [PelangganController::class, 'detailJastip'])->name('pelanggan.detail.jastip');
+    Route::post('/pesan', [PelangganController::class, 'simpanPesanan'])->name('pelanggan.pesan');
 
     // Review
     Route::get('/review/{id_order}', [PelangganController::class, 'review'])->name('pelanggan.review');

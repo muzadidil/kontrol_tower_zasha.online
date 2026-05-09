@@ -56,14 +56,49 @@ class PelangganController extends Controller
         return response()->json(['status' => $status ?? 'tidak_ditemukan']);
     }
 
-    public function katalog($id_kategori)
+    public function katalog(Request $request, $id_kategori)
     {
         $kategori = DB::table('kategori_pekerjaan')->where('id_kategori', $id_kategori)->first();
-        $mitras   = DB::table('mitras')
-            ->where('kategori', $id_kategori)
-            ->where('status', 'Aktif')
-            ->get();
-        return view('pelanggan.katalog', compact('kategori', 'mitras'));
+        if (!$kategori) abort(404);
+
+        $sort      = $request->get('sort', 'bintang');
+        $is_jastip = false;
+
+        $query = DB::table('mitra as m')
+            ->leftJoin('pesanan_mitra as pm', 'm.id_mitra', '=', 'pm.id_mitra')
+            ->leftJoin('kategori_pekerjaan as k', 'm.id_kategori', '=', 'k.id_kategori')
+            ->select(
+                'm.id_mitra',
+                'm.nama_panggilan as nama_mitra',
+                'm.foto_mitra',
+                'm.status_mitra',
+                DB::raw('COALESCE(m.tarif_per_jam, 0) as tarif_per_jam'),
+                DB::raw('0 as jarak'),
+                DB::raw('COALESCE(k.satuan, "Jam") as satuan_tarif'),
+                DB::raw('COALESCE(AVG(pm.rating), 0) as rating_rata'),
+                DB::raw('COUNT(pm.id_pesanan) as total_order')
+            )
+            ->where('m.id_kategori', $id_kategori)
+            ->groupBy('m.id_mitra', 'm.nama_panggilan', 'm.foto_mitra', 'm.status_mitra', 'm.tarif_per_jam', 'k.satuan');
+
+        if ($sort == 'orderan') {
+            $query->orderByDesc('total_order');
+        } elseif ($sort == 'bintang') {
+            $query->orderByDesc('rating_rata');
+        } else {
+            $query->orderBy('m.id_mitra');
+        }
+
+        $mitras = $query->get();
+
+        return view('pelanggan.katalog', [
+            'kategori'    => $kategori,
+            'mitras'      => $mitras,
+            'nama_kat'    => $kategori->nama_kategori ?? 'Katalog',
+            'id_kategori' => $id_kategori,
+            'sort'        => $sort,
+            'is_jastip'   => $is_jastip,
+        ]);
     }
 
     public function review($id_order)
@@ -95,6 +130,48 @@ class PelangganController extends Controller
             ]);
 
         return redirect()->route('pelanggan.riwayat.index')->with('success', 'Terima kasih! Ulasan berhasil dikirim.');
+    }
+
+    public function detailMitra($id)
+    {
+        $mitra = DB::table('mitra as m')
+            ->leftJoin('kategori_pekerjaan as k', 'm.id_kategori', '=', 'k.id_kategori')
+            ->select('m.*', 'k.nama_kategori', DB::raw('COALESCE(k.satuan, "Jam") as satuan_tarif'))
+            ->where('m.id_mitra', $id)
+            ->first();
+
+        if (!$mitra) abort(404);
+
+        $rating_rata = DB::table('pesanan_mitra')
+            ->where('id_mitra', $id)
+            ->whereNotNull('rating')
+            ->where('rating', '>', 0)
+            ->avg('rating') ?? 0;
+
+        $total_order = DB::table('pesanan_mitra')->where('id_mitra', $id)->count();
+
+        $ulasans = DB::table('pesanan_mitra as pm')
+            ->join('pelanggan as pl', 'pm.id_pelanggan', '=', 'pl.id_pelanggan')
+            ->select('pm.rating', 'pm.ulasan', 'pl.nama_pelanggan', 'pm.id_pesanan')
+            ->where('pm.id_mitra', $id)
+            ->whereNotNull('pm.ulasan')
+            ->orderBy('pm.id_pesanan', 'desc')
+            ->limit(5)
+            ->get();
+
+        $alamats = auth('pelanggan')->check()
+            ? DB::table('alamats')->where('id_pelanggan', auth('pelanggan')->id())->orderByDesc('is_utama')->get()
+            : collect();
+
+        return view('pelanggan.detail-mitra', compact('mitra', 'rating_rata', 'total_order', 'ulasans', 'alamats'));
+    }
+
+    public function detailJastip($id)
+    {
+        $driver = DB::table('mitra_jastip')->where('id_driver', $id)->first();
+        if (!$driver) abort(404);
+
+        return view('pelanggan.detail-jastip', compact('driver'));
     }
 
     public function simpanPesanan(Request $request)

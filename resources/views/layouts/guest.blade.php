@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -13,18 +13,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="{{ asset(\'css/auth/login.css\') }}" rel="stylesheet">
+    <link href="{{ asset('css/auth/login.css') }}" rel="stylesheet">
 
-    @stack(\'styles\')
+    @stack('styles')
 </head>
 <body>
 
     <main>
-        @yield(\'content\')
+        @yield('content')
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset(\'js/auth/login.js\') }}"></script>
-    @stack(\'scripts\')
+    <script src="{{ asset('js/auth/login.js') }}"></script>
+    @stack('scripts')
 </body>
 </html>
