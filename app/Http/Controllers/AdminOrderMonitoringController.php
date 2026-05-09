@@ -48,29 +48,41 @@ class AdminOrderMonitoringController extends Controller
         ";
 
         $final_query = "SELECT * FROM ($query_text) as gabungan WHERE 1=1";
-        
+        $bindings = [];
+
         if ($filter_status != '') {
-            $final_query .= " AND status = '$filter_status'";
+            $final_query .= " AND status = ?";
+            $bindings[] = $filter_status;
         }
         if ($search != '') {
-            $final_query .= " AND (id LIKE '%$search%' OR nama_pelanggan LIKE '%$search%' OR nama_pekerja LIKE '%$search%')";
+            $final_query .= " AND (id LIKE ? OR nama_pelanggan LIKE ? OR nama_pekerja LIKE ?)";
+            $like = '%' . $search . '%';
+            $bindings[] = $like;
+            $bindings[] = $like;
+            $bindings[] = $like;
         }
 
         $final_query .= " ORDER BY FIELD(status, 'Menunggu Konfirmasi', 'Proses', 'Pending', 'Lunas'), tgl DESC";
 
-        $orders = DB::select($final_query);
+        $orders = DB::select($final_query, $bindings);
 
         return view('admin.orders.index', compact('orders', 'filter_status', 'search'));
     }
 
     public function updateStatus(Request $request)
     {
-        $table = ($request->tipe_order == 'JASA') ? 'pesanan' : 'pesanan_jastip';
-        $id_column = ($request->tipe_order == 'JASA') ? 'id_pesanan' : 'id_jastip';
+        $request->validate([
+            'tipe_order'  => 'required|in:JASA,JASTIP',
+            'id_pesanan'  => 'required',
+            'status_baru' => 'required|string|max:50',
+        ]);
+
+        $table         = ($request->tipe_order == 'JASA') ? 'pesanan' : 'pesanan_jastip';
+        $id_column     = ($request->tipe_order == 'JASA') ? 'id_pesanan' : 'id_jastip';
         $status_column = ($request->tipe_order == 'JASA') ? 'status_pesanan' : 'status_jastip';
 
         DB::table($table)->where($id_column, $request->id_pesanan)->update([
-            $status_column => $request->status_baru
+            $status_column => $request->status_baru,
         ]);
 
         return redirect()->back()->with('pesan', 'Status berhasil diperbarui!');

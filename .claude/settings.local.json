@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\xampp\\\\htdocs\\\\zasha-tower\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(git -C \"c:\\\\xampp\\\\htdocs\\\\zasha-tower\" log --oneline -10)"
+    ]
+  }
+}

@@ -18,6 +18,14 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'pelanggan_id'       => 'required',
+            'mitra_id'           => 'required',
+            'metode_pembayaran'  => 'required|in:COD,Transfer,Saldo',
+            'jarak_km'           => 'nullable|numeric|min:0',
+            'durasi_kerja'       => 'nullable|numeric|min:0',
+        ]);
+
         $mitra = Mitra::findOrFail($request->mitra_id);
 
         if ($mitra->is_wfh && $request->metode_pembayaran == 'COD') {
@@ -75,7 +83,7 @@ class OrderController extends Controller
         $total_jasa = $order->items()->where('tipe_item', 'jasa')->sum('harga_asli');
         $komisi_zasha = ($total_jasa + $order->biaya_bensin_service) * 0.05;
 
-        if ($order->metode_pembayaran == 'COD' && $komisi_zasha > $mitra->saldo_mitra) {
+        if ($order->metode_pembayaran == 'COD' && $komisi_zasha > $mitra->saldo) {
             return back()->withErrors(['error' => 'Saldo tidak cukup, mohon gunakan pembayaran Transfer/Cashless.']);
         }
 
@@ -83,23 +91,23 @@ class OrderController extends Controller
             // Validasi saldo untuk Jastip COD
             if ($order->metode_pembayaran == 'COD') {
                 $komisi = $order->ongkos_jastip * 0.05;
-                if ($mitra->saldo_mitra < $komisi) {
+                if ($mitra->saldo < $komisi) {
                     return back()->withErrors(['error' => 'Saldo mitra tidak cukup untuk membayar komisi Jastip.']);
                 }
                 // Potong saldo mitra sebesar 5% dari ongkos jastip
-                $mitra->saldo_mitra -= $komisi;
+                $mitra->saldo -= $komisi;
                 $mitra->save();
             }
         } elseif ($mitra->is_wfh) {
             // Escrow: 95% ke mitra, 5% ke platform
             $pendapatan_mitra = $order->total_biaya * 0.95;
             // ... (pendapatan platform logic)
-            $mitra->saldo_mitra += $pendapatan_mitra;
+            $mitra->saldo += $pendapatan_mitra;
             $mitra->save();
         } else {
             // New logic for Service Module
             if ($order->metode_pembayaran == 'COD') {
-                $mitra->saldo_mitra -= $komisi_zasha;
+                $mitra->saldo -= $komisi_zasha;
                 $mitra->save();
             }
         }

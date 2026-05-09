@@ -9,9 +9,10 @@ class Alamat extends Model
     protected $table = 'alamats';
     protected $fillable = [
         'id_pelanggan',
-        'alamat',
-        'latitude',
-        'longitude',
+        'label_alamat',
+        'nama_penerima',
+        'no_wa_penerima',
+        'alamat_lengkap',
         'is_utama',
     ];
 

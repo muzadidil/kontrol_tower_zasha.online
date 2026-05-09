@@ -19,27 +19,29 @@ class WithdrawalController extends Controller
     public function request(Request $request)
     {
         $request->validate([
-            'bank_name' => 'required',
-            'account_number' => 'required',
-            'account_name' => 'required',
-            'nominal' => 'required|numeric|min:50000',
+            'bank_name'      => 'required|string|max:100',
+            'account_number' => 'required|string|max:50',
+            'account_name'   => 'required|string|max:100',
+            'nominal'        => 'required|numeric|min:50000|max:10000000',
         ]);
-
-        $mitra = Mitra::where('id', auth()->user()->mitra_id)->first();
-        if ($mitra->saldo < $request->nominal) {
-            return back()->with('error', 'Saldo tidak mencukupi.');
-        }
 
         DB::beginTransaction();
         try {
+            // lockForUpdate() mencegah race condition: dua request bersamaan tidak bisa baca saldo yang sama
+            $mitra = Mitra::where('id', auth()->user()->mitra_id)->lockForUpdate()->first();
+            if (!$mitra || $mitra->saldo < $request->nominal) {
+                DB::rollBack();
+                return back()->with('error', 'Saldo tidak mencukupi.');
+            }
+
             $mitra->decrement('saldo', $request->nominal);
             Withdrawal::create([
-                'mitra_id' => $mitra->id,
-                'bank_name' => $request->bank_name,
+                'mitra_id'       => $mitra->id,
+                'bank_name'      => $request->bank_name,
                 'account_number' => $request->account_number,
-                'account_name' => $request->account_name,
-                'nominal' => $request->nominal,
-                'status' => 'pending',
+                'account_name'   => $request->account_name,
+                'nominal'        => $request->nominal,
+                'status'         => 'pending',
             ]);
             DB::commit();
             return back()->with('success', 'Request penarikan berhasil.');

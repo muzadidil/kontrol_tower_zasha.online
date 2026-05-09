@@ -20,6 +20,11 @@ class AdminVerificationController extends Controller
 
     public function approve(Request $request)
     {
+        $request->validate([
+            'target_id'    => 'required',
+            'account_type' => 'required|in:driver,mitra',
+        ]);
+
         $id = $request->target_id;
         $type = $request->account_type;
 

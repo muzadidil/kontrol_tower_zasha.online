@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminArsipPesananController extends Controller
 {
@@ -23,13 +24,14 @@ class AdminArsipPesananController extends Controller
             $query->where('pesanan.status_pesanan', $filter_status);
         }
         if ($filter_nama != '') {
-            $query->where('pelanggan.nama_pelanggan', 'like', "%$filter_nama%");
+            $query->where('pelanggan.nama_pelanggan', 'like', '%' . Str::escapeLike($filter_nama) . '%');
         }
         if ($search != '') {
-            $query->where(function($q) use ($search) {
-                $q->where('pesanan.id_pesanan', 'like', "%$search%")
-                  ->orWhere('pelanggan.nama_pelanggan', 'like', "%$search%")
-                  ->orWhere('mitra.nama_mitra', 'like', "%$search%");
+            $safe = Str::escapeLike($search);
+            $query->where(function ($q) use ($safe) {
+                $q->where('pesanan.id_pesanan', 'like', '%' . $safe . '%')
+                  ->orWhere('pelanggan.nama_pelanggan', 'like', '%' . $safe . '%')
+                  ->orWhere('mitra.nama_mitra', 'like', '%' . $safe . '%');
             });
         }
 
@@ -40,6 +42,11 @@ class AdminArsipPesananController extends Controller
 
     public function updateStatus(Request $request)
     {
+        $request->validate([
+            'id_pesanan'  => 'required',
+            'status_baru' => 'required|string|in:Selesai,Batal',
+        ]);
+
         DB::table('pesanan')
             ->where('id_pesanan', $request->id_pesanan)
             ->update(['status_pesanan' => $request->status_baru]);

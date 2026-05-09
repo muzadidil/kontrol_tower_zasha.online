@@ -11,7 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Redirect unauthenticated user ke halaman login
+        $middleware->redirectGuestsTo(fn() => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

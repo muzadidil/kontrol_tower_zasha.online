@@ -17,6 +17,17 @@ class AdminMasterKategoriController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'nama_kategori' => 'required|string|max:255',
+            'satuan'        => 'required|string|max:100',
+            'svg_kategori'  => 'nullable|string',
+            'id_edit'       => 'nullable|integer',
+            'f_label'       => 'nullable|array',
+            'f_label.*'     => 'nullable|string|max:100',
+            'f_value'       => 'nullable|array',
+            'f_value.*'     => 'nullable|numeric',
+        ]);
+
         // Olah Skema Tarif ke JSON
         $skema = [];
         if ($request->has('f_label')) {

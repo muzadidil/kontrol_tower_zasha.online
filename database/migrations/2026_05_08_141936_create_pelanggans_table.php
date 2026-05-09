@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Hapus tabel lama (dibuat migration 2026_05_05) sebelum buat ulang dengan schema yang benar
+        Schema::dropIfExists('pelanggans');
+
         Schema::create('pelanggans', function (Blueprint $table) {
             // ID Utama - Jika menggunakan nama custom, pastikan di Model diset $primaryKey
             $table->id('id_pelanggan'); 

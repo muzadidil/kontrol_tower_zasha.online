@@ -44,9 +44,6 @@ class LoginController extends Controller
 
         $credentials = [
             'no_wa' => $normalized_wa,
-
-        $credentials = [
-            'no_wa' => $formattedNoWa,
             'password' => $request->password,
         ];
 

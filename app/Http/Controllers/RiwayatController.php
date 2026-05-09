@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 
 class RiwayatController extends Controller
 {
@@ -19,7 +18,7 @@ class RiwayatController extends Controller
 
     public function index(Request $request)
     {
-        $id_pelanggan = Auth::id(); // Menggunakan Auth::id()
+        $id_pelanggan = auth('pelanggan')->id(); // Menggunakan auth('pelanggan')->id()
         $status_filter = $request->get('status', 'semua');
 
         // Query Jasa (Pesanan Mitra)
@@ -55,7 +54,7 @@ class RiwayatController extends Controller
 
     public function updateStatus(Request $request)
     {
-        $id_pelanggan = Auth::id();
+        $id_pelanggan = auth('pelanggan')->id();
         $id_o = $request->id_order;
         $aksi = $request->aksi;
         $type = $request->get('type', 'jasa');
@@ -83,7 +82,7 @@ class RiwayatController extends Controller
 
     public function kirimUlasan(Request $request)
     {
-        $id_pelanggan = Auth::id();
+        $id_pelanggan = auth('pelanggan')->id();
         
         DB::table('pesanan_mitra')
             ->where('id_pesanan', $request->id_order)

@@ -2,12 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-
-// Authentication Routes
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\PelangganController;
@@ -27,37 +21,59 @@ use App\Http\Controllers\AdminVerificationController;
 use App\Http\Controllers\AdminMasterKategoriController;
 use App\Http\Controllers\AdminTopupController;
 
-// Pelanggan Routes
-Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
-Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
-Route::get('/pesanan', function () { return redirect()->route('pelanggan.riwayat.index'); })->name('pelanggan.pesanan');
-Route::get('/profil', [ProfilController::class, 'index'])->name('pelanggan.profil');
-Route::post('/profil/update', [ProfilController::class, 'updateProfil'])->name('profil.update');
-Route::post('/profil/foto', [ProfilController::class, 'uploadFoto'])->name('profil.foto');
-Route::post('/profil/alamat', [ProfilController::class, 'storeAlamat'])->name('profil.alamat.store');
-// Route::get('/alamat', [PelangganController::class, 'alamat'])->name('pelanggan.alamat');
-Route::get('/alamat', [AlamatController::class, 'index'])->name('pelanggan.alamat');
-Route::get('/review/{id_order}', [PelangganController::class, 'review'])->name('pelanggan.review');
-Route::post('/review/kirim', [PelangganController::class, 'kirimReview'])->name('pelanggan.review.kirim');
-Route::get('/dompet', [PelangganController::class, 'dompet'])->name('pelanggan.dompet');
-Route::post('/dompet/topup', [PelangganController::class, 'topup'])->name('pelanggan.dompet.topup');
-Route::get('/invoice/{id}', [PelangganController::class, 'invoice'])->name('pelanggan.invoice');
-Route::get('/invoice/cek-status/{id}', [PelangganController::class, 'cekStatus']);
-Route::get('/katalog/{id_kategori}', [PelangganController::class, 'katalog'])->name('pelanggan.katalog');
-Route::get('/topup', function () { return "Halaman Topup"; })->name('pelanggan.topup');
-Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
+// Authentication Routes (public)
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Fitur Riwayat
-Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
-    Route::get('/', [RiwayatController::class, 'index'])->name('index');
-    Route::get('/update-status', [RiwayatController::class, 'updateStatus'])->name('update');
-    Route::post('/ulasan', [RiwayatController::class, 'kirimUlasan'])->name('ulasan');
+// Katalog publik (tidak perlu login)
+Route::get('/katalog/{id_kategori}', [PelangganController::class, 'katalog'])->name('pelanggan.katalog');
+
+// Pelanggan Routes (butuh login)
+Route::middleware('auth:pelanggan')->group(function () {
+    Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
+    Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
+    Route::get('/pesanan', function () { return redirect()->route('pelanggan.riwayat.index'); })->name('pelanggan.pesanan');
+    Route::get('/profil', [ProfilController::class, 'index'])->name('pelanggan.profil');
+    Route::post('/profil/update', [ProfilController::class, 'updateProfil'])->name('profil.update');
+    Route::post('/profil/foto', [ProfilController::class, 'uploadFoto'])->name('profil.foto');
+    Route::post('/profil/alamat', [ProfilController::class, 'storeAlamat'])->name('profil.alamat.store');
+    // Buku Alamat
+    Route::get('/alamat', [AlamatController::class, 'index'])->name('pelanggan.alamat');
+    Route::post('/alamat', [AlamatController::class, 'store'])->name('pelanggan.alamat.store');
+    Route::put('/alamat/{id}', [AlamatController::class, 'update'])->name('pelanggan.alamat.update');
+    Route::delete('/alamat/{id}', [AlamatController::class, 'destroy'])->name('pelanggan.alamat.destroy');
+    Route::post('/alamat/{id}/utama', [AlamatController::class, 'setUtama'])->name('pelanggan.alamat.utama');
+
+    // Katalog & Detail Mitra
+    Route::get('/detail/mitra/{id}', function ($id) {
+        return view('pelanggan.detail-mitra', ['id' => $id]);
+    })->name('pelanggan.detail.mitra');
+    Route::get('/detail/jastip/{id}', function ($id) {
+        return view('pelanggan.detail-jastip', ['id' => $id]);
+    })->name('pelanggan.detail.jastip');
+
+    // Review
+    Route::get('/review/{id_order}', [PelangganController::class, 'review'])->name('pelanggan.review');
+    Route::post('/review/kirim', [PelangganController::class, 'kirimReview'])->name('pelanggan.review.kirim');
+    Route::get('/dompet', [PelangganController::class, 'dompet'])->name('pelanggan.dompet');
+    Route::post('/dompet/topup', [PelangganController::class, 'topup'])->name('pelanggan.dompet.topup');
+    Route::get('/invoice/{id}', [PelangganController::class, 'invoice'])->name('pelanggan.invoice');
+    Route::get('/invoice/cek-status/{id}', [PelangganController::class, 'cekStatus']);
+    Route::get('/topup', function () { return "Halaman Topup"; })->name('pelanggan.topup');
+
+    // Fitur Riwayat
+    Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
+        Route::get('/', [RiwayatController::class, 'index'])->name('index');
+        Route::get('/update-status', [RiwayatController::class, 'updateStatus'])->name('update');
+        Route::post('/ulasan', [RiwayatController::class, 'kirimUlasan'])->name('ulasan');
+    });
 });
 
 // Admin & Mitra Routes
 Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
-    
+
     // Monitoring & Orders
     Route::get('/orders', [AdminOrderMonitoringController::class, 'index'])->name('admin.orders.index');
     Route::post('/orders/update-status', [AdminOrderMonitoringController::class, 'updateStatus'])->name('admin.orders.updateStatus');
@@ -80,8 +96,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/finance/withdrawal', [WithdrawalController::class, 'adminIndex'])->name('admin.finance.withdrawal');
     Route::post('/finance/withdrawal/{id}/approve', [WithdrawalController::class, 'approve'])->name('admin.finance.withdrawal.approve');
     Route::post('/finance/withdrawal/{id}/reject', [WithdrawalController::class, 'reject'])->name('admin.finance.withdrawal.reject');
-    
-    // Konfirmasi Topup (YANG BARU)
+
+    // Konfirmasi Topup
     Route::get('/finance/topup', [AdminTopupController::class, 'index'])->name('admin.finance.topup.index');
     Route::get('/finance/topup/process/{id}', [AdminTopupController::class, 'process'])->name('admin.finance.topup.process');
 
@@ -94,7 +110,7 @@ Route::prefix('admin')->group(function () {
     Route::prefix('mitra')->name('mitra.')->group(function () {
         Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
         Route::resource('/', MitraController::class)->parameters(['' => 'mitra'])->names([
-            'index' => 'index', 'create' => 'create', 'store' => 'store', 
+            'index' => 'index', 'create' => 'create', 'store' => 'store',
             'show' => 'show', 'edit' => 'edit', 'update' => 'update', 'destroy' => 'destroy',
         ]);
     });

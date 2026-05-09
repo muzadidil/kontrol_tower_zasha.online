@@ -39,7 +39,11 @@ class MitraController extends Controller
             'nomor_wa' => 'required',
         ]);
 
-        Mitra::create($request->all());
+        Mitra::create($request->only([
+            'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat', 'nomor_wa',
+            'tarif_per_jam', 'tarif_per_hari', 'status', 'portfolio_link',
+            'is_wfh', 'tarif_per_km', 'biaya_service_standar', 'tarif_bensin_per_km_service',
+        ]));
         return redirect()->route('mitra.index')->with('success', 'Mitra berhasil ditambahkan.');
     }
 
@@ -74,7 +78,11 @@ class MitraController extends Controller
         ]);
 
         $mitra = Mitra::findOrFail($id);
-        $mitra->update($request->all());
+        $mitra->update($request->only([
+            'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat', 'nomor_wa',
+            'tarif_per_jam', 'tarif_per_hari', 'status', 'portfolio_link',
+            'is_wfh', 'tarif_per_km', 'biaya_service_standar', 'tarif_bensin_per_km_service',
+        ]));
         return redirect()->route('mitra.index')->with('success', 'Mitra berhasil diperbarui.');
     }
 
@@ -90,9 +98,7 @@ class MitraController extends Controller
 
     public function dashboard()
     {
-        // Contoh, asumsikan mitra sedang login dengan ID 1 untuk testing.
-        // Seharusnya menggunakan Auth::id() atau middleware yang sesuai.
-        $mitraId = 1; 
+        $mitraId = auth()->user()->mitra_id;
         $activeOrder = Order::where('mitra_id', $mitraId)
                             ->whereIn('status', ['Pending', 'Menuju Lokasi'])
                             ->first();
