@@ -10,27 +10,6 @@
                 <i class="fas fa-users me-2"></i> Manajemen Mitra
             </a>
         </li>
-        <li>
-            <a href="{{ route('admin.verification.index') }}" class="nav-link {{ request()->is('admin/verification*') ? 'active' : '' }}">
-                <i class="fas fa-user-check me-2"></i> Verifikasi Akun
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.kategori.index') }}" class="nav-link {{ request()->is('admin/kategori') ? 'active' : '' }}">
-                <i class="fas fa-tags me-2"></i> Manajemen Kategori
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.master.kategori') }}" class="nav-link {{ request()->is('admin/master-kategori*') ? 'active' : '' }}">
-                <i class="fas fa-layer-group me-2"></i> Master Satuan & Jastip
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.monitor') }}" class="nav-link {{ request()->is('admin/monitor') ? 'active' : '' }}">
-                <i class="fas fa-broadcast-tower me-2"></i> Radar Mitra
-            </a>
-        </li>
-        
         <li class="sidebar-divider">Keuangan</li>
         <li>
             <a href="{{ route('admin.finance.dashboard') }}" class="nav-link {{ request()->is('admin/dashboard/finance') ? 'active' : '' }}">
@@ -66,11 +45,5 @@
             </a>
         </li>
 
-        <li class="sidebar-divider">Sistem Logika</li>
-        <li>
-            <a href="{{ route('admin.jastip') }}" class="nav-link {{ request()->is('admin/jastip') ? 'active' : '' }}">
-                <i class="fas fa-motorcycle me-2"></i> Logika Mitra Jastip
-            </a>
-        </li>
     </ul>
 </div>

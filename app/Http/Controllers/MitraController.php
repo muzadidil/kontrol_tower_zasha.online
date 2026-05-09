@@ -18,7 +18,36 @@ class MitraController extends Controller
         $mitras     = Mitra::orderBy('created_at', 'desc')->get();
         $categories = DB::table('kategori_pekerjaan')->orderBy('id_kategori', 'desc')->get();
         $units      = DB::table('master_satuan')->orderBy('nama_satuan')->get();
-        return view('admin.mitra.index', compact('mitras', 'categories', 'units'));
+
+        // Verifikasi
+        $list_driver = DB::table('mitra_jastip')->where('status_verifikasi', 'Pending')->get();
+        $list_mitra_verif = DB::table('mitra')
+            ->where('status_verifikasi', 'Pending')
+            ->orWhereNotNull('plat_pengajuan')
+            ->get();
+
+        // Jastip
+        $cuan_zasha     = DB::table('pesanan_jastip')->where('status_jastip', 'Selesai')
+                            ->sum(DB::raw('(ongkir * 0.1) + (total_admin_lokasi * 0.5)'));
+        $order_hari_ini = DB::table('pesanan_jastip')->whereDate('waktu_order', date('Y-m-d'))->count();
+        $driver_aktif   = DB::table('mitra_jastip')->where('status_kerja', 'Aktif')->count();
+        $total_pending  = DB::table('pesanan_jastip')->where('status_jastip', 'Mencari Driver')->count();
+        $all_jastip     = DB::table('pesanan_jastip as pj')
+                            ->join('pelanggans as pl', 'pj.id_pelanggan', '=', 'pl.id_pelanggan')
+                            ->leftJoin('mitra_jastip as mj', 'pj.id_mitra', '=', 'mj.id_driver')
+                            ->select('pj.*', 'pl.nama_pelanggan', 'pl.no_wa', 'mj.nama_driver')
+                            ->orderByDesc('pj.waktu_order')
+                            ->get();
+
+        // Radar
+        $radar_mitras = DB::table('mitra')->orderByDesc('updated_at')->get();
+
+        return view('admin.mitra.index', compact(
+            'mitras', 'categories', 'units',
+            'list_driver', 'list_mitra_verif',
+            'cuan_zasha', 'order_hari_ini', 'driver_aktif', 'total_pending', 'all_jastip',
+            'radar_mitras'
+        ));
     }
 
     /**
