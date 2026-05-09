@@ -47,6 +47,11 @@ return [
             'driver' => 'session',
             'provider' => 'pelanggans',
         ],
+
+        'mitra' => [
+            'driver' => 'session',
+            'provider' => 'mitras',
+        ],
     ],
 
     /*
@@ -75,6 +80,11 @@ return [
         'pelanggans' => [
             'driver' => 'eloquent',
             'model' => App\Models\Pelanggan::class,
+        ],
+
+        'mitras' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Mitra::class,
         ],
 
         // 'users' => [

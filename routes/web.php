@@ -20,6 +20,8 @@ use App\Http\Controllers\AdminArsipPesananController;
 use App\Http\Controllers\AdminVerificationController;
 use App\Http\Controllers\AdminMasterKategoriController;
 use App\Http\Controllers\AdminTopupController;
+use App\Http\Controllers\Auth\MitraLoginController;
+use App\Http\Controllers\Mitra\MitraDashboardController;
 
 // Authentication Routes (public)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -65,6 +67,19 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::get('/update-status', [RiwayatController::class, 'updateStatus'])->name('update');
         Route::post('/ulasan', [RiwayatController::class, 'kirimUlasan'])->name('ulasan');
     });
+});
+
+// Mitra Auth Routes
+Route::get('/mitra/login', [MitraLoginController::class, 'showLoginForm'])->name('mitra.login');
+Route::post('/mitra/login', [MitraLoginController::class, 'login'])->name('mitra.login.submit');
+Route::match(['get','post'], '/mitra/logout', [MitraLoginController::class, 'logout'])->name('mitra.logout');
+
+// Mitra Dashboard Routes (butuh login mitra)
+Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function () {
+    Route::get('/dashboard', [MitraDashboardController::class, 'dashboard'])->name('dashboard');
+    Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])->name('pesanan');
+    Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
+    Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
 });
 
 // Admin & Mitra Routes
