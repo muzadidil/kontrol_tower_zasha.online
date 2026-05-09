@@ -57,6 +57,16 @@
         </form>
     </div>
 
+    {{-- Logout --}}
+    <div class="text-start mb-3">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-outline-danger w-100 rounded-pill fw-bold">
+                <i class="bi bi-box-arrow-right me-2"></i>Keluar
+            </button>
+        </form>
+    </div>
+
     {{-- Buku Alamat --}}
     <div class="text-start mb-4">
         <div class="d-flex justify-content-between align-items-center mb-2">

@@ -24,7 +24,7 @@ use App\Http\Controllers\AdminTopupController;
 // Authentication Routes (public)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::match(['get','post'], '/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Katalog publik (tidak perlu login)
 Route::get('/katalog/{id_kategori}', [PelangganController::class, 'katalog'])->name('pelanggan.katalog');
