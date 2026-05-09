@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Order;
 use App\Models\PpobTransaction;
 use App\Models\Mitra;
 use App\Models\Pelanggan;
@@ -13,17 +12,20 @@ class FinanceController extends Controller
 {
     public function index(Request $request)
     {
-        $filter = $request->query('filter', 'all');
+        $totalOmzet = DB::table('pesanan_mitra')
+            ->where('status_pesanan', 'Selesai')
+            ->sum('total_pesanan');
 
-        $queryOrder = Order::where('status', 'Selesai');
-        $queryOrderWfh = Order::where('status', '!=', 'Selesai'); // Assuming WFH logic is in orders
+        $totalCuanZasha = DB::table('pesanan_jastip')
+            ->where('status_jastip', 'Selesai')
+            ->sum(DB::raw('(ongkir * 0.1) + (total_admin_lokasi * 0.5)'));
 
-        // Apply filter logic here if needed...
+        $totalProfitPpob = PpobTransaction::select(DB::raw('SUM(selling_price - price) as profit'))->value('profit') ?? 0;
 
-        $totalOmzet = $queryOrder->sum('total_biaya');
-        $totalCuanZasha = $queryOrder->sum('komisi_zasha');
-        $totalProfitPpob = PpobTransaction::select(DB::raw('SUM(selling_price - price) as profit'))->value('profit');
-        $totalDanaEscrow = $queryOrderWfh->sum('total_biaya');
+        $totalDanaEscrow = DB::table('pesanan_mitra')
+            ->whereNotIn('status_pesanan', ['Selesai', 'Batal', 'Dibatalkan'])
+            ->sum('total_pesanan');
+
         $totalSaldoMengendap = Mitra::sum('saldo') + Pelanggan::sum('saldo');
 
         return view('admin.dashboard.finance', compact('totalOmzet', 'totalCuanZasha', 'totalProfitPpob', 'totalDanaEscrow', 'totalSaldoMengendap'));

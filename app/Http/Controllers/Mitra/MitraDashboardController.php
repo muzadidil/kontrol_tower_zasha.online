@@ -19,7 +19,7 @@ class MitraDashboardController extends Controller
         $totalPesanan = DB::table('pesanan_mitra')->where('id_mitra', $mitra->id_mitra)->count();
         $pesananAktif = DB::table('pesanan_mitra')
                           ->where('id_mitra', $mitra->id_mitra)
-                          ->whereNotIn('status_pesanan', ['selesai', 'dibatalkan'])
+                          ->whereNotIn('status_pesanan', ['Selesai', 'Batal', 'Dibatalkan'])
                           ->count();
 
         return view('mitra.dashboard', compact('mitra', 'totalPesanan', 'pesananAktif'));

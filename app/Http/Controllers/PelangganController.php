@@ -190,7 +190,7 @@ class PelangganController extends Controller
             'id_mitra'        => $request->id_mitra,
             'id_kategori'     => $mitra->id_kategori,
             'tanggal_pesanan' => now(),
-            'total_pesanan'   => ($mitra->tarif_per_jam * $request->durasi) + 5000 + rand(111, 999),
+            'total_pesanan'   => ($mitra->tarif_per_jam * $request->durasi) + 5000,
             'status_pesanan'  => 'Pending',
         ]);
 

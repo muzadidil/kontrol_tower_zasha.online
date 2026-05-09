@@ -83,13 +83,21 @@ class RiwayatController extends Controller
     public function kirimUlasan(Request $request)
     {
         $id_pelanggan = auth('pelanggan')->id();
-        
+
+        $request->validate([
+            'id_order'     => 'required|integer',
+            'rating_nilai' => 'required|integer|min:1|max:5',
+            'ulasan_teks'  => 'nullable|string|max:500',
+        ]);
+
+        // whereNull('rating') mencegah overwrite ulasan yang sudah pernah dikirim
         DB::table('pesanan_mitra')
             ->where('id_pesanan', $request->id_order)
             ->where('id_pelanggan', $id_pelanggan)
+            ->whereNull('rating')
             ->update([
                 'rating' => $request->rating_nilai,
-                'ulasan' => $request->ulasan_teks
+                'ulasan' => $request->ulasan_teks,
             ]);
 
         return redirect()->route('pelanggan.riwayat.index');
