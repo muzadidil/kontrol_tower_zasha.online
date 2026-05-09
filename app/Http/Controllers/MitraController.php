@@ -22,8 +22,10 @@ class MitraController extends Controller
         // Verifikasi
         $list_driver = DB::table('mitra_jastip')->where('status_verifikasi', 'Pending')->get();
         $list_mitra_verif = DB::table('mitra')
-            ->where('status_verifikasi', 'Pending')
-            ->orWhereNotNull('plat_pengajuan')
+            ->where(function ($q) {
+                $q->where('status_verifikasi', 'Pending')
+                  ->orWhereNotNull('plat_pengajuan');
+            })
             ->get();
 
         // Jastip
@@ -125,7 +127,7 @@ class MitraController extends Controller
 
     public function dashboard()
     {
-        $mitraId = auth()->user()->mitra_id;
+        $mitraId = auth('mitra')->id();
         $activeOrder = Order::where('mitra_id', $mitraId)
                             ->whereIn('status', ['Pending', 'Menuju Lokasi'])
                             ->first();

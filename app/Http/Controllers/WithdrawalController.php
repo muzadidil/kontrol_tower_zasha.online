@@ -12,7 +12,7 @@ class WithdrawalController extends Controller
     // Mitra functions
     public function index()
     {
-        $withdrawals = Withdrawal::where('mitra_id', auth()->user()->mitra_id)->latest()->get();
+        $withdrawals = Withdrawal::where('mitra_id', auth('mitra')->id())->latest()->get();
         return view('admin.finance.withdrawal', compact('withdrawals'));
     }
 
@@ -28,7 +28,7 @@ class WithdrawalController extends Controller
         DB::beginTransaction();
         try {
             // lockForUpdate() mencegah race condition: dua request bersamaan tidak bisa baca saldo yang sama
-            $mitra = Mitra::where('id', auth()->user()->mitra_id)->lockForUpdate()->first();
+            $mitra = Mitra::where('id_mitra', auth('mitra')->id())->lockForUpdate()->first();
             if (!$mitra || $mitra->saldo < $request->nominal) {
                 DB::rollBack();
                 return back()->with('error', 'Saldo tidak mencukupi.');
@@ -36,7 +36,7 @@ class WithdrawalController extends Controller
 
             $mitra->decrement('saldo', $request->nominal);
             Withdrawal::create([
-                'mitra_id'       => $mitra->id,
+                'mitra_id'       => $mitra->id_mitra,
                 'bank_name'      => $request->bank_name,
                 'account_number' => $request->account_number,
                 'account_name'   => $request->account_name,

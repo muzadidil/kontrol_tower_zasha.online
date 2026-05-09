@@ -181,6 +181,10 @@ class PelangganController extends Controller
         $id_pelanggan = auth('pelanggan')->id();
         $mitra        = DB::table('mitra')->where('id_mitra', $request->id_mitra)->first();
 
+        if (!$mitra) {
+            return back()->with('error', 'Mitra tidak ditemukan.');
+        }
+
         $id_pesanan = DB::table('pesanan')->insertGetId([
             'id_pelanggan'    => $id_pelanggan,
             'id_mitra'        => $request->id_mitra,

@@ -11,8 +11,10 @@ class AdminVerificationController extends Controller
     {
         $list_driver = DB::table('mitra_jastip')->where('status_verifikasi', 'Pending')->get();
         $list_mitra = DB::table('mitra')
-            ->where('status_verifikasi', 'Pending')
-            ->orWhereNotNull('plat_pengajuan')
+            ->where(function ($q) {
+                $q->where('status_verifikasi', 'Pending')
+                  ->orWhereNotNull('plat_pengajuan');
+            })
             ->get();
 
         return view('admin.verification.index', compact('list_driver', 'list_mitra'));

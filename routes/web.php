@@ -21,6 +21,7 @@ use App\Http\Controllers\AdminVerificationController;
 use App\Http\Controllers\AdminMasterKategoriController;
 use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\Auth\MitraLoginController;
+use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Mitra\MitraDashboardController;
 
 // Authentication Routes (public)
@@ -82,8 +83,13 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
 });
 
+// Admin Auth Routes (public)
+Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminLoginController::class, 'login'])->name('admin.login.submit');
+Route::match(['get','post'], '/admin/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+
 // Admin & Mitra Routes
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
 
     // Monitoring & Orders
