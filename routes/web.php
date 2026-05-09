@@ -95,7 +95,7 @@ Route::prefix('admin')->group(function () {
     // Verifikasi & Master Data
     Route::get('/verification', [AdminVerificationController::class, 'index'])->name('admin.verification.index');
     Route::post('/verification/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
-    Route::get('/master-kategori', [AdminMasterKategoriController::class, 'index'])->name('admin.master.kategori');
+    Route::get('/master-kategori', fn() => redirect()->route('mitra.index'))->name('admin.master.kategori');
     Route::post('/master-kategori/store', [AdminMasterKategoriController::class, 'store'])->name('admin.master.kategori.store');
     Route::delete('/master-kategori/{id}', [AdminMasterKategoriController::class, 'destroy'])->name('admin.master.kategori.destroy');
     Route::post('/master-kategori/unit', [AdminMasterKategoriController::class, 'storeUnit'])->name('admin.master.kategori.unit.store');

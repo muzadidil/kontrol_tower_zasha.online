@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\Order;
 use App\Models\Mitra;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MitraController extends Controller
 {
@@ -15,8 +15,10 @@ class MitraController extends Controller
      */
     public function index()
     {
-        $mitras = Mitra::all();
-        return view('admin.mitra.index', compact('mitras'));
+        $mitras     = Mitra::orderBy('created_at', 'desc')->get();
+        $categories = DB::table('kategori_pekerjaan')->orderBy('id_kategori', 'desc')->get();
+        $units      = DB::table('master_satuan')->orderBy('nama_satuan')->get();
+        return view('admin.mitra.index', compact('mitras', 'categories', 'units'));
     }
 
     /**
