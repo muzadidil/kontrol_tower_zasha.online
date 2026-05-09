@@ -33,16 +33,14 @@ class MitraController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required',
-            'kategori' => 'required',
-            'alamat' => 'required',
-            'nomor_wa' => 'required',
+            'nama_panggilan' => 'required',
+            'no_wa'          => 'required',
         ]);
 
         Mitra::create($request->only([
-            'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat', 'nomor_wa',
-            'tarif_per_jam', 'tarif_per_hari', 'status', 'portfolio_link',
-            'is_wfh', 'tarif_per_km', 'biaya_service_standar', 'tarif_bensin_per_km_service',
+            'id_kategori', 'nama_panggilan', 'nama_asli', 'no_wa',
+            'tarif_per_jam', 'tarif_per_hari', 'biaya_service_standar',
+            'status_mitra', 'deskripsi_singkat', 'alamat',
         ]));
         return redirect()->route('mitra.index')->with('success', 'Mitra berhasil ditambahkan.');
     }
@@ -53,7 +51,7 @@ class MitraController extends Controller
     public function show(string $id)
     {
         $mitra = Mitra::findOrFail($id);
-        return view('admin.mitra.show', compact('mitra'));
+        return view('admin.mitra.edit', compact('mitra'));
     }
 
     /**
@@ -71,17 +69,15 @@ class MitraController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'nama' => 'required',
-            'kategori' => 'required',
-            'alamat' => 'required',
-            'nomor_wa' => 'required',
+            'nama_panggilan' => 'required',
+            'no_wa'          => 'required',
         ]);
 
         $mitra = Mitra::findOrFail($id);
         $mitra->update($request->only([
-            'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat', 'nomor_wa',
-            'tarif_per_jam', 'tarif_per_hari', 'status', 'portfolio_link',
-            'is_wfh', 'tarif_per_km', 'biaya_service_standar', 'tarif_bensin_per_km_service',
+            'id_kategori', 'nama_panggilan', 'nama_asli', 'no_wa',
+            'tarif_per_jam', 'tarif_per_hari', 'biaya_service_standar',
+            'status_mitra', 'deskripsi_singkat', 'alamat',
         ]));
         return redirect()->route('mitra.index')->with('success', 'Mitra berhasil diperbarui.');
     }
