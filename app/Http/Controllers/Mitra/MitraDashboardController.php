@@ -16,9 +16,9 @@ class MitraDashboardController extends Controller
     public function dashboard()
     {
         $mitra        = $this->mitra();
-        $totalPesanan = DB::table('pesanan')->where('id_mitra', $mitra->id)->count();
-        $pesananAktif = DB::table('pesanan')
-                          ->where('id_mitra', $mitra->id)
+        $totalPesanan = DB::table('pesanan_mitra')->where('id_mitra', $mitra->id_mitra)->count();
+        $pesananAktif = DB::table('pesanan_mitra')
+                          ->where('id_mitra', $mitra->id_mitra)
                           ->whereNotIn('status_pesanan', ['selesai', 'dibatalkan'])
                           ->count();
 
@@ -28,8 +28,8 @@ class MitraDashboardController extends Controller
     public function pesanan()
     {
         $mitra   = $this->mitra();
-        $pesanan = DB::table('pesanan')
-                     ->where('id_mitra', $mitra->id)
+        $pesanan = DB::table('pesanan_mitra')
+                     ->where('id_mitra', $mitra->id_mitra)
                      ->orderByDesc('created_at')
                      ->get();
 
@@ -38,11 +38,11 @@ class MitraDashboardController extends Controller
 
     public function saldo()
     {
-        $mitra    = $this->mitra();
-        $riwayat  = DB::table('withdrawals')
-                      ->where('mitra_id', $mitra->id)
-                      ->orderByDesc('created_at')
-                      ->get();
+        $mitra   = $this->mitra();
+        $riwayat = DB::table('withdrawals')
+                     ->where('mitra_id', $mitra->id_mitra)
+                     ->orderByDesc('created_at')
+                     ->get();
 
         return view('mitra.saldo', compact('mitra', 'riwayat'));
     }

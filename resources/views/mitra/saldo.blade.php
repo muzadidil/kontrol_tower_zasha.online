@@ -8,7 +8,7 @@
     <div class="card card-custom p-4 mb-4 border-0" style="background:linear-gradient(135deg,#0a5c36,#1a7a4a);">
         <small class="text-white-50 fw-bold d-block mb-1" style="font-size:10px;">SALDO TERSEDIA</small>
         <h3 class="fw-bold text-white mb-0 allow-select">
-            Rp {{ number_format($mitra->saldo_mitra ?? $mitra->saldo ?? 0, 0, ',', '.') }}
+            Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}
         </h3>
     </div>
 

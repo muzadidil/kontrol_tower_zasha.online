@@ -11,11 +11,11 @@
             </div>
             <div>
                 <h6 class="fw-bold mb-0 allow-select">Halo, {{ explode(' ', trim($mitra->nama_panggilan))[0] }}!</h6>
-                <span style="background:#e8f5e9;color:#0a5c36;padding:3px 10px;border-radius:50px;font-weight:800;font-size:0.65rem;" class="allow-select">{{ $mitra->id }}</span>
+                <span style="background:#e8f5e9;color:#0a5c36;padding:3px 10px;border-radius:50px;font-weight:800;font-size:0.65rem;" class="allow-select">{{ $mitra->id_mitra }}</span>
             </div>
         </div>
-        <span class="{{ $mitra->status === 'Aktif' ? 'badge-status-aktif' : 'badge-status-nonaktif' }}">
-            {{ $mitra->status }}
+        <span class="{{ $mitra->status_mitra === 'aktif' ? 'badge-status-aktif' : 'badge-status-nonaktif' }}">
+            {{ ucfirst($mitra->status_mitra) }}
         </span>
     </div>
 
@@ -23,7 +23,7 @@
     <div class="card card-custom p-3 mb-4 border-0" style="background:linear-gradient(135deg,#0a5c36,#1a7a4a);">
         <small class="text-white-50 fw-bold d-block mb-1" style="font-size:10px;">SALDO MITRA</small>
         <h4 class="fw-bold text-white mb-0 allow-select">
-            Rp {{ number_format($mitra->saldo_mitra ?? $mitra->saldo ?? 0, 0, ',', '.') }}
+            Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}
         </h4>
         <div class="mt-3 d-flex gap-2">
             <a href="{{ route('mitra.saldo') }}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold" style="font-size:0.7rem;">

@@ -25,18 +25,14 @@ class MitraLoginController extends Controller
             'password'  => ['required', 'string'],
         ]);
 
-        // Normalisasi nomor WA ke format 62XXXXXXXXX
+        // Normalisasi ke format 62XXXXXXXXX
         $nomor = $request->nomor_wa;
-        if (str_starts_with($nomor, '0')) {
-            $nomor = substr($nomor, 1);
-        }
-        if (str_starts_with($nomor, '62')) {
-            $nomor = substr($nomor, 2);
-        }
+        if (str_starts_with($nomor, '0'))  $nomor = substr($nomor, 1);
+        if (str_starts_with($nomor, '62')) $nomor = substr($nomor, 2);
         $nomor = '62' . $nomor;
 
-        // Cari mitra berdasarkan nomor_wa
-        $mitra = Mitra::where('nomor_wa', $nomor)->first();
+        // Cari di tabel mitra (kolom: no_wa)
+        $mitra = Mitra::where('no_wa', $nomor)->first();
 
         if (!$mitra || !Hash::check($request->password, $mitra->password)) {
             return back()->withErrors([

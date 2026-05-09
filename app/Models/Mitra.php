@@ -9,48 +9,33 @@ class Mitra extends Authenticatable
 {
     use Notifiable;
 
-    public $incrementing = false;
-    protected $keyType   = 'string';
-    protected $table     = 'mitras';
+    protected $table      = 'mitra';
+    protected $primaryKey = 'id_mitra';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
 
     protected $fillable = [
-        'id', 'nama_panggilan', 'usia', 'kategori', 'deskripsi_singkat',
-        'nomor_wa', 'password', 'saldo', 'saldo_mitra', 'tarif_per_jam', 'tarif_per_hari',
-        'status', 'portfolio_link', 'is_wfh',
-        'tarif_per_km', 'biaya_service_standar', 'tarif_bensin_per_km_service',
+        'id_kategori', 'nama_panggilan', 'nama_asli', 'foto_mitra',
+        'no_wa', 'password', 'status_mitra', 'status_verifikasi',
+        'tarif_per_jam', 'tarif_per_hari', 'biaya_service_standar',
+        'saldo', 'deskripsi_singkat', 'alamat',
+        'lat_mitra', 'lng_mitra',
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
-    protected static function booted(): void
-    {
-        static::creating(function ($model) {
-            if (empty($model->id)) {
-                $latest = self::latest('created_at')->first();
-                $number = $latest ? (int) substr($latest->id, -4) + 1 : 1;
-                $model->id = 'ZSH-MTR-' . str_pad($number, 4, '0', STR_PAD_LEFT);
-            }
-        });
-    }
-
-    // Accessor agar auth bisa pakai kolom nomor_wa sebagai username
-    public function getAuthIdentifierName(): string
-    {
-        return 'id';
-    }
-
     public function walletTransfersSent()
     {
-        return $this->hasMany(WalletTransfer::class, 'sender_mitra_id');
+        return $this->hasMany(WalletTransfer::class, 'sender_mitra_id', 'id_mitra');
     }
 
     public function walletTransfersReceived()
     {
-        return $this->hasMany(WalletTransfer::class, 'receiver_mitra_id');
+        return $this->hasMany(WalletTransfer::class, 'receiver_mitra_id', 'id_mitra');
     }
 
     public function withdrawals()
     {
-        return $this->hasMany(Withdrawal::class, 'mitra_id');
+        return $this->hasMany(Withdrawal::class, 'mitra_id', 'id_mitra');
     }
 }

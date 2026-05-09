@@ -15,7 +15,7 @@
 
     <div class="text-center mb-4">
         <h5 class="fw-bold mb-1 allow-select">{{ $mitra->nama_panggilan }}</h5>
-        <span class="allow-select" style="background:#e8f5e9;color:#0a5c36;padding:3px 12px;border-radius:50px;font-size:0.7rem;font-weight:800;">{{ $mitra->id }}</span>
+        <span class="allow-select" style="background:#e8f5e9;color:#0a5c36;padding:3px 12px;border-radius:50px;font-size:0.7rem;font-weight:800;">MTR-{{ str_pad($mitra->id_mitra, 4, '0', STR_PAD_LEFT) }}</span>
     </div>
 
     @if(session('success'))
@@ -36,8 +36,8 @@
             </div>
             <div class="col-6">
                 <div class="small text-muted fw-bold mt-2">Status</div>
-                <span class="{{ $mitra->status === 'Aktif' ? 'badge-status-aktif' : 'badge-status-nonaktif' }}">
-                    {{ $mitra->status }}
+                <span class="{{ $mitra->status_mitra === 'aktif' ? 'badge-status-aktif' : 'badge-status-nonaktif' }}">
+                    {{ ucfirst($mitra->status_mitra) }}
                 </span>
             </div>
         </div>
