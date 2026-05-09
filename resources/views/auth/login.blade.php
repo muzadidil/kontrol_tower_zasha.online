@@ -26,9 +26,7 @@
                                placeholder="8xxxxxxxxxx" maxlength="11" autocomplete="tel" autofocus>
                         <input type="hidden" name="no_wa" id="no_wa_hidden" value="{{ old('no_wa') }}">
                     </div>
-                    <div id="wa-feedback" class="form-text text-danger small d-none">
-                        Nomor harus diawali angka <strong>8</strong> (contoh: 81234567890)
-                    </div>
+                    <div id="wa-feedback" class="form-text text-danger small d-none" id="wa-feedback"></div>
                     @error('no_wa')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -74,14 +72,23 @@
         input.value = oldVal.startsWith('62') ? oldVal.slice(2) : oldVal;
     }
 
-    input.addEventListener('input', function () {
-        // Hanya angka
-        this.value = this.value.replace(/\D/g, '');
-
-        const val = this.value;
-
-        // Validasi: huruf pertama harus 8
+    function validate(val) {
         if (val.length > 0 && val[0] !== '8') {
+            return 'Nomor harus diawali angka <strong>8</strong> (contoh: 81234567890)';
+        }
+        if (val.length > 0 && val.length !== 11) {
+            return 'Nomor harus <strong>11 digit</strong> setelah +62 (contoh: 81234567890)';
+        }
+        return null;
+    }
+
+    input.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '');
+        const val  = this.value;
+        const err  = validate(val);
+
+        if (err) {
+            feedback.innerHTML = err;
             feedback.classList.remove('d-none');
             input.classList.add('is-invalid');
         } else {
@@ -89,16 +96,16 @@
             input.classList.remove('is-invalid');
         }
 
-        // Sync ke hidden field dengan prefix 62
         hidden.value = val ? '62' + val : '';
     });
 
     // Validasi sebelum submit
     document.getElementById('loginForm').addEventListener('submit', function (e) {
         const val = input.value;
-        // Total digit dengan 62 = 13, jadi user harus ketik 11 digit (8 + 10 angka)
-        if (!val || val[0] !== '8' || val.length !== 11) {
+        const err = validate(val);
+        if (err) {
             e.preventDefault();
+            feedback.innerHTML = err;
             feedback.classList.remove('d-none');
             input.classList.add('is-invalid');
             input.focus();
