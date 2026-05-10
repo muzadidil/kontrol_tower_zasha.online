@@ -37,6 +37,7 @@ use App\Http\Controllers\Pelanggan\ServiceController as PelangganServiceControll
 use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Pelanggan\PpobController as PelangganPpobNewController;
+use App\Http\Controllers\Admin\PpobController as AdminPpobController;
 use App\Http\Controllers\TopupController;
 
 // Authentication Routes (public)
@@ -214,6 +215,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
     Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings');
     Route::post('/settings', [SettingController::class, 'update'])->name('admin.settings.update');
+    Route::post('/settings/api', [SettingController::class, 'updateApi'])->name('admin.settings.api');
+    Route::post('/settings/operasional', [SettingController::class, 'updateOperasional'])->name('admin.settings.operasional');
+    Route::post('/settings/legal', [SettingController::class, 'updateLegal'])->name('admin.settings.legal');
+    Route::post('/settings/about', [SettingController::class, 'updateAbout'])->name('admin.settings.about');
 
     // Monitoring & Orders
     Route::get('/orders', [AdminOrderMonitoringController::class, 'index'])->name('admin.orders.index');
@@ -252,31 +257,37 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
 
     // WFH Admin
-    Route::prefix('wfh')->name('wfh.')->group(function () {
+    Route::prefix('wfh')->name('admin.wfh.')->group(function () {
         Route::get('/', [AdminWfhController::class, 'index'])->name('index');
         Route::get('/{wfhOrder}', [AdminWfhController::class, 'show'])->name('show');
         Route::post('/{wfhOrder}/resolusi', [AdminWfhController::class, 'resolusiDispute'])->name('resolusi');
     });
 
     // Jastip Admin (modul baru)
-    Route::prefix('jastip-monitoring')->name('jastip.')->group(function () {
+    Route::prefix('jastip-monitoring')->name('admin.jastip.')->group(function () {
         Route::get('/', [AdminJastipNewController::class, 'index'])->name('index');
         Route::get('/{jastipOrder}', [AdminJastipNewController::class, 'show'])->name('show');
         Route::post('/{jastipOrder}/resolusi', [AdminJastipNewController::class, 'resolusiDispute'])->name('resolusi');
     });
 
     // Tenaga Admin
-    Route::prefix('tenaga')->name('tenaga.')->group(function () {
+    Route::prefix('tenaga')->name('admin.tenaga.')->group(function () {
         Route::get('/', [AdminTenagaController::class, 'index'])->name('index');
         Route::get('/{tenagaOrder}', [AdminTenagaController::class, 'show'])->name('show');
         Route::post('/{tenagaOrder}/resolusi', [AdminTenagaController::class, 'resolusiDispute'])->name('resolusi');
     });
 
     // Service Admin
-    Route::prefix('service')->name('service.')->group(function () {
+    Route::prefix('service')->name('admin.service.')->group(function () {
         Route::get('/', [AdminServiceController::class, 'index'])->name('index');
         Route::get('/{serviceOrder}', [AdminServiceController::class, 'show'])->name('show');
         Route::post('/{serviceOrder}/resolusi', [AdminServiceController::class, 'resolusiDispute'])->name('resolusi');
+    });
+
+    // PPOB Monitoring Admin
+    Route::prefix('ppob')->name('admin.ppob.')->group(function () {
+        Route::get('/', [AdminPpobController::class, 'index'])->name('index');
+        Route::get('/{trx}', [AdminPpobController::class, 'show'])->name('show');
     });
     Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
 

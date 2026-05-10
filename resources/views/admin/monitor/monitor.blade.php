@@ -45,15 +45,17 @@
                     {{-- 3. LOOPING DATA MITRA --}}
                     @forelse($mitras as $mitra)
                         @php
+                            $lastActive = $mitra->last_active_at ?? $mitra->updated_at;
                             $is_online = false;
-                            if(!empty($mitra->last_ping)) {
-                                $diff = time() - strtotime($mitra->last_ping);
-                                if($diff < 300) { $is_online = true; } 
+                            if (!empty($lastActive)) {
+                                $diff = time() - strtotime($lastActive);
+                                // Anggap online kalau aktif < 5 menit DAN punya session aktif
+                                if ($diff < 300 && !empty($mitra->session_token)) { $is_online = true; }
                             }
                         @endphp
                         <tr>
                             <td class="ps-4">
-                                <div class="fw-bold text-dark">{{ $mitra->nama_mitra }}</div>
+                                <div class="fw-bold text-dark">{{ $mitra->nama_mitra ?? $mitra->nama_panggilan ?? '-' }}</div>
                                 <div class="text-muted small"><i class="bi bi-whatsapp me-1 text-success"></i>{{ $mitra->no_wa }}</div>
                             </td>
                             <td>
@@ -69,29 +71,31 @@
                             </td>
                             <td>
                                 <span class="badge badge-status-kerja">
-                                    {{ $mitra->status_kerja ?? 'istirahat' }}
+                                    {{ $mitra->status_mitra ?? 'istirahat' }}
                                 </span>
+                                @if($mitra->device_name)
+                                    <div class="small text-muted mt-1"><i class="bi bi-phone"></i> {{ $mitra->device_name }}</div>
+                                @endif
                             </td>
                             <td>
                                 <div class="ping-time">
-                                    {{ $mitra->last_ping ? \Carbon\Carbon::parse($mitra->last_ping)->format('H:i:s') : '-' }}
+                                    {{ $lastActive ? \Carbon\Carbon::parse($lastActive)->format('H:i:s') : '-' }}
                                 </div>
                                 <div class="ping-date">
-                                    {{ $mitra->last_ping ? \Carbon\Carbon::parse($mitra->last_ping)->format('d/m/Y') : '' }}
+                                    {{ $lastActive ? \Carbon\Carbon::parse($lastActive)->format('d/m/Y') : '' }}
                                 </div>
                             </td>
                             <td class="text-center">
-                                @if($mitra->token_login)
+                                @if($mitra->session_token)
                                     <code class="token-code">
-                                        {{ Str::substr($mitra->token_login, 0, 8) }}...
+                                        {{ \Illuminate\Support\Str::substr($mitra->session_token, 0, 8) }}...
                                     </code>
                                 @else
                                     <span class="text-muted small italic">-</span>
                                 @endif
                             </td>
                             <td class="text-end pe-4">
-                                @if($mitra->token_login)
-                                    {{-- Menggunakan Form POST untuk aksi yang memanipulasi database --}}
+                                @if($mitra->session_token)
                                     <form action="{{ route('admin.monitor.force_logout', $mitra->id_mitra) }}" method="POST" class="d-inline" onsubmit="return confirm('Paksa keluar mitra ini? Mereka harus login ulang nanti.')">
                                         @csrf
                                         <button type="submit" class="btn btn-danger btn-sm rounded-3 px-3 shadow-sm btn-force">
