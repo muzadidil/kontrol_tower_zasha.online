@@ -34,6 +34,7 @@
         </li>
         
         <li class="sidebar-divider">Operasional & Order</li>
+
         <li>
             <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->is('admin/orders') ? 'active' : '' }}">
                 <i class="fas fa-receipt me-2"></i> Global Monitoring
@@ -45,5 +46,11 @@
             </a>
         </li>
 
+        <li class="sidebar-divider">Konfigurasi</li>
+        <li>
+            <a href="{{ route('admin.settings') }}" class="nav-link {{ request()->is('admin/settings') ? 'active' : '' }}">
+                <i class="fas fa-cog me-2"></i> Pengaturan Sistem
+            </a>
+        </li>
     </ul>
 </div>

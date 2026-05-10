@@ -58,7 +58,7 @@ class PelangganController extends Controller
         $d = DB::table('pesanan as p')
             ->join('mitra as m', 'p.id_mitra', '=', 'm.id_mitra')
             ->join('pelanggan as pl', 'p.id_pelanggan', '=', 'pl.id_pelanggan')
-            ->select('p.*', 'm.nama_mitra', 'pl.nama_pelanggan')
+            ->select('p.*', 'm.nama_asli as nama_mitra', 'pl.nama_pelanggan')
             ->where('p.id_pesanan', $id)
             ->first();
         return view('pelanggan.invoice', compact('d'));

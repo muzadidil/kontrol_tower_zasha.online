@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
+    public function index()
+    {
+        $gmaps_api_key = Setting::get('google_maps_api_key', '');
+        return view('admin.settings.index', compact('gmaps_api_key'));
+    }
+
     public function update(Request $request)
     {
         $request->validate([
@@ -15,6 +21,6 @@ class SettingController extends Controller
 
         Setting::set('google_maps_api_key', $request->google_maps_api_key);
 
-        return back()->with('setting_saved', 'API Key berhasil disimpan.');
+        return redirect()->route('admin.settings')->with('setting_saved', 'API Key berhasil disimpan.');
     }
 }

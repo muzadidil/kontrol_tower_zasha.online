@@ -21,7 +21,7 @@ class AdminOrderMonitoringController extends Controller
                 p.metode_pembayaran COLLATE utf8mb4_general_ci as metode,
                 'JASA' COLLATE utf8mb4_general_ci as tipe_order,
                 plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan, 
-                COALESCE(m.nama_mitra, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
+                COALESCE(m.nama_asli, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
                 p.kategori_jasa COLLATE utf8mb4_general_ci as detail,
                 (p.biaya_jasa + p.ongkir + p.kode_unik) as total_biaya
             FROM pesanan p
@@ -38,7 +38,7 @@ class AdminOrderMonitoringController extends Controller
                 pj.metode_pembayaran COLLATE utf8mb4_general_ci as metode,
                 'JASTIP' COLLATE utf8mb4_general_ci as tipe_order,
                 plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan, 
-                COALESCE(mj.nama_mitra, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
+                COALESCE(mj.nama_asli, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
                 pj.lokasi_asal COLLATE utf8mb4_general_ci as detail,
                 (pj.total_harga_barang + pj.ongkir) as total_biaya
             FROM pesanan_jastip pj

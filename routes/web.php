@@ -92,6 +92,7 @@ Route::match(['get','post'], '/admin/logout', [AdminLoginController::class, 'log
 // Admin & Mitra Routes
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
+    Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings');
     Route::post('/settings', [SettingController::class, 'update'])->name('admin.settings.update');
 
     // Monitoring & Orders

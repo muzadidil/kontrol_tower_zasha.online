@@ -17,7 +17,7 @@ class AdminArsipPesananController extends Controller
         $query = DB::table('pesanan')
             ->join('pelanggan', 'pesanan.id_pelanggan', '=', 'pelanggan.id_pelanggan')
             ->leftJoin('mitra', 'pesanan.id_mitra', '=', 'mitra.id_mitra')
-            ->select('pesanan.*', 'pelanggan.nama_pelanggan', 'mitra.nama_mitra')
+            ->select('pesanan.*', 'pelanggan.nama_pelanggan', 'mitra.nama_asli as nama_mitra')
             ->whereIn('pesanan.status_pesanan', ['Selesai', 'Batal']);
 
         if ($filter_status != '') {
@@ -31,7 +31,7 @@ class AdminArsipPesananController extends Controller
             $query->where(function ($q) use ($safe) {
                 $q->where('pesanan.id_pesanan', 'like', '%' . $safe . '%')
                   ->orWhere('pelanggan.nama_pelanggan', 'like', '%' . $safe . '%')
-                  ->orWhere('mitra.nama_mitra', 'like', '%' . $safe . '%');
+                  ->orWhere('mitra.nama_asli', 'like', '%' . $safe . '%');
             });
         }
 
