@@ -12,8 +12,9 @@
 
     <div style="font-size:16px;font-weight:800;color:white;margin-bottom:21px;">Akun Saya</div>
 
-    {{-- Avatar --}}
-    <div style="position:relative;display:inline-block;margin-bottom:13px;">
+    {{-- Avatar with edit button --}}
+    <form id="formFotoPelanggan" action="{{ route('pelanggan.profil.foto') }}" method="POST" enctype="multipart/form-data" style="display:inline-block;position:relative;margin-bottom:13px;">
+        @csrf
         <img src="{{ $user->foto
                 ? asset('storage/'.$user->foto)
                 : 'https://ui-avatars.com/api/?name='.urlencode($user->nama_pelanggan).'&background=f0a500&color=002d72&bold=true&size=128' }}"
@@ -26,7 +27,19 @@
             <i class="bi {{ $user->status_verifikasi == 1 ? 'bi-check-lg' : 'bi-x-lg' }}"
                style="color:white;font-size:10px;"></i>
         </div>
-    </div>
+        <label for="inputFotoPelanggan"
+               style="position:absolute;top:-5px;right:-5px;width:28px;height:28px;
+                      background:var(--gold);color:#002d72;border-radius:50%;display:flex;
+                      align-items:center;justify-content:center;cursor:pointer;
+                      box-shadow:0 4px 12px rgba(0,0,0,.25);border:2px solid #002d72;"
+               title="Ubah foto profil">
+            <i class="bi bi-camera-fill" style="font-size:12px;"></i>
+        </label>
+        <input type="file" id="inputFotoPelanggan" name="foto"
+               accept="image/jpeg,image/png,image/webp,image/gif"
+               onchange="document.getElementById('formFotoPelanggan').submit()"
+               style="display:none;">
+    </form>
 
     <div style="font-size:19px;font-weight:800;color:white;margin-bottom:5px;">{{ $user->nama_pelanggan }}</div>
     <div style="font-size:11px;color:rgba(255,255,255,.55);">
@@ -42,6 +55,14 @@
                     display:flex;gap:10px;align-items:center;">
             <i class="bi bi-check-circle-fill" style="color:#10b981;font-size:18px;"></i>
             <span style="font-size:12px;color:#065f46;font-weight:600;">{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if(session('error') || $errors->any())
+        <div style="background:#fee2e2;border-radius:13px;padding:13px 16px;margin-bottom:13px;
+                    display:flex;gap:10px;align-items:center;">
+            <i class="bi bi-exclamation-circle-fill" style="color:#ef4444;font-size:18px;"></i>
+            <span style="font-size:12px;color:#991b1b;font-weight:600;">{{ session('error') ?? $errors->first() }}</span>
         </div>
     @endif
 

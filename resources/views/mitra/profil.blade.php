@@ -17,15 +17,31 @@
 <div class="page-pad stack-3" style="margin-top: calc(var(--fib-6) * -1);">
 
     <div class="text-center" style="position: relative; z-index: 3;">
-        <div class="avatar-89 mx-auto" style="background: var(--surface); border: var(--fib-1) solid var(--surface); display:inline-flex; align-items:center; justify-content:center; box-shadow: 0 var(--fib-2) var(--fib-5) rgba(10,92,54,0.15); border-radius: 50%; overflow: hidden;">
-            @if($mitra->foto_mitra)
-                <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-            @else
-                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #e8f5e9, var(--mitra-gold-soft)); border-radius: 50%; display:flex; align-items:center; justify-content:center;">
-                    <i class="bi bi-person-fill" style="font-size: var(--fib-5); color: var(--mitra-green);"></i>
-                </div>
-            @endif
-        </div>
+        <form id="formFotoMitra" action="{{ route('mitra.profil.foto') }}" method="POST" enctype="multipart/form-data" style="display:inline-block;position:relative;">
+            @csrf
+            <div class="avatar-89" style="background: var(--surface); border: var(--fib-1) solid var(--surface); display:inline-flex; align-items:center; justify-content:center; box-shadow: 0 var(--fib-2) var(--fib-5) rgba(10,92,54,0.15); border-radius: 50%; overflow: hidden;">
+                @if($mitra->foto_mitra)
+                    <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @else
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #e8f5e9, var(--mitra-gold-soft)); border-radius: 50%; display:flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-person-fill" style="font-size: var(--fib-5); color: var(--mitra-green);"></i>
+                    </div>
+                @endif
+            </div>
+            <label for="inputFotoMitra"
+                   style="position:absolute;bottom:var(--fib-1);right:var(--fib-1);width:var(--fib-5);height:var(--fib-5);
+                          background:var(--mitra-gold);color:#fff;border-radius:50%;display:flex;
+                          align-items:center;justify-content:center;cursor:pointer;
+                          box-shadow:0 var(--fib-1) var(--fib-3) rgba(0,0,0,0.2);
+                          border:2px solid var(--surface);"
+                   title="Ubah foto profil">
+                <i class="bi bi-camera-fill" style="font-size: var(--t-xs);"></i>
+            </label>
+            <input type="file" id="inputFotoMitra" name="foto"
+                   accept="image/jpeg,image/png,image/webp,image/gif"
+                   onchange="document.getElementById('formFotoMitra').submit()"
+                   style="display:none;">
+        </form>
     </div>
 
     <div class="text-center stack-3">
@@ -48,6 +64,12 @@
     @if(session('success'))
         <div class="alert alert-success small mb-0" style="border-radius: var(--r-md); padding: var(--fib-2) var(--fib-3); font-size: var(--t-xs);">
             <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error') || $errors->any())
+        <div class="alert alert-danger small mb-0" style="border-radius: var(--r-md); padding: var(--fib-2) var(--fib-3); font-size: var(--t-xs);">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') ?? $errors->first() }}
         </div>
     @endif
 

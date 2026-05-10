@@ -167,6 +167,7 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
     Route::post('/saldo/topup', [MitraDashboardController::class, 'topup'])->name('saldo.topup');
     Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
+    Route::post('/profil/foto', [MitraDashboardController::class, 'uploadFoto'])->name('profil.foto');
 
     // WFH Orders
     Route::prefix('wfh')->name('wfh.')->group(function () {

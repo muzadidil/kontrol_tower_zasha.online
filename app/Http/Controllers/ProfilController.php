@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
 use App\Models\Alamat;
+use App\Support\ImageUploader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ProfilController extends Controller
 {
@@ -35,16 +36,25 @@ class ProfilController extends Controller
 
     public function uploadFoto(Request $request)
     {
-        $request->validate(['foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048']);
-        
+        $request->validate(['foto' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:5120']);
+
         $pelanggan = Auth::guard('pelanggan')->user();
-        
-        if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('profil', 'public');
+
+        try {
+            $path = ImageUploader::uploadWebp(
+                $request->file('foto'),
+                folder: 'profil',
+                maxDimension: 800,
+                quality: 85,
+                oldPath: $pelanggan->foto,
+            );
             $pelanggan->update(['foto' => $path]);
+        } catch (\RuntimeException $e) {
+            Log::error('Upload foto pelanggan gagal', ['message' => $e->getMessage(), 'pelanggan_id' => $pelanggan->id_pelanggan]);
+            return back()->with('error', 'Gagal memproses foto: ' . $e->getMessage());
         }
 
-        return back()->with('success', 'Foto berhasil diupload');
+        return back()->with('success', 'Foto profil berhasil diperbarui');
     }
 
     public function storeAlamat(Request $request)
