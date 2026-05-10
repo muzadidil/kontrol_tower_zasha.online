@@ -41,4 +41,14 @@ return [
         'webhook_secret' => env('DIGIFLAZZ_WEBHOOK_SECRET'),
     ],
 
+    'tokopay' => [
+        'merchant_id' => env('TOKOPAY_MERCHANT_ID'),
+        'secret'      => env('TOKOPAY_SECRET'),
+        'url'         => env('TOKOPAY_URL', 'https://api.tokopay.id/v1/order'),
+    ],
+
+    'fcm' => [
+        'server_key' => env('FCM_SERVER_KEY'),
+    ],
+
 ];

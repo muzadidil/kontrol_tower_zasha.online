@@ -27,6 +27,17 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
 use App\Http\Controllers\Mitra\WfhController as MitraWfhController;
 use App\Http\Controllers\Admin\WfhController as AdminWfhController;
+use App\Http\Controllers\Pelanggan\JastipController as PelangganJastipController;
+use App\Http\Controllers\Mitra\JastipController as MitraJastipController;
+use App\Http\Controllers\Admin\JastipController as AdminJastipNewController;
+use App\Http\Controllers\Pelanggan\TenagaController as PelangganTenagaController;
+use App\Http\Controllers\Mitra\TenagaController as MitraTenagaController;
+use App\Http\Controllers\Admin\TenagaController as AdminTenagaController;
+use App\Http\Controllers\Pelanggan\ServiceController as PelangganServiceController;
+use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
+use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
+use App\Http\Controllers\Pelanggan\PpobController as PelangganPpobNewController;
+use App\Http\Controllers\TopupController;
 
 // Authentication Routes (public)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -76,6 +87,52 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::post('/{wfhOrder}/dispute', [PelangganWfhController::class, 'dispute'])->name('dispute');
     });
 
+    // Jastip Orders
+    Route::prefix('jastip')->name('pelanggan.jastip.')->middleware(['profil.lengkap'])->group(function () {
+        Route::get('/', [PelangganJastipController::class, 'index'])->name('index');
+        Route::get('/order', [PelangganJastipController::class, 'create'])->name('create');
+        Route::post('/order', [PelangganJastipController::class, 'store'])->name('store');
+        Route::get('/{jastipOrder}', [PelangganJastipController::class, 'show'])->name('show');
+        Route::post('/{jastipOrder}/konfirmasi', [PelangganJastipController::class, 'konfirmasi'])->name('konfirmasi');
+        Route::post('/{jastipOrder}/dispute', [PelangganJastipController::class, 'dispute'])->name('dispute');
+    });
+
+    // Tenaga Orders
+    Route::prefix('tenaga')->name('pelanggan.tenaga.')->middleware(['profil.lengkap'])->group(function () {
+        Route::get('/', [PelangganTenagaController::class, 'index'])->name('index');
+        Route::get('/order', [PelangganTenagaController::class, 'create'])->name('create');
+        Route::post('/order', [PelangganTenagaController::class, 'store'])->name('store');
+        Route::get('/{tenagaOrder}', [PelangganTenagaController::class, 'show'])->name('show');
+        Route::post('/{tenagaOrder}/konfirmasi', [PelangganTenagaController::class, 'konfirmasi'])->name('konfirmasi');
+        Route::post('/{tenagaOrder}/dispute', [PelangganTenagaController::class, 'dispute'])->name('dispute');
+    });
+
+    // PPOB Pelanggan (tanpa profil.lengkap karena PPOB boleh diakses semua)
+    Route::prefix('ppob')->name('pelanggan.ppob.')->group(function () {
+        Route::get('/', [PelangganPpobNewController::class, 'index'])->name('index');
+        Route::get('/beli', [PelangganPpobNewController::class, 'form'])->name('form');
+        Route::post('/transaksi', [PelangganPpobNewController::class, 'transaksi'])->name('transaksi');
+        Route::get('/{trx}', [PelangganPpobNewController::class, 'show'])->name('show');
+    });
+
+    // Topup pelanggan (Tokopay)
+    Route::prefix('topup-saldo')->name('pelanggan.topup.')->group(function () {
+        Route::get('/', [TopupController::class, 'pelangganForm'])->name('form');
+        Route::post('/', [TopupController::class, 'pelangganStore'])->name('store');
+        Route::get('/riwayat', [TopupController::class, 'pelangganIndex'])->name('index');
+    });
+
+    // Service Orders
+    Route::prefix('service')->name('pelanggan.service.')->middleware(['profil.lengkap'])->group(function () {
+        Route::get('/', [PelangganServiceController::class, 'index'])->name('index');
+        Route::get('/order', [PelangganServiceController::class, 'create'])->name('create');
+        Route::post('/order', [PelangganServiceController::class, 'store'])->name('store');
+        Route::get('/{serviceOrder}', [PelangganServiceController::class, 'show'])->name('show');
+        Route::post('/{serviceOrder}/approve-harga', [PelangganServiceController::class, 'approveHarga'])->name('approve-harga');
+        Route::post('/{serviceOrder}/konfirmasi', [PelangganServiceController::class, 'konfirmasi'])->name('konfirmasi');
+        Route::post('/{serviceOrder}/dispute', [PelangganServiceController::class, 'dispute'])->name('dispute');
+    });
+
     // Fitur Riwayat
     Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
         Route::get('/', [RiwayatController::class, 'index'])->name('index');
@@ -104,6 +161,46 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{wfhOrder}/terima', [MitraWfhController::class, 'terima'])->name('terima');
         Route::post('/{wfhOrder}/tolak', [MitraWfhController::class, 'tolak'])->name('tolak');
         Route::post('/{wfhOrder}/kirim-file', [MitraWfhController::class, 'kirimFile'])->name('kirim-file');
+    });
+
+    // Jastip Orders
+    Route::prefix('jastip')->name('jastip.')->group(function () {
+        Route::get('/', [MitraJastipController::class, 'index'])->name('index');
+        Route::get('/{jastipOrder}', [MitraJastipController::class, 'show'])->name('show');
+        Route::post('/{jastipOrder}/terima', [MitraJastipController::class, 'terima'])->name('terima');
+        Route::post('/{jastipOrder}/tolak', [MitraJastipController::class, 'tolak'])->name('tolak');
+        Route::post('/stop/{stop}/tiba', [MitraJastipController::class, 'tibaStop'])->name('tiba-stop');
+        Route::post('/item/{item}/check', [MitraJastipController::class, 'checklistItem'])->name('checklist-item');
+        Route::post('/{jastipOrder}/mulai-antar', [MitraJastipController::class, 'mulaiAntar'])->name('mulai-antar');
+        Route::post('/{jastipOrder}/diantar', [MitraJastipController::class, 'diantar'])->name('diantar');
+    });
+
+    // Topup mitra
+    Route::prefix('topup-saldo')->name('topup.')->group(function () {
+        Route::get('/', [TopupController::class, 'mitraForm'])->name('form');
+        Route::post('/', [TopupController::class, 'mitraStore'])->name('store');
+        Route::get('/riwayat', [TopupController::class, 'mitraIndex'])->name('index');
+    });
+
+    // Tenaga
+    Route::prefix('tenaga')->name('tenaga.')->group(function () {
+        Route::get('/', [MitraTenagaController::class, 'index'])->name('index');
+        Route::get('/{tenagaOrder}', [MitraTenagaController::class, 'show'])->name('show');
+        Route::post('/{tenagaOrder}/terima', [MitraTenagaController::class, 'terima'])->name('terima');
+        Route::post('/{tenagaOrder}/tolak', [MitraTenagaController::class, 'tolak'])->name('tolak');
+        Route::post('/{tenagaOrder}/mulai-kerja', [MitraTenagaController::class, 'mulaiKerja'])->name('mulai-kerja');
+        Route::post('/{tenagaOrder}/selesai-kerja', [MitraTenagaController::class, 'selesaiKerja'])->name('selesai-kerja');
+    });
+
+    // Service
+    Route::prefix('service')->name('service.')->group(function () {
+        Route::get('/', [MitraServiceController::class, 'index'])->name('index');
+        Route::get('/{serviceOrder}', [MitraServiceController::class, 'show'])->name('show');
+        Route::post('/{serviceOrder}/terima', [MitraServiceController::class, 'terima'])->name('terima');
+        Route::post('/{serviceOrder}/tolak', [MitraServiceController::class, 'tolak'])->name('tolak');
+        Route::post('/{serviceOrder}/mulai-diagnosa', [MitraServiceController::class, 'mulaiDiagnosa'])->name('mulai-diagnosa');
+        Route::post('/{serviceOrder}/submit-diagnosa', [MitraServiceController::class, 'submitDiagnosa'])->name('submit-diagnosa');
+        Route::post('/{serviceOrder}/selesai-kerja', [MitraServiceController::class, 'selesaiKerja'])->name('selesai-kerja');
     });
 });
 
@@ -160,6 +257,27 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::get('/{wfhOrder}', [AdminWfhController::class, 'show'])->name('show');
         Route::post('/{wfhOrder}/resolusi', [AdminWfhController::class, 'resolusiDispute'])->name('resolusi');
     });
+
+    // Jastip Admin (modul baru)
+    Route::prefix('jastip-monitoring')->name('jastip.')->group(function () {
+        Route::get('/', [AdminJastipNewController::class, 'index'])->name('index');
+        Route::get('/{jastipOrder}', [AdminJastipNewController::class, 'show'])->name('show');
+        Route::post('/{jastipOrder}/resolusi', [AdminJastipNewController::class, 'resolusiDispute'])->name('resolusi');
+    });
+
+    // Tenaga Admin
+    Route::prefix('tenaga')->name('tenaga.')->group(function () {
+        Route::get('/', [AdminTenagaController::class, 'index'])->name('index');
+        Route::get('/{tenagaOrder}', [AdminTenagaController::class, 'show'])->name('show');
+        Route::post('/{tenagaOrder}/resolusi', [AdminTenagaController::class, 'resolusiDispute'])->name('resolusi');
+    });
+
+    // Service Admin
+    Route::prefix('service')->name('service.')->group(function () {
+        Route::get('/', [AdminServiceController::class, 'index'])->name('index');
+        Route::get('/{serviceOrder}', [AdminServiceController::class, 'show'])->name('show');
+        Route::post('/{serviceOrder}/resolusi', [AdminServiceController::class, 'resolusiDispute'])->name('resolusi');
+    });
     Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
 
     Route::prefix('mitra')->name('mitra.')->group(function () {
@@ -175,3 +293,10 @@ Route::post('/ppob/transaction', [PpobController::class, 'createTransaction'])->
 Route::post('/mitra/transfer', [WalletTransferController::class, 'transfer'])->name('mitra.transfer');
 Route::get('/mitra/withdrawal', [WithdrawalController::class, 'index'])->name('mitra.withdrawal');
 Route::post('/mitra/withdrawal', [WithdrawalController::class, 'request'])->name('mitra.withdrawal.request');
+
+// Webhooks (public, no auth)
+Route::post('/webhook/tokopay', [TopupController::class, 'webhook'])->name('webhook.tokopay');
+Route::post('/webhook/digiflazz', function (\Illuminate\Http\Request $request) {
+    app(\App\Services\PpobService::class)->handleWebhook($request->all());
+    return response()->json(['status' => 'ok']);
+})->name('webhook.digiflazz');

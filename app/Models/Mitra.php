@@ -6,10 +6,11 @@ use App\Enums\{MitraKategori, MitraStatus};
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Mitra extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, HasApiTokens;
 
     protected $table      = 'mitra';
     protected $primaryKey = 'id_mitra';
