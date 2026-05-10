@@ -1,13 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(Get-ChildItem -Path \"c:\\\\xampp\\\\htdocs\\\\zasha-tower\" -Force)",
-      "Bash(Select-Object Name, PSIsContainer)",
-      "Bash(Format-Table -AutoSize)",
-      "Bash(git -C \"c:\\\\xampp\\\\htdocs\\\\zasha-tower\" log --oneline -10)",
-      "PowerShell(php -r \"echo password_hash\\('password123', PASSWORD_BCRYPT, ['cost' => 10]\\);\")",
-      "Bash(Get-ChildItem -Path \"c:\\\\xampp\\\\htdocs\\\\zasha-tower\\\\resources\\\\views\\\\mitra\" -Recurse -ErrorAction SilentlyContinue)",
-      "Bash(Select-Object FullName)"
-    ]
+    "defaultMode": "bypassPermissions"
   }
 }
