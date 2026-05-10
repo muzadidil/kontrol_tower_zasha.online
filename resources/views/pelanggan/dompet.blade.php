@@ -1,101 +1,170 @@
-﻿@extends('layouts.pelanggan')
+@extends('layouts.pelanggan')
 
 @section('content')
-<style>
-    :root { --zasha-blue: #002d72; }
-    .header-dompet { background: var(--zasha-blue); color: white; padding: 30px 20px 80px 20px; border-radius: 0 0 30px 30px; text-align: center; }
-    .card-saldo { background: linear-gradient(135deg, #002d72, #0047b3); border: none; border-radius: 20px; color: white; padding: 25px; margin-top: -60px; box-shadow: 0 10px 20px rgba(0,45,114,0.2); }
-    .btn-topup { background: #ffc107; color: #000; border: none; border-radius: 50px; font-weight: 800; padding: 12px 25px; width: 100%; transition: 0.3s; }
-    .form-topup { display: none; background: white; border-radius: 20px; padding: 20px; margin-top: 15px; border: 1px solid #ddd; }
-    .riwayat-item { background: white; border-radius: 15px; padding: 15px; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-    .instruksi-bayar { background: #fff; border: 2px solid var(--zasha-blue); border-radius: 15px; padding: 20px; margin-top: 15px; }
-    .warning-text { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; padding: 15px; border-radius: 10px; font-size: 0.75rem; line-height: 1.5; text-align: left; }
-</style>
 
-<div class="header-dompet">
-    <h5 class="fw-bold m-0">Dompet ZASHA</h5>
-    <p class="small opacity-75">Saldo belanja jastip & jastip jember</p>
+{{-- ── HERO ─────────────────────────────────────── --}}
+<div style="background:linear-gradient(145deg,#001d4d 0%,#002d72 55%,#0047b3 100%);
+            padding:21px 21px 55px; position:relative; overflow:hidden;">
+    <div style="position:absolute;top:-34px;right:-34px;width:144px;height:144px;
+                border-radius:50%;background:rgba(240,165,0,.1);"></div>
+    <div style="position:absolute;bottom:-21px;left:21px;width:89px;height:89px;
+                border-radius:50%;background:rgba(255,255,255,.05);"></div>
+
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:21px;">
+        <a href="{{ route('pelanggan.dashboard') }}"
+           style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.1);
+                  display:flex;align-items:center;justify-content:center;text-decoration:none;">
+            <i class="bi bi-arrow-left" style="color:white;font-size:16px;"></i>
+        </a>
+        <span style="font-size:16px;font-weight:800;color:white;">Dompet ZASHA</span>
+    </div>
+
+    <div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:600;
+                text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Saldo Saya</div>
+    <div class="allow-select" style="font-size:32px;font-weight:800;color:#fff;
+                letter-spacing:-.5px;margin-bottom:5px;">
+        Rp {{ number_format($pelanggan->saldo ?? 0, 0, ',', '.') }}
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,.45);">Tersedia untuk digunakan</div>
 </div>
 
-<div class="container text-center mb-4">
-    <div class="card card-saldo mb-4 animate-in">
-        <span class="small opacity-75 fw-bold text-uppercase">Saldo Saya</span>
-        <h2 class="fw-bold mt-1 mb-4">Rp {{ number_format($pelanggan->saldo ?? 0, 0, ',', '.') }}</h2>
-        <button onclick="toggleForm()" class="btn btn-topup shadow-sm">
-            <i class="bi bi-plus-circle-fill me-2"></i> ISI SALDO (TOP UP)
+{{-- ── TOP UP CARD ─────────────────────────────── --}}
+<div style="padding:0 21px;margin-top:-34px;">
+    <div class="z-card" style="padding:21px;margin-bottom:13px;">
+
+        @if(session('success'))
+            <div style="background:#d1fae5;border-radius:13px;padding:13px;margin-bottom:21px;
+                        display:flex;gap:10px;align-items:flex-start;">
+                <i class="bi bi-check-circle-fill" style="color:#10b981;font-size:18px;flex-shrink:0;"></i>
+                <div style="font-size:12px;color:#065f46;font-weight:600;">{{ session('success') }}</div>
+            </div>
+        @endif
+
+        @if(session('notif_topup') == 'sukses')
+            <div style="border:1.5px solid #0047b3;border-radius:21px;padding:21px;margin-bottom:21px;
+                        background:#eff6ff;">
+                <div style="font-size:10px;font-weight:800;color:var(--text-faint);text-transform:uppercase;
+                            letter-spacing:.5px;margin-bottom:8px;">Transfer tepat sejumlah:</div>
+                <div class="allow-select" style="font-size:28px;font-weight:800;color:#002d72;
+                            letter-spacing:-.5px;margin-bottom:13px;">
+                    Rp {{ number_format(session('data_transfer'), 0, ',', '.') }}
+                </div>
+                <div style="background:#f8fafc;border-radius:13px;padding:13px;margin-bottom:13px;">
+                    <div style="font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;
+                                margin-bottom:5px;">Ke Rekening ({{ session('data_bank') }}):</div>
+                    @if(session('data_bank') == 'BCA')
+                        <div class="allow-select" style="font-size:21px;font-weight:800;color:#002d72;">1470807381</div>
+                        <div style="font-size:12px;color:var(--text-muted);">a/n Muzadidil Fuad</div>
+                    @else
+                        <div class="allow-select" style="font-size:21px;font-weight:800;color:#002d72;">082232458226</div>
+                        <div style="font-size:12px;color:var(--text-muted);">a/n Muzadidil Fuad</div>
+                    @endif
+                </div>
+                <div style="background:#fff3cd;border-radius:13px;padding:13px;
+                            font-size:11px;color:#92400e;line-height:1.6;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Transfer <strong>sesuai nominal</strong> hingga 3 digit terakhir agar otomatis terdeteksi.
+                </div>
+            </div>
+        @endif
+
+        <button onclick="toggleForm()" id="btnTopup"
+                style="width:100%;background:var(--gold);color:#002d72;border:none;
+                       border-radius:34px;padding:13px;font-size:14px;font-weight:800;
+                       display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;">
+            <i class="bi bi-plus-circle-fill"></i>ISI SALDO (TOP UP)
         </button>
-    </div>
 
-    @if(session('notif_topup') == 'sukses')
-        <div class="instruksi-bayar shadow-sm mb-4 animate-in">
-            <small class="text-muted d-block fw-bold">TRANSFER TEPAT SEJUMLAH:</small>
-            <h1 class="fw-bold text-primary mt-1 mb-3">Rp {{ number_format(session('data_transfer'), 0, ',', '.') }}</h1>
-            <div class="p-3 bg-light rounded-3 mb-3">
-                <small class="text-muted d-block text-uppercase fw-bold">Ke Rekening ({{ session('data_bank') }}):</small>
-                @if(session('data_bank') == 'BCA')
-                    <span class="fw-bold fs-5">1470807381</span><br>
-                    <span class="small fw-bold">a/n Muzadidil Fuad</span>
-                @else
-                    <span class="fw-bold fs-5">082232458226</span><br>
-                    <span class="small fw-bold">A/n Muzadidil Fuad</span>
-                @endif
-            </div>
-            <div class="warning-text mb-3">
-                <strong><i class="bi bi-exclamation-triangle-fill"></i> PENTING:</strong><br>
-                Mohon transfer sesuai nominal hingga 3 digit terakhir agar otomatis terdeteksi.
-            </div>
+        <div id="areaForm" style="display:none;margin-top:21px;border-top:1px solid var(--border);padding-top:21px;">
+            <form action="{{ route('pelanggan.dompet.topup') }}" method="POST">
+                @csrf
+                <div style="margin-bottom:13px;">
+                    <div style="font-size:10px;font-weight:700;color:var(--text-faint);
+                                text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Media Transfer</div>
+                    <select name="bank_tujuan" class="form-select" style="border-radius:13px;border-color:var(--border);
+                            font-size:13px;font-weight:600;" required>
+                        <option value="DANA">DANA — Muzadidil Fuad</option>
+                        <option value="BCA">BCA — Muzadidil Fuad</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:13px;">
+                    <div style="font-size:10px;font-weight:700;color:var(--text-faint);
+                                text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Nominal</div>
+                    <input type="number" name="nominal" class="form-control" placeholder="Minimal Rp 10.000"
+                           style="border-radius:13px;border-color:var(--border);font-size:15px;font-weight:700;
+                                  padding:12px 16px;" required>
+                    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                        @foreach([50000,100000,250000,500000] as $n)
+                            <button type="button" onclick="setNominal({{ $n }})"
+                                    style="background:#eff6ff;color:#002d72;border:1px solid #bfdbfe;
+                                           border-radius:34px;padding:5px 13px;font-size:11px;font-weight:700;">
+                                {{ number_format($n,0,',','.') }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+                <div style="margin-bottom:21px;">
+                    <div style="font-size:10px;font-weight:700;color:var(--text-faint);
+                                text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Nama Pengirim</div>
+                    <input type="text" name="nomor_rekening" class="form-control" placeholder="Sesuai nama rekening"
+                           style="border-radius:13px;border-color:var(--border);font-size:13px;padding:12px 16px;" required>
+                </div>
+                <button type="submit" class="btn-z-primary w-100" style="padding:13px;font-size:13px;">
+                    KONFIRMASI SEKARANG
+                </button>
+            </form>
         </div>
-    @endif
-
-    <div id="areaForm" class="form-topup shadow-sm text-start">
-        <form action="{{ route('pelanggan.dompet.topup') }}" method="POST">
-            @csrf
-            <div class="mb-3">
-                <label class="small fw-bold">Pilih Media Transfer</label>
-                <select name="bank_tujuan" class="form-select" required>
-                    <option value="DANA">DANA (Muzadidil Fuad)</option>
-                    <option value="BCA">BCA (Muzadidil Fuad)</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="small fw-bold">Nominal Isi Saldo</label>
-                <input type="number" name="nominal" class="form-control" placeholder="Contoh: 50000" required>
-            </div>
-            <div class="mb-3">
-                <label class="small fw-bold">Nama Pengirim (Sesuai Rekening)</label>
-                <input type="text" name="nomor_rekening" class="form-control" placeholder="Contoh: Siti Aminah" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">KONFIRMASI SEKARANG</button>
-        </form>
     </div>
+</div>
 
-    <h6 class="fw-bold mt-4 mb-3 small text-muted text-uppercase text-start">Riwayat Isi Saldo</h6>
+{{-- ── RIWAYAT ──────────────────────────────────── --}}
+<div style="padding:0 21px 34px;">
+    <div class="divider-label">Riwayat Isi Saldo</div>
+
     @forelse($riwayat as $r)
-        <div class="riwayat-item border p-3 text-start">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="small fw-bold">Rp {{ number_format($r->total_transfer, 0, ',', '.') }}</span>
-                @php 
-                    $badge = "bg-warning text-dark"; 
-                    if($r->status == 'sukses') $badge = "bg-success text-white";
-                    if($r->status == 'batal') $badge = "bg-danger text-white";
-                @endphp
-                <span class="badge {{ $badge }} rounded-pill" style="font-size: 0.65rem;">{{ ucfirst($r->status) }}</span>
+        @php
+            $badgeStyle = 'background:#fef9c3;color:#b45309;';
+            if(($r->status ?? '') == 'sukses') $badgeStyle = 'background:#d1fae5;color:#065f46;';
+            if(($r->status ?? '') == 'batal')  $badgeStyle = 'background:#fee2e2;color:#991b1b;';
+        @endphp
+        <div class="z-card" style="padding:16px 21px;margin-bottom:8px;display:flex;
+                                   align-items:center;gap:13px;">
+            <div style="width:42px;height:42px;border-radius:13px;background:#eff6ff;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="bi bi-wallet2" style="color:#002d72;font-size:18px;"></i>
             </div>
-            <div class="d-flex justify-content-between small text-muted">
-                <span>Via {{ $r->bank_tujuan }}</span>
-                <span>{{ date('d/m, H:i', strtotime($r->waktu_request)) }}</span>
+            <div style="flex:1;">
+                <div style="font-size:14px;font-weight:800;color:var(--text-main);">
+                    Rp {{ number_format($r->total_transfer ?? 0, 0, ',', '.') }}
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);">
+                    Via {{ $r->bank_tujuan ?? '-' }} &bull;
+                    {{ isset($r->waktu_request) ? date('d M, H:i', strtotime($r->waktu_request)) : '-' }}
+                </div>
             </div>
+            <span style="{{ $badgeStyle }}border-radius:34px;font-size:9px;font-weight:800;
+                          padding:4px 10px;text-transform:uppercase;">
+                {{ ucfirst($r->status ?? '-') }}
+            </span>
         </div>
     @empty
-        <p class="text-muted small">Belum ada riwayat transaksi.</p>
+        <div style="text-align:center;padding:34px 0;color:var(--text-faint);">
+            <i class="bi bi-clock-history" style="font-size:34px;display:block;margin-bottom:13px;opacity:.4;"></i>
+            <div style="font-size:13px;font-weight:600;">Belum ada riwayat transaksi</div>
+        </div>
     @endforelse
 </div>
 
+@push('scripts')
 <script>
-    function toggleForm() {
-        var x = document.getElementById("areaForm");
-        x.style.display = (x.style.display === "none" || x.style.display === "") ? "block" : "none";
-        if(x.style.display === "block") x.scrollIntoView({behavior: "smooth"});
-    }
+function toggleForm() {
+    var f = document.getElementById('areaForm');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+    if (f.style.display === 'block') f.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function setNominal(v) {
+    document.querySelector('input[name=nominal]').value = v;
+}
 </script>
+@endpush
 @endsection

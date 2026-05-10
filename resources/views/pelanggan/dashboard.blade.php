@@ -1,83 +1,170 @@
 @extends('layouts.pelanggan')
 
 @section('content')
-<div class="container py-3">
-    
-    <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
-        <div class="d-flex align-items-center">
-            <img src="{{ !empty($user->foto) ? $user->foto : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=002d72&color=fff' }}" class="profile-img shadow-sm me-3">
+
+{{-- ── HERO HEADER ──────────────────────────────── --}}
+<div style="background: linear-gradient(145deg, #002d72 0%, #0047b3 60%, #005dd6 100%);
+            padding: 21px 21px 55px; position: relative; overflow: hidden;">
+
+    {{-- decorative circles (golden ratio proportions) --}}
+    <div style="position:absolute; top:-34px; right:-34px; width:144px; height:144px;
+                border-radius:50%; background:rgba(240,165,0,.12);"></div>
+    <div style="position:absolute; bottom:-21px; left:-13px; width:89px; height:89px;
+                border-radius:50%; background:rgba(255,255,255,.06);"></div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <img src="{{ !empty($user->foto)
+                    ? $user->foto
+                    : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=f0a500&color=002d72&bold=true' }}"
+                 style="width:44px;height:44px;border-radius:13px;object-fit:cover;
+                        border:2.5px solid rgba(240,165,0,.6); flex-shrink:0;">
             <div>
-                <h6 class="fw-bold mb-0 allow-select">Halo, {{ explode(' ', trim($user->name))[0] }}!</h6>
-                <span class="id-badge shadow-sm allow-select">{{ $user->kode_zasha }}</span>
+                <div style="font-size:11px; color:rgba(255,255,255,.65); font-weight:600;">Selamat datang,</div>
+                <div class="allow-select" style="font-size:18px; font-weight:800; color:#fff; line-height:1.2;">
+                    {{ explode(' ', trim($user->name))[0] }} 👋
+                </div>
             </div>
         </div>
-        <a href="{{ route('pelanggan.notifikasi') }}" class="btn btn-white shadow-sm rounded-circle p-2 position-relative" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white;">
-            <i class="bi bi-bell fs-5 text-dark"></i>
+        <a href="{{ route('pelanggan.notifikasi') }}"
+           style="width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.12);
+                  display:flex;align-items:center;justify-content:center;
+                  border:1px solid rgba(255,255,255,.2); position:relative; flex-shrink:0; text-decoration:none;">
+            <i class="bi bi-bell-fill" style="color:white;font-size:18px;"></i>
             @if(!empty($unread_notif) && $unread_notif > 0)
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.55rem; padding:3px 5px;">
+                <span style="position:absolute;top:-5px;right:-5px;background:#f0a500;
+                             color:#002d72;font-size:8px;font-weight:800;width:18px;height:18px;
+                             border-radius:50%;display:flex;align-items:center;justify-content:center;
+                             border:2px solid #0047b3;">
                     {{ $unread_notif > 9 ? '9+' : $unread_notif }}
                 </span>
             @endif
         </a>
     </div>
 
+    {{-- Kode Zasha badge --}}
+    <div class="allow-select mt-2" style="display:inline-flex;align-items:center;gap:6px;
+              background:rgba(240,165,0,.18);border-radius:34px;padding:4px 13px;
+              border:1px solid rgba(240,165,0,.35);">
+        <i class="bi bi-shield-check" style="color:#f0a500;font-size:11px;"></i>
+        <span style="font-size:10px;font-weight:800;color:#f0a500;letter-spacing:.5px;">{{ $user->kode_zasha }}</span>
+    </div>
+</div>
+
+{{-- ── SALDO CARD (float up) ──────────────────── --}}
+<div style="padding: 0 21px; margin-top: -34px;">
+
     @if($user->is_verif == 0)
-    <div class="card card-custom mb-4 bg-white border-start border-danger border-4 p-3">
-        <div class="d-flex align-items-center">
-            <i class="bi bi-shield-lock-fill text-danger fs-2 me-3"></i>
-            <div class="flex-grow-1">
-                <h6 class="fw-bold text-danger mb-1" style="font-size: 0.8rem;">Verifikasi Akun</h6>
-                <p class="text-muted mb-0" style="font-size: 0.65rem;">Lengkapi profil untuk memesan.</p>
-            </div>
-            <a href="{{ route('pelanggan.profil') }}" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold" style="font-size: 0.65rem;">LENGKAPI</a>
+    <div style="background:#fff3cd; border-radius:13px; padding:13px 16px; margin-bottom:13px;
+                display:flex; align-items:center; gap:13px; border:1px solid #ffc107;">
+        <i class="bi bi-exclamation-triangle-fill" style="color:#b45309;font-size:21px;flex-shrink:0;"></i>
+        <div style="flex:1;">
+            <div style="font-size:12px;font-weight:800;color:#92400e;">Akun Belum Terverifikasi</div>
+            <div style="font-size:10px;color:#78350f;">Lengkapi profil untuk bisa memesan.</div>
         </div>
+        <a href="{{ route('pelanggan.profil') }}"
+           style="background:#f0a500;color:#002d72;border-radius:34px;padding:6px 13px;
+                  font-size:10px;font-weight:800;text-decoration:none;white-space:nowrap;">LENGKAPI</a>
     </div>
     @endif
 
-    <div class="card card-custom p-3 bg-white border-start border-primary border-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <small class="text-muted fw-bold d-block mb-1" style="font-size: 10px;">DOMPET ZASHA</small>
-                <h5 class="fw-bold mb-0 text-primary allow-select">Rp {{ number_format($user->saldo, 0, ',', '.') }}</h5>
-            </div>
-            <a href="{{ route('pelanggan.dompet') }}" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
-                <i class="bi bi-plus-lg me-1"></i>Isi Saldo
-            </a>
-        </div>
-    </div>
+    <div class="z-card" style="padding:21px; background:linear-gradient(135deg,#001d4d,#002d72);
+                               position:relative; overflow:hidden;">
+        <div style="position:absolute;top:-13px;right:-13px;width:89px;height:89px;
+                    border-radius:50%;background:rgba(240,165,0,.1);"></div>
+        <div style="position:absolute;bottom:-21px;right:34px;width:55px;height:55px;
+                    border-radius:50%;background:rgba(255,255,255,.05);"></div>
 
-    <h6 class="fw-bold mb-3 small text-muted text-uppercase" style="letter-spacing: 0.5px;">Layanan Zasha</h6>
-    <div class="row row-cols-4 g-2 mb-4 text-center">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.5px;
+                    text-transform:uppercase;margin-bottom:8px;">
+            <i class="bi bi-wallet2 me-1"></i>Dompet Zasha
+        </div>
+        <div class="allow-select" style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-.5px;
+                    margin-bottom:21px; line-height:1;">
+            Rp {{ number_format($user->saldo, 0, ',', '.') }}
+        </div>
+        <a href="{{ route('pelanggan.dompet') }}"
+           style="background:var(--gold);color:#002d72;border-radius:34px;padding:10px 21px;
+                  font-size:12px;font-weight:800;text-decoration:none;display:inline-flex;
+                  align-items:center;gap:6px;">
+            <i class="bi bi-plus-circle-fill"></i>Isi Saldo
+        </a>
+    </div>
+</div>
+
+{{-- ── LAYANAN GRID ────────────────────────────── --}}
+<div style="padding: 21px;">
+    <div class="divider-label">Layanan Zasha</div>
+
+    <div class="row row-cols-4 g-2">
         @foreach($categories as $kat)
-            @php
-                $locked = ($user->is_verif == 0);
-            @endphp
+            @php $locked = ($user->is_verif == 0); @endphp
             <div class="col">
-                <a href="{{ $locked ? '#' : route('pelanggan.katalog', ['id_kategori' => $kat->id_kategori]) }}" 
-                   class="btn-menu {{ $locked ? 'locked' : '' }}" 
-                   {!! $locked ? "onclick='bukaModalLocked()'" : "" !!} 
-                   style="cursor:pointer;">
-                    <div class="svg-icon">
+                <a href="{{ $locked ? '#' : route('pelanggan.katalog', ['id_kategori' => $kat->id_kategori]) }}"
+                   class="menu-btn {{ $locked ? 'locked' : '' }}"
+                   {!! $locked ? "onclick='bukaModalLocked(); return false;'" : '' !!}>
+                    <div class="menu-icon-wrap">
                         @if($locked)
-                            <i class="bi bi-lock-fill text-muted"></i>
+                            <i class="bi bi-lock-fill" style="color:var(--text-faint);"></i>
                         @else
                             {!! $kat->svg_kategori !!}
                         @endif
                     </div>
-                    <span>{{ $kat->nama_kategori }}</span>
+                    <span style="color:var(--text-main);font-size:9px;line-height:1.3;">{{ $kat->nama_kategori }}</span>
                 </a>
             </div>
         @endforeach
     </div>
-    
-    <div class="card card-custom bg-primary text-white p-3 border-0 mt-2" style="background: linear-gradient(135deg, #002d72, #004a9f);">
-        <div class="d-flex align-items-center">
-            <i class="bi bi-rocket-takeoff-fill fs-2 text-warning me-3"></i>
+</div>
+
+{{-- ── PROMO BANNER ────────────────────────────── --}}
+<div style="padding: 0 21px 34px;">
+    <div style="background:linear-gradient(135deg,#002d72,#0047b3,#005dd6);
+                border-radius:21px; padding:21px; position:relative; overflow:hidden;">
+        <div style="position:absolute;top:-21px;right:-21px;width:89px;height:89px;
+                    border-radius:50%;background:rgba(240,165,0,.15);"></div>
+        <div style="position:absolute;bottom:-13px;right:55px;width:55px;height:55px;
+                    border-radius:50%;background:rgba(255,255,255,.07);"></div>
+        <div style="display:flex;align-items:center;gap:13px;">
+            <div style="width:44px;height:44px;border-radius:13px;background:rgba(240,165,0,.2);
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="bi bi-rocket-takeoff-fill" style="color:#f0a500;font-size:21px;"></i>
+            </div>
             <div>
-                <h6 class="fw-bold mb-1 small">Siap Antar Jemput</h6>
-                <p class="mb-0 text-white-50" style="font-size: 0.65rem;">Layanan jastip andalan warga Jember.</p>
+                <div style="font-size:13px;font-weight:800;color:#fff;">Jastip Jember Siap Antar</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px;">
+                    Belanja apa saja, diantar ke pintu kamu.
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+{{-- Modal locked --}}
+<div class="modal fade" id="modalLocked" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:21px;border:none;padding:21px;text-align:center;">
+            <div style="width:55px;height:55px;border-radius:13px;background:#fee2e2;
+                        display:flex;align-items:center;justify-content:center;margin:0 auto 13px;">
+                <i class="bi bi-shield-lock-fill" style="color:#ef4444;font-size:21px;"></i>
+            </div>
+            <h6 style="font-weight:800;color:var(--text-main);margin-bottom:8px;">Akun Belum Terverifikasi</h6>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:21px;">
+                Lengkapi data profil kamu dulu untuk bisa memesan layanan.
+            </p>
+            <div class="d-flex gap-2">
+                <button class="btn-z-ghost w-100" data-bs-dismiss="modal">Nanti</button>
+                <a href="{{ route('pelanggan.profil') }}" class="btn-z-primary w-100 text-center text-decoration-none">Lengkapi</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function bukaModalLocked() {
+    new bootstrap.Modal(document.getElementById('modalLocked')).show();
+}
+</script>
+@endpush
 @endsection
