@@ -1,100 +1,131 @@
 @extends('layouts.mitra')
 
 @section('content')
-<div class="container py-3">
+<div class="page-pad stack-4">
 
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
-        <div class="d-flex align-items-center">
-            <div style="width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,#0a5c36,#1a7a4a);display:flex;align-items:center;justify-content:center;" class="me-3 shadow-sm">
-                <i class="bi bi-person-fill text-white fs-5"></i>
+    {{-- Header (fib-3 gap) --}}
+    <div class="d-flex justify-content-between align-items-center" style="padding-top: var(--fib-2);">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar-34" style="background: linear-gradient(135deg,var(--mitra-green),var(--mitra-green-light));display:flex;align-items:center;justify-content:center;box-shadow:0 var(--fib-1) var(--fib-3) rgba(10,92,54,0.25);">
+                <i class="bi bi-person-fill text-white" style="font-size:var(--t-md);"></i>
             </div>
             <div>
-                <h6 class="fw-bold mb-0 allow-select">Halo, {{ explode(' ', trim($mitra->nama_panggilan))[0] }}!</h6>
-                <span style="background:#e8f5e9;color:#0a5c36;padding:3px 10px;border-radius:50px;font-weight:800;font-size:0.65rem;" class="allow-select">{{ $mitra->id_mitra }}</span>
+                <div class="t-xs label-up" style="color:var(--ink-soft);margin-bottom:2px;">Halo,</div>
+                <h6 class="fw-bold mb-0 allow-select t-lg" style="line-height:1;">{{ explode(' ', trim($mitra->nama_panggilan ?? $mitra->nama_asli ?? 'Mitra'))[0] }}</h6>
             </div>
         </div>
-        <span class="{{ $mitra->status_mitra === 'aktif' ? 'badge-status-aktif' : 'badge-status-nonaktif' }}">
-            {{ ucfirst($mitra->status_mitra) }}
+        <span class="{{ ($mitra->status_mitra ?? '') === 'aktif' ? 'badge-status-aktif' : 'badge-status-nonaktif' }}">
+            {{ ucfirst($mitra->status_mitra ?? 'offline') }}
         </span>
     </div>
 
-    {{-- Saldo --}}
-    <div class="card card-custom p-3 mb-4 border-0" style="background:linear-gradient(135deg,#0a5c36,#1a7a4a);">
-        <small class="text-white-50 fw-bold d-block mb-1" style="font-size:10px;">SALDO MITRA</small>
-        <h4 class="fw-bold text-white mb-0 allow-select">
-            Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}
-        </h4>
-        <div class="mt-3 d-flex gap-2">
-            <a href="{{ route('mitra.saldo') }}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold" style="font-size:0.7rem;">
-                <i class="bi bi-arrow-down-circle me-1"></i>Tarik Dana
-            </a>
-            <a href="{{ route('mitra.saldo') }}" class="btn btn-sm rounded-pill px-3 fw-bold text-white" style="background:rgba(255,255,255,0.2);font-size:0.7rem;">
-                <i class="bi bi-clock-history me-1"></i>Riwayat
-            </a>
+    {{-- Hero Saldo (Golden Ratio: padding fib-4, content centered) --}}
+    <div class="hero-mitra">
+        <div class="hero-content">
+            <div class="d-flex justify-content-between align-items-start" style="margin-bottom: var(--fib-3);">
+                <div>
+                    <div class="label-up" style="color:rgba(255,255,255,0.7);">Saldo Mitra</div>
+                    <h2 class="fw-bold mb-0 mt-1 allow-select" style="font-size: var(--t-2xl); letter-spacing: -0.02em;">
+                        Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}
+                    </h2>
+                </div>
+                <div style="width: var(--fib-4); height: var(--fib-4); border-radius: 50%; background: rgba(212,175,55,0.4); display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-stars" style="color: var(--mitra-gold-soft); font-size: var(--t-xs);"></i>
+                </div>
+            </div>
+
+            <div class="t-xxs allow-select" style="color: rgba(255,255,255,0.6); margin-bottom: var(--fib-3);">
+                ID: {{ $mitra->id_mitra ?? '-' }}
+            </div>
+
+            <div class="d-flex" style="gap: var(--fib-2);">
+                <a href="{{ route('mitra.saldo') }}" class="btn-mitra-ghost flex-grow-1 text-center" style="display: inline-flex; align-items: center; justify-content: center; gap: var(--fib-1);">
+                    <i class="bi bi-arrow-down-circle"></i>
+                    <span>Tarik</span>
+                </a>
+                <a href="{{ route('mitra.topup.form') }}" class="btn-mitra-ghost flex-grow-1 text-center" style="display: inline-flex; align-items: center; justify-content: center; gap: var(--fib-1);">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Topup</span>
+                </a>
+                <a href="{{ route('mitra.saldo') }}" class="btn-mitra-ghost flex-grow-1 text-center" style="display: inline-flex; align-items: center; justify-content: center; gap: var(--fib-1);">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Riwayat</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    {{-- Statistik --}}
-    <div class="row g-3 mb-4">
-        <div class="col-6">
-            <div class="card card-custom p-3 text-center">
-                <div class="fw-bold text-muted" style="font-size:0.65rem;text-transform:uppercase;">Total Pesanan</div>
-                <div class="fw-bold text-dark mt-1" style="font-size:1.5rem;">{{ $totalPesanan }}</div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card card-custom p-3 text-center">
-                <div class="fw-bold text-muted" style="font-size:0.65rem;text-transform:uppercase;">Pesanan Aktif</div>
-                <div class="fw-bold mt-1" style="font-size:1.5rem;color:#0a5c36;">{{ $pesananAktif }}</div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Menu Cepat --}}
-    <h6 class="fw-bold mb-3 small text-muted text-uppercase" style="letter-spacing:0.5px;">Fitur</h6>
+    {{-- Stats (golden 1:1.618 ratio - 2 cards, 3rd one hidden) --}}
     <div class="row g-3">
         <div class="col-6">
-            <a href="{{ route('mitra.pesanan') }}" class="card card-custom p-3 d-flex flex-row align-items-center text-decoration-none gap-3">
-                <div style="width:42px;height:42px;border-radius:12px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;">
-                    <i class="bi bi-clipboard-check text-success fs-5"></i>
+            <div class="card-custom" style="padding: var(--fib-3);">
+                <div class="d-flex align-items-center" style="gap: var(--fib-2); margin-bottom: var(--fib-2);">
+                    <div style="width: var(--fib-3); height: var(--fib-3); border-radius: var(--r-sm); background: var(--mitra-gold-soft);"></div>
+                    <span class="label-up t-xxs">Total Order</span>
                 </div>
-                <div>
-                    <div class="fw-bold small text-dark">Pesanan</div>
-                    <div class="text-muted" style="font-size:0.65rem;">Lihat semua</div>
-                </div>
-            </a>
+                <div class="fw-bold" style="font-size: var(--t-xl); color: var(--ink);">{{ $totalPesanan ?? 0 }}</div>
+            </div>
         </div>
         <div class="col-6">
-            <a href="{{ route('mitra.saldo') }}" class="card card-custom p-3 d-flex flex-row align-items-center text-decoration-none gap-3">
-                <div style="width:42px;height:42px;border-radius:12px;background:#fef9c3;display:flex;align-items:center;justify-content:center;">
-                    <i class="bi bi-wallet2 text-warning fs-5"></i>
+            <div class="card-custom" style="padding: var(--fib-3);">
+                <div class="d-flex align-items-center" style="gap: var(--fib-2); margin-bottom: var(--fib-2);">
+                    <div style="width: var(--fib-3); height: var(--fib-3); border-radius: var(--r-sm); background: #d1fae5;"></div>
+                    <span class="label-up t-xxs">Aktif</span>
                 </div>
-                <div>
-                    <div class="fw-bold small text-dark">Saldo</div>
-                    <div class="text-muted" style="font-size:0.65rem;">Tarik & riwayat</div>
-                </div>
-            </a>
+                <div class="fw-bold" style="font-size: var(--t-xl); color: var(--mitra-green);">{{ $pesananAktif ?? 0 }}</div>
+            </div>
         </div>
-        <div class="col-6">
-            <a href="{{ route('mitra.profil') }}" class="card card-custom p-3 d-flex flex-row align-items-center text-decoration-none gap-3">
-                <div style="width:42px;height:42px;border-radius:12px;background:#ede9fe;display:flex;align-items:center;justify-content:center;">
-                    <i class="bi bi-person-circle text-purple fs-5" style="color:#7c3aed;"></i>
-                </div>
-                <div>
-                    <div class="fw-bold small text-dark">Profil</div>
-                    <div class="text-muted" style="font-size:0.65rem;">Data akun</div>
-                </div>
-            </a>
+    </div>
+
+    {{-- Menu Tiles (2x2 grid, fibonacci radius) --}}
+    <div>
+        <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
+            <h6 class="label-up mb-0">Fitur</h6>
+            <span class="t-xs" style="color: var(--ink-soft);">{{ count([1,2,3,4]) }} menu</span>
         </div>
-        <div class="col-6">
-            <div class="card card-custom p-3 d-flex flex-row align-items-center gap-3" style="opacity:0.5;">
-                <div style="width:42px;height:42px;border-radius:12px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
-                    <i class="bi bi-graph-up text-secondary fs-5"></i>
-                </div>
-                <div>
-                    <div class="fw-bold small text-dark">Statistik</div>
-                    <div class="text-muted" style="font-size:0.65rem;">Segera hadir</div>
+        <div class="row g-3">
+            <div class="col-6">
+                <a href="{{ route('mitra.pesanan') }}" class="menu-tile">
+                    <div class="menu-tile-icon" style="background: #ecfdf5; color: var(--mitra-green);">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold t-sm">Pesanan</div>
+                        <div class="t-xxs" style="color: var(--ink-soft);">Lihat semua</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{{ route('mitra.saldo') }}" class="menu-tile">
+                    <div class="menu-tile-icon" style="background: var(--mitra-gold-soft); color: var(--mitra-gold);">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold t-sm">Saldo</div>
+                        <div class="t-xxs" style="color: var(--ink-soft);">Tarik & riwayat</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{{ route('mitra.profil') }}" class="menu-tile">
+                    <div class="menu-tile-icon" style="background: #f3e8ff; color: #7c3aed;">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold t-sm">Profil</div>
+                        <div class="t-xxs" style="color: var(--ink-soft);">Data akun</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6">
+                <div class="menu-tile" style="opacity: 0.55; cursor: not-allowed;">
+                    <div class="menu-tile-icon" style="background: #f1f5f9; color: #64748b;">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold t-sm">Statistik</div>
+                        <div class="t-xxs" style="color: var(--ink-soft);">Segera hadir</div>
+                    </div>
                 </div>
             </div>
         </div>
