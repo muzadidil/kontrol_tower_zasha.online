@@ -30,27 +30,51 @@ class PelangganController extends Controller
     public function topup(Request $request)
     {
         $request->validate([
-            'nominal' => 'required|numeric|min:10000|max:10000000',
+            'nominal'     => 'required|numeric|min:10000|max:10000000',
+            'bank_tujuan' => 'required|in:DANA,BCA',
         ]);
 
         $id_p = auth('pelanggan')->id();
 
+        // Bersihkan format nominal (hapus titik, koma, spasi) lalu cast ke integer
+        $rawNominal = $request->input('nominal');
+        $nominal    = (int) preg_replace('/[^0-9]/', '', $rawNominal);
+
+        // Pastikan nominal valid setelah parsing
+        if ($nominal < 10000) {
+            return back()->withErrors(['nominal' => 'Nominal minimal Rp 10.000'])->withInput();
+        }
+
+        // Generate kode unik 3 digit (100-999) untuk identifikasi transfer
+        $kode_unik = rand(100, 999);
+
+        // Hitung total transfer = nominal + kode_unik
+        $total_transfer = $nominal + $kode_unik;
+
         DB::table('dompet_pelanggan')->insert([
-            'id_pelanggan'  => $id_p,
-            'nominal'       => $request->nominal,
-            'status'        => 'pending',
-            'waktu_request' => now(),
+            'id_pelanggan'   => (int) $id_p,
+            'nominal'        => $nominal,
+            'kode_unik'      => $kode_unik,
+            'total_transfer' => $total_transfer,
+            'bank_tujuan'    => $request->input('bank_tujuan'),
+            'status'         => 'pending',
+            'waktu_request'  => now(),
         ]);
 
         NotifHelper::kirim(
             $id_p,
             'Request Top-Up Diterima',
-            'Request top-up sebesar Rp ' . number_format($request->nominal, 0, ',', '.') . ' sedang diproses. Silakan transfer sesuai nominal.',
+            'Request top-up sebesar Rp ' . number_format($nominal, 0, ',', '.') . ' sedang diproses. Transfer tepat Rp ' . number_format($total_transfer, 0, ',', '.') . ' agar otomatis terdeteksi.',
             'topup',
             route('pelanggan.dompet')
         );
 
-        return back()->with('success', 'Request topup Rp ' . number_format($request->nominal, 0, ',', '.') . ' berhasil. Silakan transfer sesuai nominal.');
+        return back()
+            ->with('notif_topup', 'sukses')
+            ->with('data_nominal', $nominal)
+            ->with('data_kode_unik', $kode_unik)
+            ->with('data_transfer', $total_transfer)
+            ->with('data_bank', $request->input('bank_tujuan'));
     }
 
     public function invoice($id)

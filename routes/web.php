@@ -94,6 +94,7 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::get('/dashboard', [MitraDashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])->name('pesanan');
     Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
+    Route::post('/saldo/topup', [MitraDashboardController::class, 'topup'])->name('saldo.topup');
     Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
 
     // WFH Orders
@@ -140,8 +141,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('/finance/withdrawal/{id}/approve', [WithdrawalController::class, 'approve'])->name('admin.finance.withdrawal.approve');
     Route::post('/finance/withdrawal/{id}/reject', [WithdrawalController::class, 'reject'])->name('admin.finance.withdrawal.reject');
 
-    // Konfirmasi Topup
+    // Konfirmasi Topup (Mitra + Pelanggan)
     Route::get('/finance/topup', [AdminTopupController::class, 'index'])->name('admin.finance.topup.index');
+    Route::get('/finance/topup/mitra/{id}', [AdminTopupController::class, 'processMitra'])->name('admin.finance.topup.mitra');
+    Route::get('/finance/topup/pelanggan/{id}', [AdminTopupController::class, 'processPelanggan'])->name('admin.finance.topup.pelanggan');
     Route::get('/finance/topup/process/{id}', [AdminTopupController::class, 'process'])->name('admin.finance.topup.process');
 
     // Others

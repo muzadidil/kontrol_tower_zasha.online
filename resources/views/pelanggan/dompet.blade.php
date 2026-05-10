@@ -41,18 +41,36 @@
         @endif
 
         @if(session('notif_topup') == 'sukses')
+            @php
+                $s_nominal    = (int) session('data_nominal', 0);
+                $s_kode_unik  = (int) session('data_kode_unik', 0);
+                $s_transfer   = (int) session('data_transfer', 0);
+                $s_bank       = session('data_bank', 'DANA');
+            @endphp
             <div style="border:1.5px solid #0047b3;border-radius:21px;padding:21px;margin-bottom:21px;
                         background:#eff6ff;">
                 <div style="font-size:10px;font-weight:800;color:var(--text-faint);text-transform:uppercase;
                             letter-spacing:.5px;margin-bottom:8px;">Transfer tepat sejumlah:</div>
                 <div class="allow-select" style="font-size:28px;font-weight:800;color:#002d72;
                             letter-spacing:-.5px;margin-bottom:13px;">
-                    Rp {{ number_format(session('data_transfer'), 0, ',', '.') }}
+                    Rp {{ number_format($s_transfer, 0, ',', '.') }}
+                </div>
+                <div style="background:#f0f9ff;border-radius:13px;padding:13px;margin-bottom:13px;border:1px solid #bfdbfe;">
+                    <div style="font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;
+                                margin-bottom:5px;">Rincian Transfer:</div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="font-size:12px;color:var(--text-main);">Nominal Topup:</span>
+                        <span style="font-size:12px;font-weight:700;color:var(--text-main);">Rp {{ number_format($s_nominal, 0, ',', '.') }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;border-top:1px solid #e0e7ff;padding-top:8px;">
+                        <span style="font-size:12px;color:var(--text-main);">Kode Unik:</span>
+                        <span style="font-size:12px;font-weight:700;color:#0047b3;">+ {{ $s_kode_unik }}</span>
+                    </div>
                 </div>
                 <div style="background:#f8fafc;border-radius:13px;padding:13px;margin-bottom:13px;">
                     <div style="font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;
-                                margin-bottom:5px;">Ke Rekening ({{ session('data_bank') }}):</div>
-                    @if(session('data_bank') == 'BCA')
+                                margin-bottom:5px;">Ke Rekening ({{ $s_bank }}):</div>
+                    @if($s_bank == 'BCA')
                         <div class="allow-select" style="font-size:21px;font-weight:800;color:#002d72;">1470807381</div>
                         <div style="font-size:12px;color:var(--text-muted);">a/n Muzadidil Fuad</div>
                     @else
@@ -63,7 +81,7 @@
                 <div style="background:#fff3cd;border-radius:13px;padding:13px;
                             font-size:11px;color:#92400e;line-height:1.6;">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    Transfer <strong>sesuai nominal</strong> hingga 3 digit terakhir agar otomatis terdeteksi.
+                    Transfer <strong>sesuai nominal</strong> termasuk 3 digit kode unik di akhir agar otomatis terdeteksi.
                 </div>
             </div>
         @endif
@@ -135,9 +153,12 @@
             </div>
             <div style="flex:1;">
                 <div style="font-size:14px;font-weight:800;color:var(--text-main);">
-                    Rp {{ number_format($r->total_transfer ?? 0, 0, ',', '.') }}
+                    Rp {{ number_format($r->total_transfer ?? $r->nominal ?? 0, 0, ',', '.') }}
                 </div>
                 <div style="font-size:11px;color:var(--text-muted);">
+                    @if($r->kode_unik)
+                        Nominal: Rp {{ number_format($r->nominal ?? 0, 0, ',', '.') }} + Kode: {{ $r->kode_unik }} &bull;
+                    @endif
                     Via {{ $r->bank_tujuan ?? '-' }} &bull;
                     {{ isset($r->waktu_request) ? date('d M, H:i', strtotime($r->waktu_request)) : '-' }}
                 </div>
