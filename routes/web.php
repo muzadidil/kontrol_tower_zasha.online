@@ -24,6 +24,9 @@ use App\Http\Controllers\Auth\MitraLoginController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Mitra\MitraDashboardController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
+use App\Http\Controllers\Mitra\WfhController as MitraWfhController;
+use App\Http\Controllers\Admin\WfhController as AdminWfhController;
 
 // Authentication Routes (public)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -63,6 +66,16 @@ Route::middleware('auth:pelanggan')->group(function () {
     Route::get('/invoice/cek-status/{id}', [PelangganController::class, 'cekStatus']);
     Route::get('/topup', function () { return "Halaman Topup"; })->name('pelanggan.topup');
 
+    // WFH Orders
+    Route::prefix('wfh')->name('pelanggan.wfh.')->middleware(['profil.lengkap'])->group(function () {
+        Route::get('/', [PelangganWfhController::class, 'index'])->name('index');
+        Route::get('/order', [PelangganWfhController::class, 'create'])->name('create');
+        Route::post('/order', [PelangganWfhController::class, 'store'])->name('store');
+        Route::get('/{wfhOrder}', [PelangganWfhController::class, 'show'])->name('show');
+        Route::post('/{wfhOrder}/konfirmasi', [PelangganWfhController::class, 'konfirmasi'])->name('konfirmasi');
+        Route::post('/{wfhOrder}/dispute', [PelangganWfhController::class, 'dispute'])->name('dispute');
+    });
+
     // Fitur Riwayat
     Route::prefix('riwayat')->name('pelanggan.riwayat.')->group(function () {
         Route::get('/', [RiwayatController::class, 'index'])->name('index');
@@ -82,6 +95,15 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])->name('pesanan');
     Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
     Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
+
+    // WFH Orders
+    Route::prefix('wfh')->name('wfh.')->group(function () {
+        Route::get('/', [MitraWfhController::class, 'index'])->name('index');
+        Route::get('/{wfhOrder}', [MitraWfhController::class, 'show'])->name('show');
+        Route::post('/{wfhOrder}/terima', [MitraWfhController::class, 'terima'])->name('terima');
+        Route::post('/{wfhOrder}/tolak', [MitraWfhController::class, 'tolak'])->name('tolak');
+        Route::post('/{wfhOrder}/kirim-file', [MitraWfhController::class, 'kirimFile'])->name('kirim-file');
+    });
 });
 
 // Admin Auth Routes (public)
@@ -128,6 +150,13 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('/kategori', [KategoriPekerjaanController::class, 'store'])->name('admin.kategori.store');
     Route::delete('/kategori/{id}', [KategoriPekerjaanController::class, 'destroy'])->name('admin.kategori.destroy');
     Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
+
+    // WFH Admin
+    Route::prefix('wfh')->name('wfh.')->group(function () {
+        Route::get('/', [AdminWfhController::class, 'index'])->name('index');
+        Route::get('/{wfhOrder}', [AdminWfhController::class, 'show'])->name('show');
+        Route::post('/{wfhOrder}/resolusi', [AdminWfhController::class, 'resolusiDispute'])->name('resolusi');
+    });
     Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
 
     Route::prefix('mitra')->name('mitra.')->group(function () {

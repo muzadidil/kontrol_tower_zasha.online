@@ -17,6 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             return route('login');
         });
+
+        $middleware->alias([
+            'mitra.kategori'   => \App\Http\Middleware\CheckMitraKategori::class,
+            'profil.lengkap'   => \App\Http\Middleware\CheckPelangganProfil::class,
+            'umur'             => \App\Http\Middleware\CheckUmurPelanggan::class,
+            'single.device'    => \App\Http\Middleware\CheckSingleDevice::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

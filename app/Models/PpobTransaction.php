@@ -7,9 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class PpobTransaction extends Model
 {
     protected $fillable = [
-        'id', 'user_id', 'user_type', 'sku', 'target_number', 'price', 'selling_price', 'status', 'ref_id', 'sn'
+        'user_type', 'user_id', 'jenis_produk', 'nomor_tujuan',
+        'kode_produk', 'nama_produk', 'harga_modal', 'harga_jual', 'margin_zasha',
+        'digiflazz_ref', 'sn', 'status', 'digiflazz_response', 'processed_at',
     ];
 
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected $casts = [
+        'digiflazz_response' => 'array',
+        'processed_at'       => 'datetime',
+    ];
 }

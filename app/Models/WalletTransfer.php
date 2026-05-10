@@ -3,18 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WalletTransfer extends Model
 {
-    protected $fillable = ['sender_mitra_id', 'receiver_mitra_id', 'amount', 'description'];
+    protected $fillable = ['dari_mitra_id', 'ke_mitra_id', 'jumlah', 'catatan', 'status'];
 
-    public function sender()
-    {
-        return $this->belongsTo(Mitra::class, 'sender_mitra_id');
-    }
+    protected $casts = ['jumlah' => 'decimal:2'];
 
-    public function receiver()
-    {
-        return $this->belongsTo(Mitra::class, 'receiver_mitra_id');
-    }
+    public function dariMitra(): BelongsTo { return $this->belongsTo(Mitra::class, 'dari_mitra_id', 'id_mitra'); }
+    public function keMitra(): BelongsTo { return $this->belongsTo(Mitra::class, 'ke_mitra_id', 'id_mitra'); }
 }
