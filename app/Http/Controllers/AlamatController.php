@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alamat;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,9 +11,10 @@ class AlamatController extends Controller
 {
     public function index()
     {
-        $id      = Auth::guard('pelanggan')->id();
-        $alamats = Alamat::where('id_pelanggan', $id)->orderBy('is_utama', 'desc')->get();
-        return view('pelanggan.alamat.index', compact('alamats'));
+        $id           = Auth::guard('pelanggan')->id();
+        $alamats      = Alamat::where('id_pelanggan', $id)->orderBy('is_utama', 'desc')->get();
+        $gmaps_api_key = Setting::get('google_maps_api_key', '');
+        return view('pelanggan.alamat.index', compact('alamats', 'gmaps_api_key'));
     }
 
     public function store(Request $request)

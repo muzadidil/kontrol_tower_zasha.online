@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\PpobTransaction;
 use App\Models\Mitra;
 use App\Models\Pelanggan;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 
 class FinanceController extends Controller
@@ -27,8 +28,9 @@ class FinanceController extends Controller
             ->sum('total_pesanan');
 
         $totalSaldoMengendap = Mitra::sum('saldo') + Pelanggan::sum('saldo');
+        $gmaps_api_key       = Setting::get('google_maps_api_key', '');
 
-        return view('admin.dashboard.finance', compact('totalOmzet', 'totalCuanZasha', 'totalProfitPpob', 'totalDanaEscrow', 'totalSaldoMengendap'));
+        return view('admin.dashboard.finance', compact('totalOmzet', 'totalCuanZasha', 'totalProfitPpob', 'totalDanaEscrow', 'totalSaldoMengendap', 'gmaps_api_key'));
     }
 
     public function deposit()

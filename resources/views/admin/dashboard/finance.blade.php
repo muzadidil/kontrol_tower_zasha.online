@@ -142,4 +142,77 @@
         </div>
     </div>
 </div>
+
+{{-- PENGATURAN SISTEM --}}
+<div class="row g-3 mt-1">
+    <div class="col-12">
+        <div class="card border-0 rounded-4 p-4" style="background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div class="section-title d-flex align-items-center gap-2">
+                <i class="fas fa-cog" style="color:#005aa9;"></i> Pengaturan Sistem
+            </div>
+
+            @if(session('setting_saved'))
+                <div class="alert border-0 rounded-3 mb-3 d-flex align-items-center gap-2"
+                     style="background:#dcfce7; color:#15803d; font-size:0.875rem;">
+                    <i class="fas fa-check-circle"></i> {{ session('setting_saved') }}
+                </div>
+            @endif
+
+            <form action="{{ route('admin.settings.update') }}" method="POST">
+                @csrf
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-8">
+                        <label class="form-label-sm">Google Maps API Key</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background:#f8fafc; border-color:#e5e7eb;">
+                                <i class="fas fa-map-marker-alt" style="color:#005aa9;"></i>
+                            </span>
+                            <input type="text" name="google_maps_api_key"
+                                   class="form-control"
+                                   value="{{ $gmaps_api_key }}"
+                                   placeholder="AIzaSy..."
+                                   style="border-color:#e5e7eb; font-family:monospace; font-size:0.82rem;">
+                            <button type="button" id="toggleKey"
+                                    class="input-group-text" style="background:#f8fafc; border-color:#e5e7eb; cursor:pointer;">
+                                <i class="fas fa-eye" style="font-size:0.8rem; color:#64748b;"></i>
+                            </button>
+                        </div>
+                        <div class="mt-1" style="font-size:0.72rem; color:#94a3b8;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Digunakan untuk fitur pilih lokasi alamat pelanggan via Google Maps.
+                            Pastikan API sudah aktifkan <strong>Maps JavaScript API</strong> dan <strong>Places API</strong>.
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <button type="submit" class="btn w-100 fw-bold rounded-pill"
+                                style="background:#005aa9; color:white; font-size:0.875rem; padding:10px;">
+                            <i class="fas fa-save me-2"></i>Simpan API Key
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.getElementById('toggleKey').addEventListener('click', function() {
+    const inp = this.previousElementSibling;
+    const ico = this.querySelector('i');
+    if (inp.type === 'text') {
+        inp.type = 'password';
+        ico.classList.replace('fa-eye-slash', 'fa-eye');
+    } else {
+        inp.type = 'text';
+        ico.classList.replace('fa-eye', 'fa-eye-slash');
+    }
+});
+// Default: sembunyikan key jika sudah ada isinya
+document.addEventListener('DOMContentLoaded', function() {
+    const inp = document.querySelector('input[name=google_maps_api_key]');
+    if (inp && inp.value.length > 0) inp.type = 'password';
+});
+</script>
+@endpush
 @endsection

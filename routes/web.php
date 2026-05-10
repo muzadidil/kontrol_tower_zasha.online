@@ -23,6 +23,7 @@ use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\Auth\MitraLoginController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Mitra\MitraDashboardController;
+use App\Http\Controllers\SettingController;
 
 // Authentication Routes (public)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -91,6 +92,7 @@ Route::match(['get','post'], '/admin/logout', [AdminLoginController::class, 'log
 // Admin & Mitra Routes
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', [FinanceController::class, 'index'])->name('admin.dashboard');
+    Route::post('/settings', [SettingController::class, 'update'])->name('admin.settings.update');
 
     // Monitoring & Orders
     Route::get('/orders', [AdminOrderMonitoringController::class, 'index'])->name('admin.orders.index');
