@@ -83,8 +83,8 @@
             min-height: 100vh;
             position: relative;
             box-shadow: 0 0 var(--fib-5) rgba(0,0,0,0.06);
-            /* Extra fib-6 (55px) buffer agar konten terakhir tidak tertutup nav */
-            padding-bottom: calc(var(--nav-height) + var(--fib-6) + env(safe-area-inset-bottom));
+            /* Extra fib-8 (144px) buffer agar konten terakhir aman dari overlap nav */
+            padding-bottom: calc(var(--nav-height) + var(--fib-8) + env(safe-area-inset-bottom));
             padding-top: env(safe-area-inset-top);
             overflow-x: hidden;
         }
