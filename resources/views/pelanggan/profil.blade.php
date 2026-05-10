@@ -4,7 +4,7 @@
 
 {{-- ── HERO PROFIL ──────────────────────────────── --}}
 <div style="background:linear-gradient(145deg,#001d4d,#002d72,#0047b3);
-            padding:34px 21px 55px; text-align:center; position:relative; overflow:hidden;">
+            padding:21px 21px 34px; text-align:center; position:relative; overflow:hidden;">
     <div style="position:absolute;top:-21px;right:-21px;width:89px;height:89px;
                 border-radius:50%;background:rgba(240,165,0,.12);"></div>
     <div style="position:absolute;bottom:-13px;left:-13px;width:55px;height:55px;
@@ -35,7 +35,7 @@
 </div>
 
 {{-- ── KONTEN ───────────────────────────────────── --}}
-<div style="padding:0 21px;margin-top:-34px;">
+<div style="padding:13px 21px 0;">
 
     @if(session('success'))
         <div style="background:#d1fae5;border-radius:13px;padding:13px 16px;margin-bottom:13px;

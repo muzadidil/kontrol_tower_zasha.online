@@ -4,7 +4,7 @@
 
 {{-- ── HERO ─────────────────────────────────────── --}}
 <div style="background:linear-gradient(145deg,#001d4d 0%,#002d72 55%,#0047b3 100%);
-            padding:21px 21px 55px; position:relative; overflow:hidden;">
+            padding:21px; position:relative; overflow:hidden;">
     <div style="position:absolute;top:-34px;right:-34px;width:144px;height:144px;
                 border-radius:50%;background:rgba(240,165,0,.1);"></div>
     <div style="position:absolute;bottom:-21px;left:21px;width:89px;height:89px;
@@ -29,7 +29,7 @@
 </div>
 
 {{-- ── TOP UP CARD ─────────────────────────────── --}}
-<div style="padding:0 21px;margin-top:-34px;">
+<div style="padding:13px 21px 0;">
     <div class="z-card" style="padding:21px;margin-bottom:13px;">
 
         @if(session('success'))
