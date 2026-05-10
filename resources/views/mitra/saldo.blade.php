@@ -19,7 +19,7 @@
         <div class="hero-content">
             <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
                 <span class="label-up" style="color: rgba(255,255,255,0.7);">Saldo Tersedia</span>
-                <i class="bi bi-shield-check" style="color: var(--mitra-gold-soft); font-size: var(--t-md);"></i>
+                <i class="bi bi-shield-check" style="color: var(--mitra-blue-soft); font-size: var(--t-md);"></i>
             </div>
             <div class="fw-bold allow-select" style="font-size: var(--t-2xl); letter-spacing: -0.02em; line-height: 1;">
                 Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}
@@ -46,35 +46,35 @@
             $s_transfer  = (int) session('data_transfer', 0);
             $s_bank      = session('data_bank', 'DANA');
         @endphp
-        <div class="card-custom" style="padding: var(--fib-4); border: 2px solid var(--mitra-green); background: #f0fdf4;">
+        <div class="card-custom" style="padding: var(--fib-4); border: 2px solid var(--mitra-blue); background: var(--mitra-blue-tint);">
             <div class="label-up" style="margin-bottom: var(--fib-2);">Transfer tepat sejumlah:</div>
-            <div class="allow-select fw-bold" style="font-size: var(--t-xl); color: var(--mitra-green); letter-spacing:-.02em; margin-bottom: var(--fib-3);">
+            <div class="allow-select fw-bold" style="font-size: var(--t-xl); color: var(--mitra-blue); letter-spacing:-.02em; margin-bottom: var(--fib-3);">
                 Rp {{ number_format($s_transfer, 0, ',', '.') }}
             </div>
 
-            <div style="background: #ecfdf5; border-radius: var(--r-md); padding: var(--fib-3); margin-bottom: var(--fib-3); border: 1px solid #bbf7d0;">
+            <div style="background: var(--mitra-blue-soft); border-radius: var(--r-md); padding: var(--fib-3); margin-bottom: var(--fib-3); border: 1px solid var(--mitra-blue-light);">
                 <div class="label-up" style="margin-bottom: var(--fib-1);">Rincian Transfer</div>
                 <div class="d-flex justify-content-between t-xs" style="margin-bottom: var(--fib-1);">
                     <span>Nominal:</span>
                     <strong>Rp {{ number_format($s_nominal, 0, ',', '.') }}</strong>
                 </div>
-                <div class="d-flex justify-content-between t-xs" style="border-top: 1px solid #d1fae5; padding-top: var(--fib-1);">
+                <div class="d-flex justify-content-between t-xs" style="border-top: 1px solid var(--mitra-blue-light); padding-top: var(--fib-1);">
                     <span>Kode Unik:</span>
-                    <strong style="color: var(--mitra-green);">+ {{ $s_kode_unik }}</strong>
+                    <strong style="color: var(--mitra-blue);">+ {{ $s_kode_unik }}</strong>
                 </div>
             </div>
 
             <div style="background: var(--bg-app); border-radius: var(--r-md); padding: var(--fib-3); margin-bottom: var(--fib-3);">
                 <div class="label-up" style="margin-bottom: var(--fib-1);">Ke {{ $s_bank }}</div>
                 @if($s_bank == 'BCA')
-                    <div class="allow-select fw-bold" style="font-size: var(--t-lg); color: var(--mitra-green);">1470807381</div>
+                    <div class="allow-select fw-bold" style="font-size: var(--t-lg); color: var(--mitra-blue);">1470807381</div>
                 @else
-                    <div class="allow-select fw-bold" style="font-size: var(--t-lg); color: var(--mitra-green);">082232458226</div>
+                    <div class="allow-select fw-bold" style="font-size: var(--t-lg); color: var(--mitra-blue);">082232458226</div>
                 @endif
                 <div class="t-xs" style="color: var(--ink-soft);">a/n Muzadidil Fuad</div>
             </div>
 
-            <div style="background: #fff3cd; border-radius: var(--r-md); padding: var(--fib-3); font-size: var(--t-xs); color: #92400e; line-height: 1.6;">
+            <div style="background: var(--mitra-blue-tint); border-radius: var(--r-md); padding: var(--fib-3); font-size: var(--t-xs); color: var(--mitra-blue-dark); line-height: 1.6; border: 1px solid var(--mitra-blue-light);">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i>
                 Transfer <strong>tepat sesuai nominal</strong> termasuk kode unik di akhir agar otomatis terdeteksi.
             </div>
@@ -84,7 +84,7 @@
     {{-- Top Up --}}
     <div class="card-custom" style="padding: var(--fib-4);">
         <div class="d-flex align-items-center" style="gap: var(--fib-3); margin-bottom: var(--fib-3);">
-            <div class="menu-tile-icon" style="background: var(--mitra-gold-soft); color: var(--mitra-gold);">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue);">
                 <i class="bi bi-plus-circle-fill"></i>
             </div>
             <div>
@@ -106,7 +106,7 @@
             <div>
                 <label class="t-xxs label-up" style="margin-bottom: var(--fib-1); display: block;">Nominal</label>
                 <div class="input-group">
-                    <span class="input-group-text" style="background: var(--mitra-gold-soft); border: none; font-weight: 700; color: var(--mitra-gold);">Rp</span>
+                    <span class="input-group-text" style="background: var(--mitra-blue-soft); border: none; font-weight: 700; color: var(--mitra-blue);">Rp</span>
                     <input type="number" name="nominal" class="form-control" placeholder="Min. 10.000"
                         min="10000" max="10000000" required
                         style="border-radius: 0 var(--r-md) var(--r-md) 0; padding: var(--fib-2) var(--fib-3); font-size: var(--t-sm);">
@@ -114,7 +114,7 @@
                 <div class="d-flex flex-wrap" style="gap: var(--fib-1); margin-top: var(--fib-2);">
                     @foreach([50000, 100000, 250000, 500000] as $nom)
                         <button type="button" onclick="setNominalTopup({{ $nom }})" class="btn"
-                            style="background: var(--mitra-gold-soft); color: var(--mitra-gold); border: 1px solid #f0deaa; border-radius: var(--r-pill); font-size: var(--t-xxs); font-weight: 700; padding: var(--fib-1) var(--fib-3);">
+                            style="background: var(--mitra-blue-soft); color: var(--mitra-blue); border: 1px solid var(--mitra-blue-light); border-radius: var(--r-pill); font-size: var(--t-xxs); font-weight: 700; padding: var(--fib-1) var(--fib-3);">
                             {{ number_format($nom, 0, ',', '.') }}
                         </button>
                     @endforeach
@@ -134,14 +134,14 @@
         <div class="stack-3">
             @foreach($riwayatTopup as $t)
                 @php
-                    $bg = '#fef3c7'; $color = '#92400e'; $statusLabel = $t->status_topup ?? 'Pending';
-                    if(($t->status_topup ?? '') == 'Selesai') { $bg = '#d1fae5'; $color = '#065f46'; }
-                    elseif(($t->status_topup ?? '') == 'Expired') { $bg = '#fee2e2'; $color = '#991b1b'; }
+                    $bg = '#e6f4ff'; $color = '#005aa9'; $statusLabel = $t->status_topup ?? 'Pending';
+                    if(($t->status_topup ?? '') == 'Selesai') { $bg = '#005aa9'; $color = '#ffffff'; }
+                    elseif(($t->status_topup ?? '') == 'Expired') { $bg = '#e1ecf7'; $color = '#6b7280'; }
                 @endphp
                 <div class="card-custom" style="padding: var(--fib-3);">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="fw-bold t-sm" style="color: var(--mitra-green);">
+                            <div class="fw-bold t-sm" style="color: var(--mitra-blue);">
                                 +Rp {{ number_format($t->total_transfer ?? $t->jumlah_topup ?? 0, 0, ',', '.') }}
                             </div>
                             @if($t->kode_unik)
@@ -166,7 +166,7 @@
     {{-- Tarik Dana --}}
     <div class="card-custom" style="padding: var(--fib-4);">
         <div class="d-flex align-items-center" style="gap: var(--fib-3); margin-bottom: var(--fib-3);">
-            <div class="menu-tile-icon" style="background: #fee2e2; color: #b91c1c;">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-dark);">
                 <i class="bi bi-arrow-down-circle-fill"></i>
             </div>
             <div>
@@ -195,7 +195,7 @@
             <div>
                 <label class="t-xxs label-up" style="margin-bottom: var(--fib-1); display: block;">Nominal</label>
                 <div class="input-group">
-                    <span class="input-group-text" style="background: #fef2f2; border: none; font-weight: 700; color: #b91c1c;">Rp</span>
+                    <span class="input-group-text" style="background: var(--mitra-blue-tint); border: none; font-weight: 700; color: var(--mitra-blue-dark);">Rp</span>
                     <input type="number" name="nominal" class="form-control" placeholder="50000" min="50000" required
                         style="border-radius: 0 var(--r-md) var(--r-md) 0; padding: var(--fib-2) var(--fib-3); font-size: var(--t-sm);">
                 </div>
@@ -213,9 +213,9 @@
         <div class="stack-3">
             @foreach($riwayat as $r)
                 @php
-                    $bg = '#fef3c7'; $color = '#92400e';
-                    if($r->status === 'approved') { $bg = '#d1fae5'; $color = '#065f46'; }
-                    elseif($r->status === 'rejected') { $bg = '#fee2e2'; $color = '#991b1b'; }
+                    $bg = '#e6f4ff'; $color = '#005aa9';
+                    if($r->status === 'approved') { $bg = '#005aa9'; $color = '#ffffff'; }
+                    elseif($r->status === 'rejected') { $bg = '#e1ecf7'; $color = '#6b7280'; }
                 @endphp
                 <div class="card-custom" style="padding: var(--fib-3);">
                     <div class="d-flex justify-content-between align-items-start">
@@ -227,7 +227,7 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            <div class="fw-bold t-sm" style="color: #b91c1c;">-Rp {{ number_format($r->nominal, 0, ',', '.') }}</div>
+                            <div class="fw-bold t-sm" style="color: var(--mitra-blue-dark);">-Rp {{ number_format($r->nominal, 0, ',', '.') }}</div>
                             <span style="background: {{ $bg }}; color: {{ $color }}; font-size: var(--t-xxs); padding: var(--fib-1) var(--fib-3); border-radius: var(--r-pill); font-weight: 700; margin-top: var(--fib-1); display: inline-block;">
                                 {{ ucfirst($r->status) }}
                             </span>

@@ -23,16 +23,16 @@
                 @if($mitra->foto_mitra)
                     <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 @else
-                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #e8f5e9, var(--mitra-gold-soft)); border-radius: 50%; display:flex; align-items:center; justify-content:center;">
-                        <i class="bi bi-person-fill" style="font-size: var(--fib-5); color: var(--mitra-green);"></i>
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--mitra-blue-tint), var(--mitra-blue-soft)); border-radius: 50%; display:flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-person-fill" style="font-size: var(--fib-5); color: var(--mitra-blue);"></i>
                     </div>
                 @endif
             </div>
             <label for="inputFotoMitra"
                    style="position:absolute;bottom:var(--fib-1);right:var(--fib-1);width:var(--fib-5);height:var(--fib-5);
-                          background:var(--mitra-gold);color:#fff;border-radius:50%;display:flex;
+                          background:var(--mitra-blue);color:#fff;border-radius:50%;display:flex;
                           align-items:center;justify-content:center;cursor:pointer;
-                          box-shadow:0 var(--fib-1) var(--fib-3) rgba(0,0,0,0.2);
+                          box-shadow:0 var(--fib-1) var(--fib-3) rgba(0,90,169,0.3);
                           border:2px solid var(--surface);"
                    title="Ubah foto profil">
                 <i class="bi bi-camera-fill" style="font-size: var(--t-xs);"></i>
@@ -52,7 +52,7 @@
             @endif
         </div>
         <div class="d-flex justify-content-center" style="gap: var(--fib-2);">
-            <span class="allow-select" style="background: var(--mitra-gold-soft); color: #8b6914; padding: var(--fib-1) var(--fib-3); border-radius: var(--r-pill); font-size: var(--t-xxs); font-weight: 800; letter-spacing: 0.05em;">
+            <span class="allow-select" style="background: var(--mitra-blue-soft); color: var(--mitra-blue-dark); padding: var(--fib-1) var(--fib-3); border-radius: var(--r-pill); font-size: var(--t-xxs); font-weight: 800; letter-spacing: 0.05em;">
                 <i class="bi bi-stars me-1"></i>{{ $mitra->id_mitra ?? '-' }}
             </span>
             <span class="{{ ($mitra->status_mitra ?? '') === 'aktif' ? 'badge-status-aktif' : 'badge-status-nonaktif' }}">
@@ -77,7 +77,7 @@
     <div class="card-custom" style="padding: var(--fib-4);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
             <h6 class="label-up mb-0">Informasi Akun</h6>
-            <a href="#" class="t-xs fw-bold" style="color: var(--mitra-green); text-decoration: none;">
+            <a href="#" class="t-xs fw-bold" style="color: var(--mitra-blue); text-decoration: none;">
                 <i class="bi bi-pencil-square"></i> Edit
             </a>
         </div>
@@ -98,7 +98,7 @@
                         {{ $mitra->kategori_kode?->label() ?? $mitra->id_kategori ?? 'Belum dipilih' }}
                     </div>
                 </div>
-                <i class="bi bi-tag-fill" style="color: var(--mitra-gold); font-size: var(--t-md);"></i>
+                <i class="bi bi-tag-fill" style="color: var(--mitra-blue-mid); font-size: var(--t-md);"></i>
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
@@ -112,7 +112,7 @@
                         @endif
                     </div>
                 </div>
-                <i class="bi bi-shield-check" style="color: var(--mitra-green); font-size: var(--t-md);"></i>
+                <i class="bi bi-shield-check" style="color: var(--mitra-blue); font-size: var(--t-md);"></i>
             </div>
         </div>
     </div>
@@ -122,17 +122,17 @@
         <h6 class="label-up mb-0" style="margin-bottom: var(--fib-3);">Tarif Layanan</h6>
         <div class="row g-3">
             <div class="col-6">
-                <div style="padding: var(--fib-3); background: linear-gradient(135deg, var(--mitra-gold-soft), #fff); border-radius: var(--r-md);">
+                <div style="padding: var(--fib-3); background: linear-gradient(135deg, var(--mitra-blue-tint), #fff); border-radius: var(--r-md);">
                     <div class="t-xxs label-up" style="margin-bottom: var(--fib-1);">Per Jam</div>
-                    <div class="fw-bold t-sm" style="color: var(--mitra-green);">
+                    <div class="fw-bold t-sm" style="color: var(--mitra-blue);">
                         Rp {{ number_format($mitra->tarif_per_jam ?? 0, 0, ',', '.') }}
                     </div>
                 </div>
             </div>
             <div class="col-6">
-                <div style="padding: var(--fib-3); background: linear-gradient(135deg, #ecfdf5, #fff); border-radius: var(--r-md);">
+                <div style="padding: var(--fib-3); background: linear-gradient(135deg, var(--mitra-blue-soft), #fff); border-radius: var(--r-md);">
                     <div class="t-xxs label-up" style="margin-bottom: var(--fib-1);">Per Hari</div>
-                    <div class="fw-bold t-sm" style="color: var(--mitra-green);">
+                    <div class="fw-bold t-sm" style="color: var(--mitra-blue);">
                         Rp {{ number_format($mitra->tarif_per_hari ?? 0, 0, ',', '.') }}
                     </div>
                 </div>
@@ -143,7 +143,7 @@
     {{-- Action Cards --}}
     <div class="stack-3">
         <a href="#" class="menu-tile">
-            <div class="menu-tile-icon" style="background: #ecfdf5; color: var(--mitra-green);">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue);">
                 <i class="bi bi-shield-check"></i>
             </div>
             <div style="flex: 1;">
@@ -153,7 +153,7 @@
             <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
         </a>
         <a href="#" class="menu-tile">
-            <div class="menu-tile-icon" style="background: var(--mitra-gold-soft); color: var(--mitra-gold);">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-mid);">
                 <i class="bi bi-bank"></i>
             </div>
             <div style="flex: 1;">
@@ -163,7 +163,7 @@
             <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
         </a>
         <a href="#" class="menu-tile">
-            <div class="menu-tile-icon" style="background: #f3e8ff; color: #7c3aed;">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue-dark);">
                 <i class="bi bi-question-circle"></i>
             </div>
             <div style="flex: 1;">
@@ -177,7 +177,7 @@
     {{-- Logout --}}
     <form action="{{ route('mitra.logout') }}" method="POST" class="mb-0">
         @csrf
-        <button type="submit" class="btn w-100" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: var(--r-pill); font-weight: 700; padding: var(--fib-3); font-size: var(--t-sm);">
+        <button type="submit" class="btn w-100" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-dark); border: 1px solid var(--mitra-blue-light); border-radius: var(--r-pill); font-weight: 700; padding: var(--fib-3); font-size: var(--t-sm);">
             <i class="bi bi-box-arrow-right me-2"></i>Keluar
         </button>
     </form>

@@ -1,5 +1,9 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
   }
 }

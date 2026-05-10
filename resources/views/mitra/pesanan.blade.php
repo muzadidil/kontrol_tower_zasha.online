@@ -9,8 +9,8 @@
             <div class="label-up">Order Masuk</div>
             <h5 class="fw-bold mb-0 t-lg" style="margin-top: var(--fib-1);">Daftar Pesanan</h5>
         </div>
-        <div style="width: var(--fib-5); height: var(--fib-5); background: var(--mitra-gold-soft); border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center;">
-            <span class="fw-bold" style="color: var(--mitra-gold); font-size: var(--t-sm);">{{ $pesanan->count() }}</span>
+        <div style="width: var(--fib-5); height: var(--fib-5); background: var(--mitra-blue-soft); border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center;">
+            <span class="fw-bold" style="color: var(--mitra-blue); font-size: var(--t-sm);">{{ $pesanan->count() }}</span>
         </div>
     </div>
 
@@ -23,9 +23,9 @@
             'dibatalkan' => ['Batal', 'bi-x-circle'],
         ] as $key => $tab)
             <button type="button" class="btn"
-                style="background: {{ $loop->first ? 'var(--mitra-green)' : 'var(--surface)' }};
+                style="background: {{ $loop->first ? 'var(--mitra-blue)' : 'var(--surface)' }};
                        color: {{ $loop->first ? '#fff' : 'var(--ink-soft)' }};
-                       border: 1px solid {{ $loop->first ? 'var(--mitra-green)' : 'var(--line)' }};
+                       border: 1px solid {{ $loop->first ? 'var(--mitra-blue)' : 'var(--line)' }};
                        border-radius: var(--r-pill);
                        font-size: var(--t-xs); font-weight: 700;
                        padding: var(--fib-2) var(--fib-3); white-space: nowrap;">
@@ -48,9 +48,9 @@
             @foreach($pesanan as $p)
                 @php
                     $statusKey = strtolower($p->status_pesanan ?? '');
-                    $bg = '#fef3c7'; $color = '#92400e';
-                    if(in_array($statusKey, ['selesai'])) { $bg = '#d1fae5'; $color = '#065f46'; }
-                    elseif(in_array($statusKey, ['dibatalkan','batal'])) { $bg = '#fee2e2'; $color = '#991b1b'; }
+                    $bg = '#e6f4ff'; $color = '#005aa9';
+                    if(in_array($statusKey, ['selesai'])) { $bg = '#005aa9'; $color = '#ffffff'; }
+                    elseif(in_array($statusKey, ['dibatalkan','batal'])) { $bg = '#e1ecf7'; $color = '#6b7280'; }
                 @endphp
                 <div class="card-custom" style="padding: var(--fib-3);">
                     {{-- Header row --}}
@@ -73,7 +73,7 @@
                     <div class="d-flex justify-content-between align-items-center" style="padding-top: var(--fib-2); border-top: 1px solid var(--line);">
                         <div>
                             <div class="t-xxs label-up">Pendapatan</div>
-                            <div class="fw-bold t-sm" style="color: var(--mitra-green);">
+                            <div class="fw-bold t-sm" style="color: var(--mitra-blue);">
                                 Rp {{ number_format($p->biaya_jasa ?? 0, 0, ',', '.') }}
                             </div>
                         </div>

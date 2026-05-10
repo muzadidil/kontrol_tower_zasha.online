@@ -6,7 +6,7 @@
     {{-- Header (fib-3 gap) --}}
     <div class="d-flex justify-content-between align-items-center" style="padding-top: var(--fib-2);">
         <div class="d-flex align-items-center gap-3">
-            <div class="avatar-34" style="background: linear-gradient(135deg,var(--mitra-green),var(--mitra-green-light));display:flex;align-items:center;justify-content:center;box-shadow:0 var(--fib-1) var(--fib-3) rgba(10,92,54,0.25);">
+            <div class="avatar-34" style="background: linear-gradient(135deg,var(--mitra-blue),var(--mitra-blue-dark));display:flex;align-items:center;justify-content:center;box-shadow:0 var(--fib-1) var(--fib-3) rgba(0,90,169,0.25);">
                 <i class="bi bi-person-fill text-white" style="font-size:var(--t-md);"></i>
             </div>
             <div>
@@ -29,8 +29,8 @@
                         Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}
                     </h2>
                 </div>
-                <div style="width: var(--fib-4); height: var(--fib-4); border-radius: 50%; background: rgba(212,175,55,0.4); display:flex;align-items:center;justify-content:center;">
-                    <i class="bi bi-stars" style="color: var(--mitra-gold-soft); font-size: var(--t-xs);"></i>
+                <div style="width: var(--fib-4); height: var(--fib-4); border-radius: 50%; background: rgba(179,218,253,0.4); display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-stars" style="color: var(--mitra-blue-soft); font-size: var(--t-xs);"></i>
                 </div>
             </div>
 
@@ -60,7 +60,7 @@
         <div class="col-6">
             <div class="card-custom" style="padding: var(--fib-3);">
                 <div class="d-flex align-items-center" style="gap: var(--fib-2); margin-bottom: var(--fib-2);">
-                    <div style="width: var(--fib-3); height: var(--fib-3); border-radius: var(--r-sm); background: var(--mitra-gold-soft);"></div>
+                    <div style="width: var(--fib-3); height: var(--fib-3); border-radius: var(--r-sm); background: var(--mitra-blue-light);"></div>
                     <span class="label-up t-xxs">Total Order</span>
                 </div>
                 <div class="fw-bold" style="font-size: var(--t-xl); color: var(--ink);">{{ $totalPesanan ?? 0 }}</div>
@@ -69,10 +69,10 @@
         <div class="col-6">
             <div class="card-custom" style="padding: var(--fib-3);">
                 <div class="d-flex align-items-center" style="gap: var(--fib-2); margin-bottom: var(--fib-2);">
-                    <div style="width: var(--fib-3); height: var(--fib-3); border-radius: var(--r-sm); background: #d1fae5;"></div>
+                    <div style="width: var(--fib-3); height: var(--fib-3); border-radius: var(--r-sm); background: var(--mitra-blue-soft);"></div>
                     <span class="label-up t-xxs">Aktif</span>
                 </div>
-                <div class="fw-bold" style="font-size: var(--t-xl); color: var(--mitra-green);">{{ $pesananAktif ?? 0 }}</div>
+                <div class="fw-bold" style="font-size: var(--t-xl); color: var(--mitra-blue);">{{ $pesananAktif ?? 0 }}</div>
             </div>
         </div>
     </div>
@@ -86,7 +86,7 @@
         <div class="row g-3">
             <div class="col-6">
                 <a href="{{ route('mitra.pesanan') }}" class="menu-tile">
-                    <div class="menu-tile-icon" style="background: #ecfdf5; color: var(--mitra-green);">
+                    <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue);">
                         <i class="bi bi-clipboard-check"></i>
                     </div>
                     <div>
@@ -97,7 +97,7 @@
             </div>
             <div class="col-6">
                 <a href="{{ route('mitra.saldo') }}" class="menu-tile">
-                    <div class="menu-tile-icon" style="background: var(--mitra-gold-soft); color: var(--mitra-gold);">
+                    <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-mid);">
                         <i class="bi bi-wallet2"></i>
                     </div>
                     <div>
@@ -108,7 +108,7 @@
             </div>
             <div class="col-6">
                 <a href="{{ route('mitra.profil') }}" class="menu-tile">
-                    <div class="menu-tile-icon" style="background: #f3e8ff; color: #7c3aed;">
+                    <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue-dark);">
                         <i class="bi bi-person-circle"></i>
                     </div>
                     <div>
@@ -119,7 +119,7 @@
             </div>
             <div class="col-6">
                 <div class="menu-tile" style="opacity: 0.55; cursor: not-allowed;">
-                    <div class="menu-tile-icon" style="background: #f1f5f9; color: #64748b;">
+                    <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-mid);">
                         <i class="bi bi-graph-up-arrow"></i>
                     </div>
                     <div>

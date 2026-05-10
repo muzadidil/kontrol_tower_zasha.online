@@ -43,16 +43,23 @@
             --t-xl:  1.6875rem;
             --t-2xl: 2.125rem;
 
-            /* Brand */
-            --mitra-green: #0a5c36;
-            --mitra-green-light: #1a7a4a;
-            --mitra-gold: #d4af37;
-            --mitra-gold-soft: #f9f1d6;
-            --bg-app: #fdfcf8;
+            /* Brand — Blue Laut palette (monochromatic) */
+            --mitra-blue: #005aa9;
+            --mitra-blue-dark: #003d75;
+            --mitra-blue-mid: #0087d9;
+            --mitra-blue-light: #b3dafd;
+            --mitra-blue-soft: #e6f4ff;
+            --mitra-blue-tint: #f0f7ff;
+            /* Aliases — view existing masih reference nama lama, value-nya sekarang biru */
+            --mitra-green: var(--mitra-blue);
+            --mitra-green-light: var(--mitra-blue-dark);
+            --mitra-gold: var(--mitra-blue-mid);
+            --mitra-gold-soft: var(--mitra-blue-soft);
+            --bg-app: #f8fbff;
             --surface: #ffffff;
             --ink: #1a2332;
             --ink-soft: #6b7280;
-            --line: #f0ede5;
+            --line: #e1ecf7;
 
             /* Layout */
             --nav-height: 72px;
@@ -63,7 +70,7 @@
         html, body { margin: 0; padding: 0; overflow-x: hidden; }
 
         body {
-            background-color: #e8e4d8;
+            background-color: var(--mitra-blue-light);
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--ink);
             -webkit-tap-highlight-color: transparent;
@@ -117,7 +124,7 @@
             right: calc(var(--fib-7) * -1);
             width: var(--fib-8);
             height: var(--fib-8);
-            background: rgba(212, 175, 55, 0.18);
+            background: rgba(179, 218, 253, 0.25);
             border-radius: 50%;
         }
         .hero-mitra::after {
@@ -159,10 +166,10 @@
             color: var(--ink-soft);
         }
 
-        /* ── Status badges ── */
+        /* ── Status badges (monochromatic blue tints) ── */
         .badge-status-aktif {
-            background: #d1fae5;
-            color: #065f46;
+            background: var(--mitra-blue-soft);
+            color: var(--mitra-blue-dark);
             font-size: var(--t-xxs);
             padding: var(--fib-1) var(--fib-3);
             border-radius: var(--r-pill);
@@ -171,8 +178,8 @@
             text-transform: uppercase;
         }
         .badge-status-nonaktif {
-            background: #fef2f2;
-            color: #991b1b;
+            background: #e1ecf7;
+            color: #6b7280;
             font-size: var(--t-xxs);
             padding: var(--fib-1) var(--fib-3);
             border-radius: var(--r-pill);
@@ -195,7 +202,7 @@
         .btn-mitra-primary:hover {
             color: #fff;
             transform: translateY(-2px);
-            box-shadow: 0 var(--fib-2) var(--fib-4) rgba(10,92,54,0.3);
+            box-shadow: 0 var(--fib-2) var(--fib-4) rgba(0,90,169,0.3);
         }
         .btn-mitra-ghost {
             background: rgba(255,255,255,0.18);
@@ -236,6 +243,107 @@
         }
 
         .allow-select { -webkit-user-select: text; user-select: text; }
+
+        /* ── Bootstrap utility override untuk konsistensi biru di modul (wfh/jastip/tenaga/service) ── */
+        .app-container .btn-warning,
+        .app-container .btn-warning:focus,
+        .app-container .btn-warning:active {
+            background-color: var(--mitra-blue) !important;
+            border-color: var(--mitra-blue) !important;
+            color: #fff !important;
+        }
+        .app-container .btn-warning:hover {
+            background-color: var(--mitra-blue-dark) !important;
+            border-color: var(--mitra-blue-dark) !important;
+        }
+        .app-container .btn-outline-warning,
+        .app-container .btn-outline-warning:focus {
+            color: var(--mitra-blue) !important;
+            border-color: var(--mitra-blue) !important;
+            background: transparent !important;
+        }
+        .app-container .btn-outline-warning:hover,
+        .app-container .btn-outline-warning:active {
+            background: var(--mitra-blue) !important;
+            color: #fff !important;
+            border-color: var(--mitra-blue) !important;
+        }
+        .app-container .text-warning { color: var(--mitra-blue) !important; }
+        .app-container .bg-warning {
+            background-color: var(--mitra-blue-soft) !important;
+            color: var(--mitra-blue-dark) !important;
+        }
+        .app-container .border-warning { border-color: var(--mitra-blue-light) !important; }
+
+        .app-container .btn-success {
+            background-color: var(--mitra-blue-mid) !important;
+            border-color: var(--mitra-blue-mid) !important;
+        }
+        .app-container .btn-success:hover {
+            background-color: var(--mitra-blue) !important;
+            border-color: var(--mitra-blue) !important;
+        }
+        .app-container .text-success { color: var(--mitra-blue) !important; }
+
+        .app-container .btn-info,
+        .app-container .btn-info:focus {
+            background-color: var(--mitra-blue-mid) !important;
+            border-color: var(--mitra-blue-mid) !important;
+            color: #fff !important;
+        }
+        .app-container .text-info { color: var(--mitra-blue-mid) !important; }
+
+        .app-container .btn-primary,
+        .app-container .btn-primary:focus {
+            background-color: var(--mitra-blue) !important;
+            border-color: var(--mitra-blue) !important;
+        }
+        .app-container .btn-primary:hover {
+            background-color: var(--mitra-blue-dark) !important;
+            border-color: var(--mitra-blue-dark) !important;
+        }
+        .app-container .text-primary { color: var(--mitra-blue) !important; }
+
+        /* Form focus state — semua input di halaman mitra konsisten biru */
+        .app-container .form-control:focus,
+        .app-container .form-select:focus {
+            border-color: var(--mitra-blue) !important;
+            box-shadow: 0 0 0 0.2rem rgba(0,90,169,0.15) !important;
+        }
+
+        /* Alert tints */
+        .app-container .alert-warning {
+            background: var(--mitra-blue-soft) !important;
+            border-color: var(--mitra-blue-light) !important;
+            color: var(--mitra-blue-dark) !important;
+        }
+        .app-container .alert-info {
+            background: var(--mitra-blue-tint) !important;
+            border-color: var(--mitra-blue-light) !important;
+            color: var(--mitra-blue-dark) !important;
+        }
+        .app-container .alert-success {
+            background: var(--mitra-blue-soft) !important;
+            border-color: var(--mitra-blue-light) !important;
+            color: var(--mitra-blue-dark) !important;
+        }
+
+        /* Badge tints — semantic colors tetap recognizable tapi via blue tints */
+        .app-container .badge.bg-warning,
+        .app-container .badge.text-bg-warning {
+            background-color: var(--mitra-blue-soft) !important;
+            color: var(--mitra-blue-dark) !important;
+        }
+        .app-container .badge.bg-success,
+        .app-container .badge.text-bg-success {
+            background-color: var(--mitra-blue) !important;
+            color: #fff !important;
+        }
+        .app-container .badge.bg-info,
+        .app-container .badge.text-bg-info {
+            background-color: var(--mitra-blue-mid) !important;
+            color: #fff !important;
+        }
 
         /* ── Bottom Nav ── */
         .nav-bottom {

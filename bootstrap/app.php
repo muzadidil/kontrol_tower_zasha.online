@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('admin') || $request->is('admin/*')) {
                 return route('admin.login');
             }
+            if ($request->is('mitra') || $request->is('mitra/*')) {
+                return route('mitra.login');
+            }
             return route('login');
         });
 
