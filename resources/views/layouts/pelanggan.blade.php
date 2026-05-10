@@ -11,9 +11,10 @@
     @stack('styles')
     <style>
         :root { --zasha-blue: #002d72; --bg-app: #f4f7fe; }
-        body { 
+        html { overflow-y: scroll; scrollbar-gutter: stable; }
+        body {
             background-color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; color: #2b3674; margin: 0;
-            -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; 
+            -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
         }
         .app-container {
             max-width: 480px; margin: 0 auto; background-color: var(--bg-app); min-height: 100vh; position: relative;
