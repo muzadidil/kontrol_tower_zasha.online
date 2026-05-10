@@ -113,10 +113,31 @@
             </a>
         </li>
 
-        <li>
-            <a href="{{ route('admin.ppob.index') }}" class="nav-link {{ request()->is('admin/ppob*') ? 'active' : '' }}">
-                <i class="fas fa-mobile-alt me-2"></i> Monitoring PPOB
+        {{-- ── PRODUK DIGITAL ──────────────────────────────── --}}
+        <li class="sidebar-divider">Produk Digital</li>
+
+        @php
+            $isDigitalActive = request()->is('admin/ppob*') || request()->is('admin/game-topup*');
+        @endphp
+        <li class="nav-item">
+            <a href="#digitalMenu" data-bs-toggle="collapse" class="nav-link d-flex justify-content-between align-items-center {{ $isDigitalActive ? 'active' : '' }}" aria-expanded="{{ $isDigitalActive ? 'true' : 'false' }}">
+                <span><i class="fas fa-bolt me-2"></i> PPOB</span>
+                <i class="fas fa-chevron-down small"></i>
             </a>
+            <div class="collapse {{ $isDigitalActive ? 'show' : '' }}" id="digitalMenu">
+                <ul class="nav flex-column ms-3 mt-1">
+                    <li>
+                        <a href="{{ route('admin.ppob.index') }}" class="nav-link py-1 small {{ request()->is('admin/ppob*') ? 'active' : '' }}">
+                            <i class="fas fa-mobile-alt me-2"></i> Monitoring PPOB
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.game-topup.index') }}" class="nav-link py-1 small {{ request()->is('admin/game-topup*') ? 'active' : '' }}">
+                            <i class="fas fa-gamepad me-2"></i> Game Top-Up
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
         {{-- ── SISTEM ──────────────────────────────────────── --}}

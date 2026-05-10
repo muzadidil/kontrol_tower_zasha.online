@@ -38,11 +38,15 @@ use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Pelanggan\PpobController as PelangganPpobNewController;
 use App\Http\Controllers\Admin\PpobController as AdminPpobController;
+use App\Http\Controllers\Admin\GameTopupController as AdminGameTopupController;
+use App\Http\Controllers\Pelanggan\GameTopupController as PelangganGameTopupController;
 use App\Http\Controllers\TopupController;
 
 // Authentication Routes (public)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+Route::get('/register', [LoginController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [LoginController::class, 'register'])->name('register.submit');
 Route::match(['get','post'], '/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Katalog publik (tidak perlu login)
@@ -123,6 +127,13 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::get('/riwayat', [TopupController::class, 'pelangganIndex'])->name('index');
     });
 
+    // Game Top-Up Pelanggan
+    Route::prefix('game')->name('pelanggan.game-topup.')->group(function () {
+        Route::get('/', [PelangganGameTopupController::class, 'landing'])->name('landing');
+        Route::post('/checkout', [PelangganGameTopupController::class, 'checkout'])->name('checkout');
+        Route::get('/{kategori:kode}', [PelangganGameTopupController::class, 'show'])->name('show');
+    });
+
     // Service Orders
     Route::prefix('service')->name('pelanggan.service.')->middleware(['profil.lengkap'])->group(function () {
         Route::get('/', [PelangganServiceController::class, 'index'])->name('index');
@@ -145,6 +156,8 @@ Route::middleware('auth:pelanggan')->group(function () {
 // Mitra Auth Routes
 Route::get('/mitra/login', [MitraLoginController::class, 'showLoginForm'])->name('mitra.login');
 Route::post('/mitra/login', [MitraLoginController::class, 'login'])->name('mitra.login.submit');
+Route::get('/mitra/register', [MitraLoginController::class, 'showRegisterForm'])->name('mitra.register');
+Route::post('/mitra/register', [MitraLoginController::class, 'register'])->name('mitra.register.submit');
 Route::match(['get','post'], '/mitra/logout', [MitraLoginController::class, 'logout'])->name('mitra.logout');
 
 // Mitra Dashboard Routes (butuh login mitra)
@@ -288,6 +301,15 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::prefix('ppob')->name('admin.ppob.')->group(function () {
         Route::get('/', [AdminPpobController::class, 'index'])->name('index');
         Route::get('/{trx}', [AdminPpobController::class, 'show'])->name('show');
+    });
+
+    // Game Top-Up Admin
+    Route::prefix('game-topup')->name('admin.game-topup.')->group(function () {
+        Route::get('/', [AdminGameTopupController::class, 'index'])->name('index');
+        Route::get('/import', [AdminGameTopupController::class, 'importForm'])->name('import');
+        Route::post('/import', [AdminGameTopupController::class, 'importProduk'])->name('import.store');
+        Route::post('/sync', [AdminGameTopupController::class, 'syncHarga'])->name('sync');
+        Route::delete('/kategori/{kategori}', [AdminGameTopupController::class, 'destroyKategori'])->name('kategori.destroy');
     });
     Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
 
