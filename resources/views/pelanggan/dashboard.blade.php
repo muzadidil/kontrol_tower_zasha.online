@@ -11,8 +11,13 @@
                 <span class="id-badge shadow-sm allow-select">{{ $user->kode_zasha }}</span>
             </div>
         </div>
-        <a href="{{ route('pelanggan.notifikasi') }}" class="btn btn-white shadow-sm rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white;">
+        <a href="{{ route('pelanggan.notifikasi') }}" class="btn btn-white shadow-sm rounded-circle p-2 position-relative" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white;">
             <i class="bi bi-bell fs-5 text-dark"></i>
+            @if(!empty($unread_notif) && $unread_notif > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.55rem; padding:3px 5px;">
+                    {{ $unread_notif > 9 ? '9+' : $unread_notif }}
+                </span>
+            @endif
         </a>
     </div>
 

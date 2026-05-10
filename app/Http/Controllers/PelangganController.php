@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\NotifHelper;
 
 class PelangganController extends Controller
 {
@@ -12,9 +13,10 @@ class PelangganController extends Controller
         $user = auth('pelanggan')->user();
         if (!$user) return redirect()->route('login');
 
-        $categories = DB::table('kategori_pekerjaan')->orderBy('nama_kategori')->get();
+        $categories   = DB::table('kategori_pekerjaan')->orderBy('nama_kategori')->get();
+        $unread_notif = NotifHelper::unreadCount($user->id_pelanggan);
 
-        return view('pelanggan.dashboard', compact('user', 'categories'));
+        return view('pelanggan.dashboard', compact('user', 'categories', 'unread_notif'));
     }
 
     public function dompet()
@@ -31,12 +33,22 @@ class PelangganController extends Controller
             'nominal' => 'required|numeric|min:10000|max:10000000',
         ]);
 
+        $id_p = auth('pelanggan')->id();
+
         DB::table('dompet_pelanggan')->insert([
-            'id_pelanggan'  => auth('pelanggan')->id(),
+            'id_pelanggan'  => $id_p,
             'nominal'       => $request->nominal,
             'status'        => 'pending',
             'waktu_request' => now(),
         ]);
+
+        NotifHelper::kirim(
+            $id_p,
+            'Request Top-Up Diterima',
+            'Request top-up sebesar Rp ' . number_format($request->nominal, 0, ',', '.') . ' sedang diproses. Silakan transfer sesuai nominal.',
+            'topup',
+            route('pelanggan.dompet')
+        );
 
         return back()->with('success', 'Request topup Rp ' . number_format($request->nominal, 0, ',', '.') . ' berhasil. Silakan transfer sesuai nominal.');
     }
@@ -194,6 +206,28 @@ class PelangganController extends Controller
             'status_pesanan'  => 'Pending',
         ]);
 
+        NotifHelper::kirim(
+            $id_pelanggan,
+            'Pesanan Berhasil Dibuat',
+            'Pesanan #' . $id_pesanan . ' ke mitra ' . $mitra->nama_panggilan . ' telah dibuat dan sedang menunggu konfirmasi.',
+            'pesanan',
+            route('pelanggan.riwayat.index')
+        );
+
         return redirect()->route('pelanggan.invoice', $id_pesanan);
+    }
+
+    public function notifikasi()
+    {
+        $id_p = auth('pelanggan')->id();
+
+        $notifikasi = DB::table('notifikasi')
+            ->where('id_pelanggan', $id_p)
+            ->orderByDesc('created_at')
+            ->get();
+
+        NotifHelper::tandaiSemuaDibaca($id_p);
+
+        return view('pelanggan.notifikasi', compact('notifikasi'));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\NotifHelper;
 
 class RiwayatController extends Controller
 {
@@ -74,6 +75,24 @@ class RiwayatController extends Controller
                     ->where('id_pesanan', $id_o)
                     ->where('id_pelanggan', $id_pelanggan)
                     ->update(['status_pesanan' => $status_baru]);
+
+                if ($status_baru === 'Selesai') {
+                    NotifHelper::kirim(
+                        $id_pelanggan,
+                        'Pesanan Selesai!',
+                        'Pesanan #' . $id_o . ' telah selesai. Jangan lupa berikan ulasan untuk mitra.',
+                        'pesanan',
+                        route('pelanggan.riwayat.index')
+                    );
+                } elseif ($status_baru === 'Batal') {
+                    NotifHelper::kirim(
+                        $id_pelanggan,
+                        'Pesanan Dibatalkan',
+                        'Pesanan #' . $id_o . ' telah dibatalkan.',
+                        'info',
+                        route('pelanggan.riwayat.index')
+                    );
+                }
             }
         }
 

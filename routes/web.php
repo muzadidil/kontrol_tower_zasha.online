@@ -35,7 +35,7 @@ Route::get('/katalog/{id_kategori}', [PelangganController::class, 'katalog'])->n
 // Pelanggan Routes (butuh login)
 Route::middleware('auth:pelanggan')->group(function () {
     Route::get('/', [PelangganController::class, 'index'])->name('pelanggan.dashboard');
-    Route::get('/notifikasi', function () { return "Halaman Notifikasi"; })->name('pelanggan.notifikasi');
+    Route::get('/notifikasi', [PelangganController::class, 'notifikasi'])->name('pelanggan.notifikasi');
     Route::get('/pesanan', function () { return redirect()->route('pelanggan.riwayat.index'); })->name('pelanggan.pesanan');
     Route::get('/profil', [ProfilController::class, 'index'])->name('pelanggan.profil');
     Route::post('/profil/update', [ProfilController::class, 'updateProfil'])->name('pelanggan.profil.update');
