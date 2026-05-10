@@ -78,7 +78,7 @@
     </div>
 
     {{-- Menu Tiles (2x2 grid, fibonacci radius) --}}
-    <div>
+    <div style="margin-bottom: var(--fib-7);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
             <h6 class="label-up mb-0">Fitur</h6>
             <span class="t-xs" style="color: var(--ink-soft);">{{ count([1,2,3,4]) }} menu</span>
