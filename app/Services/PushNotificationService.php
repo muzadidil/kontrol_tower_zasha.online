@@ -18,20 +18,32 @@ class PushNotificationService
         $privateKey = Setting::get('vapid_private_key');
 
         if (!$publicKey || !$privateKey) {
-            Log::warning('VAPID keys not configured. Run: php artisan web-push:generate-keys');
+            Log::warning('VAPID keys not configured. Web push will not work. Run: php artisan web-push:generate-keys or see https://web-push-codelab.glitch.me/');
+            $this->webPush = null;
+            return;
         }
 
-        $this->webPush = new WebPush([
-            'VAPID' => [
-                'subject' => 'mailto:' . config('app.name'),
-                'publicKey' => $publicKey,
-                'privateKey' => $privateKey,
-            ],
-        ]);
+        try {
+            $this->webPush = new WebPush([
+                'VAPID' => [
+                    'subject' => 'mailto:' . config('app.name'),
+                    'publicKey' => $publicKey,
+                    'privateKey' => $privateKey,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to initialize WebPush', ['error' => $e->getMessage()]);
+            $this->webPush = null;
+        }
     }
 
     public function sendToMitra(int $mitraId, string $title, string $body, string $url = '', string $tag = 'zasha-notification')
     {
+        if (!$this->webPush) {
+            Log::warning('WebPush not configured. Skipping push notification for mitra ' . $mitraId);
+            return 0;
+        }
+
         $subscriptions = PushSubscription::where('user_type', 'mitra')
             ->where('user_id', $mitraId)
             ->get();
@@ -84,6 +96,11 @@ class PushNotificationService
 
     public function sendToPelanggan(int $pelangganId, string $title, string $body, string $url = '', string $tag = 'zasha-notification')
     {
+        if (!$this->webPush) {
+            Log::warning('WebPush not configured. Skipping push notification for pelanggan ' . $pelangganId);
+            return 0;
+        }
+
         $subscriptions = PushSubscription::where('user_type', 'pelanggan')
             ->where('user_id', $pelangganId)
             ->get();
