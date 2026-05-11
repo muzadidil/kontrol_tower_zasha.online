@@ -648,6 +648,73 @@
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ─── Push Notification Setup ───
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+        console.log('Service Worker registered:', registration);
+    }).catch(err => {
+        console.error('Service Worker registration failed:', err);
+    });
+}
+
+async function setupPushNotifications() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('Push notifications not supported');
+        return;
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        console.log('Notification permission:', permission);
+
+        if (permission !== 'granted') {
+            return;
+        }
+
+        const registration = await navigator.serviceWorker.ready;
+        const publicKeyResp = await fetch('/push/public-key');
+        const { public_key } = await publicKeyResp.json();
+
+        if (!public_key) {
+            console.error('Public key not configured. Run: php artisan web-push:generate-keys');
+            return;
+        }
+
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: public_key
+        });
+
+        const subscribeResp = await fetch('/push/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+            body: JSON.stringify({
+                endpoint: subscription.endpoint,
+                p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
+                auth_key: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))),
+                user_type: 'mitra'
+            })
+        });
+
+        if (subscribeResp.ok) {
+            console.log('Push notification subscribed successfully');
+        } else {
+            console.error('Failed to subscribe:', await subscribeResp.json());
+        }
+    } catch (error) {
+        console.error('Push notification setup error:', error);
+    }
+}
+
+// Setup push notifications on page load
+window.addEventListener('load', setupPushNotifications);
+</script>
+
 @stack('scripts')
 </body>
 </html>

@@ -44,6 +44,7 @@ use App\Http\Controllers\Admin\GameTopupController as AdminGameTopupController;
 use App\Http\Controllers\Pelanggan\GameTopupController as PelangganGameTopupController;
 use App\Http\Controllers\Pelanggan\PelangganPpobController;
 use App\Http\Controllers\TopupController;
+use App\Http\Controllers\PushNotificationController;
 
 // Authentication Routes (public)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -244,6 +245,11 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{serviceOrder}/selesai-kerja', [MitraServiceController::class, 'selesaiKerja'])->name('selesai-kerja');
     });
 });
+
+// Push Notification Routes
+Route::post('/push/subscribe', [PushNotificationController::class, 'subscribe'])->name('push.subscribe');
+Route::post('/push/unsubscribe', [PushNotificationController::class, 'unsubscribe'])->name('push.unsubscribe');
+Route::get('/push/public-key', [PushNotificationController::class, 'getPublicKey'])->name('push.public-key');
 
 // Admin Auth Routes (public)
 Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');

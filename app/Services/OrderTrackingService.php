@@ -7,6 +7,7 @@ use App\Models\MitraNotifikasi;
 use App\Models\Mitra;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\PushNotificationService;
 
 class OrderTrackingService
 {
@@ -34,13 +35,29 @@ class OrderTrackingService
                     'escrow_status' => 'held',
                 ]);
 
-                MitraNotifikasi::create([
+                $notif = MitraNotifikasi::create([
                     'mitra_id' => $mitraId,
                     'tracking_id' => $tracking->id,
                     'tipe' => 'order_masuk',
                     'judul' => "Order baru: {$orderType}",
                     'pesan' => "Anda menerima order baru type {$orderType} senilai Rp " . number_format($hargaJual, 0, ',', '.'),
                 ]);
+
+                // Send push notification
+                try {
+                    $pushService = new PushNotificationService();
+                    $pushService->sendToMitra(
+                        $mitraId,
+                        "Order Masuk! 🔔",
+                        "Ada pesanan baru dari pelanggan. Buka untuk melihat detail.",
+                        route('mitra.dashboard'),
+                        'order-masuk'
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Push notification failed for order ' . $tracking->id, [
+                        'error' => $e->getMessage(),
+                    ]);
+                }
 
                 return $tracking;
             });
