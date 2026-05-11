@@ -348,9 +348,9 @@ async function pollPendingOrder() {
         const resp = await fetch('{{ route("mitra.api.pending-order") }}');
         const data = await resp.json();
 
-        if (data.success && data.data) {
-            currentOrderId = data.data.id;
-            showIncomingOrder(data.data);
+        if (data.order) {
+            currentOrderId = data.order.id;
+            showIncomingOrder(data.order);
         }
     } catch (e) {
         console.error('Polling error:', e);
@@ -525,6 +525,7 @@ window.addEventListener('load', function() {
     if (isOnline) {
         startPolling();
     }
+    console.log('Dashboard initialized. Polling status:', isOnline ? 'active' : 'inactive');
 });
 </script>
 @endpush

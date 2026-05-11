@@ -63,14 +63,12 @@ class MitraOrderController extends Controller
 
         if (!$pending) {
             return response()->json([
-                'success' => true,
-                'data' => null,
+                'order' => null,
             ]);
         }
 
         return response()->json([
-            'success' => true,
-            'data' => [
+            'order' => [
                 'id' => $pending->id,
                 'order_type' => $pending->order_type,
                 'order_id' => $pending->order_id,
