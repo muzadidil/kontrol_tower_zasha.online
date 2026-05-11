@@ -5,23 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Mitra;
 use App\Models\WalletTransfer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class WalletTransferController extends Controller
 {
     public function transfer(Request $request)
     {
         $request->validate([
-            'receiver_id' => 'required|exists:mitras,id',
-            'amount' => 'required|numeric|min:1',
+            'receiver_id' => 'required|integer|exists:mitra,id_mitra',
+            'amount'      => 'required|numeric|min:1',
+            'description' => 'nullable|string|max:255',
         ]);
 
-        $sender = Mitra::where('id', auth()->user()->mitra_id)->first();
-        if (!$sender) {
+        $sender = Auth::guard('mitra')->user();
+        if (! $sender) {
             return back()->with('error', 'Anda bukan Mitra.');
         }
 
-        if ($sender->id === $request->receiver_id) {
+        if ((int) $sender->id_mitra === (int) $request->receiver_id) {
             return back()->with('error', 'Tidak bisa transfer ke diri sendiri.');
         }
 
@@ -29,25 +32,38 @@ class WalletTransferController extends Controller
             return back()->with('error', 'Saldo tidak mencukupi.');
         }
 
-        DB::beginTransaction();
         try {
-            $receiver = Mitra::findOrFail($request->receiver_id);
+            DB::transaction(function () use ($sender, $request) {
+                $receiver = Mitra::lockForUpdate()->findOrFail($request->receiver_id);
+                $senderLocked = Mitra::lockForUpdate()->findOrFail($sender->id_mitra);
 
-            $sender->decrement('saldo', $request->amount);
-            $receiver->increment('saldo', $request->amount);
+                if ($senderLocked->saldo < $request->amount) {
+                    throw new \RuntimeException('Saldo tidak mencukupi.');
+                }
 
-            WalletTransfer::create([
-                'sender_mitra_id' => $sender->id,
-                'receiver_mitra_id' => $receiver->id,
-                'amount' => $request->amount,
-                'description' => $request->description,
-            ]);
+                $senderLocked->decrement('saldo', $request->amount);
+                $receiver->increment('saldo', $request->amount);
 
-            DB::commit();
+                WalletTransfer::create([
+                    'dari_mitra_id' => $senderLocked->id_mitra,
+                    'ke_mitra_id'   => $receiver->id_mitra,
+                    'jumlah'        => $request->amount,
+                    'catatan'       => $request->description,
+                    'status'        => 'berhasil',
+                ]);
+            });
+
             return back()->with('success', 'Transfer berhasil.');
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
         } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('Wallet transfer error', [
+                'message'     => $e->getMessage(),
+                'sender_id'   => $sender->id_mitra,
+                'receiver_id' => $request->receiver_id,
+                'amount'      => $request->amount,
+            ]);
+            return back()->with('error', 'Terjadi kesalahan saat memproses transfer.');
         }
     }
 }
