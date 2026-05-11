@@ -23,7 +23,9 @@ use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\Auth\MitraLoginController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Mitra\MitraDashboardController;
+use App\Http\Controllers\Mitra\MitraOrderController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
 use App\Http\Controllers\Mitra\WfhController as MitraWfhController;
 use App\Http\Controllers\Admin\WfhController as AdminWfhController;
@@ -158,6 +160,11 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::get('/update-status', [RiwayatController::class, 'updateStatus'])->name('update');
         Route::post('/ulasan', [RiwayatController::class, 'kirimUlasan'])->name('ulasan');
     });
+
+    // Order Tracking
+    Route::get('/order-tracking/{tracking}', [PelangganOrderTrackingController::class, 'trackOrder'])->name('order-tracking');
+    Route::post('/order-tracking/selesai', [PelangganOrderTrackingController::class, 'confirmSelesai'])->name('order-tracking.selesai');
+    Route::post('/order-tracking/belum-selesai', [PelangganOrderTrackingController::class, 'belumSelesai'])->name('order-tracking.belum-selesai');
 });
 
 // Mitra Auth Routes
@@ -171,6 +178,16 @@ Route::match(['get','post'], '/mitra/logout', [MitraLoginController::class, 'log
 Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/dashboard', [MitraDashboardController::class, 'dashboard'])->name('dashboard');
     Route::post('/toggle-status', [MitraDashboardController::class, 'toggleStatus'])->name('toggle-status');
+
+    // Order Tracking API (polling untuk notifikasi)
+    Route::get('/api/notifikasi', [MitraOrderController::class, 'getNotifikasi'])->name('api.notifikasi');
+    Route::get('/api/pending-order', [MitraOrderController::class, 'getPendingOrder'])->name('api.pending-order');
+
+    // Order Management
+    Route::post('/order/accept', [MitraOrderController::class, 'acceptOrder'])->name('order.accept');
+    Route::post('/order/reject', [MitraOrderController::class, 'rejectOrder'])->name('order.reject');
+    Route::post('/order/progress', [MitraOrderController::class, 'updateProgress'])->name('order.progress');
+
     Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])->name('pesanan');
     Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
     Route::post('/saldo/topup', [MitraDashboardController::class, 'topup'])->name('saldo.topup');
