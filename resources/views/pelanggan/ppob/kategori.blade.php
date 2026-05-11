@@ -43,7 +43,7 @@
             <div style="font-size: 13px; font-weight: 700;">Belum ada produk</div>
             <div style="font-size: 11px; margin-top: 8px;">Kategori {{ $judul }} sedang tidak tersedia.</div>
         </div>
-    @endforelse
+    @endempty
 </div>
 
 @endsection

@@ -89,7 +89,7 @@
                             color: var(--text-muted); font-size: 13px;">
                     Belum ada produk tersedia.
                 </div>
-            @endforelse
+            @endempty
         </div>
     </div>
 
