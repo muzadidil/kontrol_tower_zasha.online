@@ -40,6 +40,7 @@ use App\Http\Controllers\Pelanggan\PpobController as PelangganPpobNewController;
 use App\Http\Controllers\Admin\PpobController as AdminPpobController;
 use App\Http\Controllers\Admin\GameTopupController as AdminGameTopupController;
 use App\Http\Controllers\Pelanggan\GameTopupController as PelangganGameTopupController;
+use App\Http\Controllers\Pelanggan\PelangganPpobController;
 use App\Http\Controllers\TopupController;
 
 // Authentication Routes (public)
@@ -118,6 +119,14 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::get('/beli', [PelangganPpobNewController::class, 'form'])->name('form');
         Route::post('/transaksi', [PelangganPpobNewController::class, 'transaksi'])->name('transaksi');
         Route::get('/{trx}', [PelangganPpobNewController::class, 'show'])->name('show');
+        // New routes untuk kategori, produk, checkout
+        Route::get('/{tipe}', [PelangganPpobController::class, 'kategori'])
+            ->name('kategori')
+            ->where('tipe', 'pulsa|token|game|ewallet');
+        Route::get('/produk/{kategori:kode}', [PelangganPpobController::class, 'produk'])
+            ->name('produk');
+        Route::post('/checkout', [PelangganPpobController::class, 'checkout'])
+            ->name('checkout');
     });
 
     // Topup pelanggan (Tokopay)

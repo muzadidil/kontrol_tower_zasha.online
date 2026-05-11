@@ -117,6 +117,53 @@
     </div>
 </div>
 
+{{-- ── PPOB SECTION ──────────────────────────── --}}
+<div style="padding: 0 21px;">
+    <div class="divider-label">Isi & Bayar</div>
+    <div class="row row-cols-4 g-2">
+        <div class="col">
+            <a href="{{ $user->is_verif == 0 ? '#' : route('pelanggan.ppob.kategori', 'pulsa') }}"
+               class="menu-btn {{ $user->is_verif == 0 ? 'locked' : '' }}"
+               {!! $user->is_verif == 0 ? "onclick='bukaModalLocked(); return false;'" : '' !!}>
+                <div class="menu-icon-wrap" style="background:#dbeafe;">
+                    <i class="bi bi-phone-fill" style="color:#3b82f6;"></i>
+                </div>
+                <span style="color:var(--text-main);font-size:9px;line-height:1.3;">Pulsa</span>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{{ $user->is_verif == 0 ? '#' : route('pelanggan.ppob.kategori', 'token') }}"
+               class="menu-btn {{ $user->is_verif == 0 ? 'locked' : '' }}"
+               {!! $user->is_verif == 0 ? "onclick='bukaModalLocked(); return false;'" : '' !!}>
+                <div class="menu-icon-wrap" style="background:#fef3c7;">
+                    <i class="bi bi-lightning-fill" style="color:#f0a500;"></i>
+                </div>
+                <span style="color:var(--text-main);font-size:9px;line-height:1.3;">Token</span>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{{ $user->is_verif == 0 ? '#' : route('pelanggan.ppob.kategori', 'game') }}"
+               class="menu-btn {{ $user->is_verif == 0 ? 'locked' : '' }}"
+               {!! $user->is_verif == 0 ? "onclick='bukaModalLocked(); return false;'" : '' !!}>
+                <div class="menu-icon-wrap" style="background:#d1fae5;">
+                    <i class="bi bi-controller" style="color:#10b981;"></i>
+                </div>
+                <span style="color:var(--text-main);font-size:9px;line-height:1.3;">Game</span>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{{ $user->is_verif == 0 ? '#' : route('pelanggan.ppob.kategori', 'ewallet') }}"
+               class="menu-btn {{ $user->is_verif == 0 ? 'locked' : '' }}"
+               {!! $user->is_verif == 0 ? "onclick='bukaModalLocked(); return false;'" : '' !!}>
+                <div class="menu-icon-wrap" style="background:#e0f7fa;">
+                    <i class="bi bi-wallet2" style="color:#00b4d8;"></i>
+                </div>
+                <span style="color:var(--text-main);font-size:9px;line-height:1.3;">E-Money</span>
+            </a>
+        </div>
+    </div>
+</div>
+
 {{-- ── PROMO BANNER ────────────────────────────── --}}
 <div style="padding: 0 21px 34px;">
     <div style="background:linear-gradient(135deg,#002d72,#0047b3,#005dd6);
