@@ -42,28 +42,40 @@
 <div class="container px-3">
     @forelse($mitras as $m)
         @php
-            $is_online = ($is_jastip ? $m->status_mitra == 'aktif' : $m->status_mitra == 'aktif');
+            $is_online = ($m->status_online === 'online');
+            $is_sibuk = ($m->status_online === 'sibuk');
             $url_foto = !empty($m->foto_mitra) ? asset('img/'.$m->foto_mitra) : 'https://ui-avatars.com/api/?name='.urlencode($m->nama_mitra).'&background=002d72&color=fff';
             $target_url = $is_jastip ? route('pelanggan.detail.jastip', $m->id_mitra) : route('pelanggan.detail.mitra', $m->id_mitra);
         @endphp
-        
-        <a @if($is_online) href="{{ $target_url }}" @else onclick="bukaModalOffline('{{ $is_jastip ? 'Driver' : 'Mitra' }}')" @endif 
-           class="card-mitra p-3 {{ $is_online ? '' : 'mitra-offline' }}" style="cursor:pointer;">
+
+        <a @if($is_online) href="{{ $target_url }}" @else onclick="bukaModalOffline('{{ $is_jastip ? 'Driver' : 'Mitra' }}')" @endif
+           class="card-mitra p-3 {{ $is_online ? '' : 'mitra-offline' }}"
+           style="cursor:pointer; {{ $is_sibuk ? 'border: 2px solid #7c3aed; background: #f5f3ff;' : '' }}">
             <div class="d-flex align-items-center">
                 <div class="img-wrapper me-3">
                     <img src="{{ $url_foto }}" class="img-mitra shadow-sm">
                     <span class="badge-jarak shadow-sm">{{ number_format($m->jarak, 1, ',', '.') }} km</span>
                 </div>
-                
+
                 <div class="flex-grow-1 w-100 overflow-hidden">
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <h6 class="fw-bold m-0 text-truncate pe-2" style="font-size: 0.95rem;">
-                            {{ $m->nama_mitra }} 
+                            {{ $m->nama_mitra }}
                             @if($is_online)<i class="bi bi-patch-check-fill verified-check ms-1"></i>@endif
                         </h6>
-                        <span class="status-badge bg-{{ $is_online ? 'success' : 'secondary' }} text-white shadow-sm mt-1">
-                            {{ $is_online ? 'Online' : 'Offline' }}
-                        </span>
+                        @if($is_online)
+                            <span class="status-badge bg-success text-white shadow-sm mt-1">
+                                Online
+                            </span>
+                        @elseif($is_sibuk)
+                            <span class="status-badge" style="background: #ede9fe; color: #7c3aed; font-size: 0.55rem; padding: 3px 8px; border-radius: 50px; font-weight: 800;">
+                                Sedang Bekerja
+                            </span>
+                        @else
+                            <span class="status-badge bg-secondary text-white shadow-sm mt-1">
+                                Offline
+                            </span>
+                        @endif
                     </div>
                     
                     <div class="d-flex align-items-center mb-2" style="font-size: 0.7rem;">

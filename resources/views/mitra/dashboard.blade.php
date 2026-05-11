@@ -20,7 +20,7 @@
     </div>
 
     {{-- Status Online/Offline Toggle --}}
-    <div class="card-custom" style="padding: var(--fib-3); display: flex; align-items: center; justify-content: space-between;">
+    <div id="status-card" class="card-custom" style="padding: var(--fib-3); display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
             <div class="label-up" style="margin-bottom: 2px;">Status Kamu</div>
             <div id="status-label" style="font-size: var(--t-xs); font-weight: 700; margin-top: var(--fib-1);"
@@ -161,6 +161,7 @@
 document.getElementById('toggleStatus').addEventListener('change', async function() {
     const isOnline = this.checked;
     const label = document.getElementById('status-label');
+    const body = document.body;
 
     try {
         const response = await fetch('{{ route("mitra.toggle-status") }}', {
@@ -177,9 +178,11 @@ document.getElementById('toggleStatus').addEventListener('change', async functio
 
         if (data.success) {
             if (isOnline) {
+                body.classList.remove('mitra-offline');
                 label.className = 'text-success';
                 label.textContent = '🟢 Online — Siap terima order';
             } else {
+                body.classList.add('mitra-offline');
                 label.className = 'text-secondary';
                 label.textContent = '⚫ Offline — Tidak menerima order';
             }

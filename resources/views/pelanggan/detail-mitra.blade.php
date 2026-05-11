@@ -51,8 +51,10 @@
             <span class="text-muted small ms-1">({{ $total_order }} order)</span>
         </div>
         <div>
-            @if(strtolower($mitra->status_mitra ?? '') == 'aktif')
+            @if($mitra->status_online === 'online')
                 <span class="badge bg-success">Online</span>
+            @elseif($mitra->status_online === 'sibuk')
+                <span class="badge" style="background: #ede9fe; color: #7c3aed;">Sedang Bekerja</span>
             @else
                 <span class="badge bg-secondary">Offline</span>
             @endif
@@ -116,10 +118,14 @@
 
 {{-- Sticky Order Button --}}
 <div class="sticky-order shadow-lg">
-    @if(strtolower($mitra->status_mitra ?? '') == 'aktif')
+    @if($mitra->status_online === 'online')
         <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold py-3 shadow"
                 data-bs-toggle="modal" data-bs-target="#modalPesan">
             <i class="bi bi-bag-plus-fill me-2"></i>PESAN SEKARANG
+        </button>
+    @elseif($mitra->status_online === 'sibuk')
+        <button class="btn btn-secondary w-100 rounded-pill fw-bold py-3" disabled>
+            Mitra Sedang Bekerja
         </button>
     @else
         <button class="btn btn-secondary w-100 rounded-pill fw-bold py-3" disabled>

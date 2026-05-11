@@ -400,11 +400,71 @@
             background: linear-gradient(90deg, var(--mitra-green), var(--mitra-gold));
             border-radius: 0 0 var(--fib-1) var(--fib-1);
         }
+
+        /* ─── Dark Mode saat offline ─── */
+        body.mitra-offline {
+            background-color: #0f172a;
+        }
+        body.mitra-offline .app-container {
+            background: #0f172a;
+        }
+        body.mitra-offline .z-card {
+            background: #1e293b;
+            color: #cbd5e1 !important;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+        }
+        body.mitra-offline .z-card * {
+            color: #cbd5e1 !important;
+        }
+        body.mitra-offline .card-custom {
+            background: #1e293b;
+            color: #cbd5e1;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+        }
+        body.mitra-offline .card-custom * {
+            color: #cbd5e1 !important;
+        }
+        body.mitra-offline .hero-mitra {
+            background: linear-gradient(135deg, #1e293b, #334155) !important;
+        }
+        body.mitra-offline .hero-mitra .hero-content {
+            color: #cbd5e1;
+        }
+        body.mitra-offline .label-up {
+            color: #64748b !important;
+        }
+        body.mitra-offline .nav-bottom {
+            background: #1e293b;
+            border-top-color: #334155;
+        }
+        body.mitra-offline .nav-link-custom {
+            color: #475569;
+        }
+        body.mitra-offline .nav-link-custom.active {
+            color: #94a3b8;
+        }
+        body.mitra-offline #status-label {
+            color: #cbd5e1 !important;
+        }
+        body.mitra-offline #status-card {
+            background: linear-gradient(135deg, #1e293b, #334155) !important;
+            border: 1px solid #475569;
+        }
+
+        /* Smooth transitions */
+        body, .app-container, .z-card, .card-custom, .hero-mitra, .nav-bottom {
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        body.mitra-offline .z-card,
+        body.mitra-offline .card-custom,
+        body.mitra-offline .hero-mitra {
+            transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+        }
     </style>
 
     @stack('styles')
 </head>
-<body>
+<body class="{{ Auth::guard('mitra')->user() && Auth::guard('mitra')->user()->status_online !== 'online' ? 'mitra-offline' : '' }}">
 <div class="app-container">
     @yield('content')
 </div>

@@ -121,6 +121,7 @@ class PelangganController extends Controller
                 'm.nama_panggilan as nama_mitra',
                 'm.foto_mitra',
                 'm.status_mitra',
+                'm.status_online',
                 DB::raw('COALESCE(m.tarif_per_jam, 0) as tarif_per_jam'),
                 DB::raw('0 as jarak'),
                 DB::raw('COALESCE(k.satuan, "Jam") as satuan_tarif'),
@@ -128,7 +129,7 @@ class PelangganController extends Controller
                 DB::raw('COUNT(pm.id_pesanan) as total_order')
             )
             ->where('m.id_kategori', $id_kategori)
-            ->groupBy('m.id_mitra', 'm.nama_panggilan', 'm.foto_mitra', 'm.status_mitra', 'm.tarif_per_jam', 'k.satuan');
+            ->groupBy('m.id_mitra', 'm.nama_panggilan', 'm.foto_mitra', 'm.status_mitra', 'm.status_online', 'm.tarif_per_jam', 'k.satuan');
 
         if ($sort == 'orderan') {
             $query->orderByDesc('total_order');
@@ -234,6 +235,15 @@ class PelangganController extends Controller
 
         if (! $mitra) {
             return back()->with('error', 'Mitra tidak ditemukan.');
+        }
+
+        if ($mitra->status_online !== 'online') {
+            $msg = match($mitra->status_online) {
+                'offline' => 'Mitra sedang offline dan tidak menerima order.',
+                'sibuk' => 'Mitra sedang dalam pengerjaan order lain.',
+                default => 'Mitra tidak tersedia saat ini.',
+            };
+            return back()->with('error', $msg);
         }
 
         if ($request->input('tipe') === 'jastip') {
