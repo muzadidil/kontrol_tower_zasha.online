@@ -213,7 +213,8 @@
 {{-- Incoming Order Popup --}}
 <div id="incoming-order" style="display: none; position: fixed; inset: 0; z-index: 9999;
      background: linear-gradient(180deg, #002d72 0%, #001d4d 100%);
-     display: flex; flex-direction: column; align-items: center; justify-content: center;">
+     display: flex; flex-direction: column; align-items: center; justify-content: center;
+     left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;">
 
     <div style="text-align: center; margin-bottom: var(--fib-5);">
         <div style="width: 89px; height: 89px; border-radius: 50%; background: rgba(240, 165, 0, 0.2);
@@ -232,20 +233,38 @@
         </div>
     </div>
 
-    <div style="width: 100%; max-width: 340px; padding: 0 var(--fib-4);">
-        <button id="btn-tolak" onclick="showRejectOptions()"
-                style="width: 100%; padding: var(--fib-4); border-radius: var(--r-lg); border: 2px solid rgba(239, 68, 68, 0.5);
-                       background: rgba(239, 68, 68, 0.15); color: #fca5a5; font-size: var(--t-sm); font-weight: 800;
-                       margin-bottom: var(--fib-3); cursor: pointer; transition: all 0.2s ease;">
-            <i class="bi bi-x-circle me-2"></i>Tolak Order
-        </button>
+    <div style="width: 100%; max-width: 340px; padding: 0 var(--fib-4); position: relative;">
+        <!-- Slide-to-action track -->
+        <div style="position: relative; height: 64px; border-radius: 34px;
+                    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+                    display: flex; align-items: center; justify-content: space-between;
+                    padding: 0 var(--fib-3); overflow: hidden;">
 
-        <button id="btn-terima" onclick="acceptOrder()"
-                style="width: 100%; padding: var(--fib-4); border-radius: var(--r-lg); border: none;
-                       background: linear-gradient(135deg, #10b981, #059669); color: white;
-                       font-size: var(--t-base); font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
-            <i class="bi bi-check-circle-fill me-2"></i>Terima Order
-        </button>
+            <!-- Label: Tolak (left) -->
+            <div style="font-size: var(--t-xxs); font-weight: 800; color: #fca5a5; z-index: 1;">
+                <i class="bi bi-x-circle"></i> Tolak
+            </div>
+
+            <!-- Slider thumb (draggable) -->
+            <div id="slider-thumb"
+                 style="position: absolute; left: 50%; transform: translateX(-50%);
+                        width: 64px; height: 48px; border-radius: 24px;
+                        background: white; cursor: grab; z-index: 2;
+                        display: flex; align-items: center; justify-content: center;
+                        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+                        touch-action: none; user-select: none; transition: none;">
+                <i class="bi bi-grip-vertical" style="color: #64748b; font-size: 21px;"></i>
+            </div>
+
+            <!-- Label: Terima (right) -->
+            <div style="font-size: var(--t-xxs); font-weight: 800; color: #6ee7b7; z-index: 1;">
+                Terima <i class="bi bi-check-circle"></i>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: var(--fib-2); font-size: var(--t-xxs); color: rgba(255,255,255,0.5);">
+            Geser untuk terima atau tolak
+        </div>
     </div>
 </div>
 
@@ -286,184 +305,70 @@
 
 @push('scripts')
 <script>
-let pollingInterval = null;
-let currentOrderId = null;
+// Status Toggle - only on dashboard
+const toggleEl = document.getElementById('toggleStatus');
+if (toggleEl) {
+    toggleEl.addEventListener('change', async function() {
+        const isOnline = this.checked;
+        const label = document.getElementById('status-label');
+        const body = document.body;
 
-// ─ Status Toggle ─
-document.getElementById('toggleStatus').addEventListener('change', async function() {
-    const isOnline = this.checked;
-    const label = document.getElementById('status-label');
-    const body = document.body;
+        try {
+            const response = await fetch('{{ route("mitra.toggle-status") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ status: isOnline ? 'online' : 'offline' })
+            });
 
-    try {
-        const response = await fetch('{{ route("mitra.toggle-status") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({ status: isOnline ? 'online' : 'offline' })
-        });
+            const data = await response.json();
 
-        const data = await response.json();
-
-        if (data.success) {
-            if (isOnline) {
-                body.classList.remove('mitra-offline');
-                label.className = 'text-success';
-                label.textContent = '🟢 Online — Siap terima order';
-                startPolling();
+            if (data.success) {
+                if (isOnline) {
+                    body.classList.remove('mitra-offline');
+                    label.className = 'text-success';
+                    label.textContent = '🟢 Online — Siap terima order';
+                    startPolling();
+                } else {
+                    body.classList.add('mitra-offline');
+                    label.className = 'text-secondary';
+                    label.textContent = '⚫ Offline — Tidak menerima order';
+                    stopPolling();
+                }
             } else {
-                body.classList.add('mitra-offline');
-                label.className = 'text-secondary';
-                label.textContent = '⚫ Offline — Tidak menerima order';
-                stopPolling();
+                this.checked = !isOnline;
+                alert('Gagal mengubah status: ' + data.message);
             }
-        } else {
+        } catch (err) {
             this.checked = !isOnline;
-            alert('Gagal mengubah status: ' + data.message);
+            console.error('Toggle failed:', err);
+            alert('Gagal mengubah status. Coba lagi.');
         }
-    } catch (err) {
-        this.checked = !isOnline;
-        console.error('Toggle failed:', err);
-        alert('Gagal mengubah status. Coba lagi.');
-    }
-});
-
-// ─ Polling Pending Order ─
-function startPolling() {
-    console.log('Polling started');
-    pollingInterval = setInterval(pollPendingOrder, 5000);
-    pollPendingOrder(); // Check immediately
+    });
 }
 
-function stopPolling() {
-    console.log('Polling stopped');
-    if (pollingInterval) clearInterval(pollingInterval);
-}
-
-async function pollPendingOrder() {
-    try {
-        const resp = await fetch('{{ route("mitra.api.pending-order") }}');
-        const data = await resp.json();
-
-        if (data.order) {
-            currentOrderId = data.order.id;
-            showIncomingOrder(data.order);
-        }
-    } catch (e) {
-        console.error('Polling error:', e);
-    }
-}
-
-// ─ Show Incoming Order Popup ─
-function showIncomingOrder(order) {
-    currentOrderId = order.id;
-    document.getElementById('order-nama').textContent = order.pelanggan.nama;
-    document.getElementById('order-jenis').textContent = order.order_type;
-    document.getElementById('order-harga').textContent = 'Rp ' + formatCurrency(order.harga_jual);
-    document.getElementById('incoming-order').style.display = 'flex';
-    stopPolling();
-}
-
-function hideIncomingOrder() {
-    document.getElementById('incoming-order').style.display = 'none';
-    startPolling();
-}
-
-// ─ Accept Order ─
-async function acceptOrder() {
-    if (!currentOrderId) return;
-
-    try {
-        const resp = await fetch('{{ route("mitra.order.accept") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ tracking_id: currentOrderId })
-        });
-
-        const data = await resp.json();
-
-        if (data.success) {
-            hideIncomingOrder();
-            showActiveOrder(currentOrderId);
-            resetProgress();
-        } else {
-            alert(data.message);
-        }
-    } catch (e) {
-        console.error('Accept failed:', e);
-        alert('Gagal menerima order');
-    }
-}
-
-// ─ Show Reject Reason Panel ─
-function showRejectOptions() {
-    document.getElementById('reject-panel').style.display = 'block';
-}
-
-function hideRejectPanel() {
-    document.getElementById('reject-panel').style.display = 'none';
-    hideIncomingOrder();
-}
-
-// ─ Reject Order ─
-async function rejectOrder(reason) {
-    if (!reason.trim()) {
-        alert('Masukkan alasan penolakan');
-        return;
-    }
-
-    if (!currentOrderId) return;
-
-    try {
-        const resp = await fetch('{{ route("mitra.order.reject") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                tracking_id: currentOrderId,
-                pesan: reason
-            })
-        });
-
-        const data = await resp.json();
-
-        if (data.success) {
-            hideRejectPanel();
-            document.getElementById('custom-reject').value = '';
-            startPolling();
-        } else {
-            alert(data.message);
-        }
-    } catch (e) {
-        console.error('Reject failed:', e);
-        alert('Gagal menolak order');
-    }
-}
-
-// ─ Show Active Order Section ─
+// Show Active Order Section - only on dashboard
 function showActiveOrder(trackingId) {
-    document.getElementById('active-order').style.display = 'block';
-    // Scroll to active order
-    document.getElementById('active-order').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const activeOrder = document.getElementById('active-order');
+    if (activeOrder) {
+        activeOrder.style.display = 'block';
+        activeOrder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
-// ─ Reset Progress to First Step ─
+// Reset Progress - only on dashboard
 function resetProgress() {
-    document.querySelectorAll('.progress-step').forEach((step, idx) => {
+    const steps = document.querySelectorAll('.progress-step');
+    steps.forEach((step, idx) => {
         step.classList.remove('active', 'completed');
         if (idx === 0) step.classList.add('active');
     });
 }
 
-// ─ Update Progress ─
+// Update Progress - only on dashboard
 async function updateProgress(status) {
     if (!currentOrderId) return;
 
@@ -494,7 +399,7 @@ async function updateProgress(status) {
     }
 }
 
-// ─ Mark Step Completed ─
+// Mark Step Completed
 function markStepCompleted(step) {
     const el = document.querySelector(`.progress-step[data-step="${step}"]`);
     if (el) {
@@ -503,7 +408,7 @@ function markStepCompleted(step) {
     }
 }
 
-// ─ Mark Next Step Active ─
+// Mark Next Step Active
 function markNextStepActive(step) {
     const steps = ['menuju_lokasi', 'di_lokasi', 'dikerjakan', 'selesai_mitra'];
     const currentIdx = steps.indexOf(step);
@@ -514,19 +419,79 @@ function markNextStepActive(step) {
     }
 }
 
-// ─ Format Currency ─
-function formatCurrency(value) {
-    return new Intl.NumberFormat('id-ID').format(value);
-}
+// ─ Slide-to-Action Logic ─
+(function initSlideToAction() {
+    const thumb = document.getElementById('slider-thumb');
+    if (!thumb) return;
 
-// ─ Initialize Polling on Page Load ─
-window.addEventListener('load', function() {
-    const isOnline = document.getElementById('toggleStatus').checked;
-    if (isOnline) {
-        startPolling();
+    const track = thumb.parentElement;
+    const trackWidth = track.offsetWidth;
+    const thumbWidth = thumb.offsetWidth;
+    const maxSlide = (trackWidth - thumbWidth) / 2 - 8;
+
+    let startX = 0, currentX = 0, isDragging = false;
+
+    function getClientX(e) {
+        return e.touches ? e.touches[0].clientX : e.clientX;
     }
-    console.log('Dashboard initialized. Polling status:', isOnline ? 'active' : 'inactive');
-});
+
+    thumb.addEventListener('mousedown', startDrag);
+    thumb.addEventListener('touchstart', startDrag, { passive: true });
+
+    function startDrag(e) {
+        isDragging = true;
+        startX = getClientX(e);
+        thumb.style.cursor = 'grabbing';
+        thumb.style.transition = 'none';
+    }
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag, { passive: true });
+
+    function onDrag(e) {
+        if (!isDragging) return;
+        const diff = getClientX(e) - startX;
+        currentX = Math.max(-maxSlide, Math.min(maxSlide, diff));
+        thumb.style.left = `calc(50% + ${currentX}px)`;
+
+        // Visual feedback
+        if (currentX > maxSlide * 0.5) {
+            thumb.style.background = '#10b981';
+            thumb.querySelector('i').style.color = 'white';
+        } else if (currentX < -maxSlide * 0.5) {
+            thumb.style.background = '#ef4444';
+            thumb.querySelector('i').style.color = 'white';
+        } else {
+            thumb.style.background = 'white';
+            thumb.querySelector('i').style.color = '#64748b';
+        }
+    }
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    function endDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        thumb.style.cursor = 'grab';
+        thumb.style.transition = 'all 0.3s ease';
+
+        if (currentX > maxSlide * 0.7) {
+            // Geser kanan → TERIMA
+            acceptOrder();
+        } else if (currentX < -maxSlide * 0.7) {
+            // Geser kiri → TOLAK
+            showRejectOptions();
+        }
+
+        // Reset posisi
+        currentX = 0;
+        thumb.style.left = '50%';
+        thumb.style.transform = 'translateX(-50%)';
+        thumb.style.background = 'white';
+        thumb.querySelector('i').style.color = '#64748b';
+    }
+})();
 </script>
 @endpush
 

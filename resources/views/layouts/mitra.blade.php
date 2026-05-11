@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ZASHA Mitra</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -711,8 +712,158 @@ async function setupPushNotifications() {
     }
 }
 
+// ─────────────────────────────────────────────────────────
+// MITRA ORDER POLLING & MANAGEMENT (runs on ALL pages)
+// ─────────────────────────────────────────────────────────
+
+let pollingInterval = null;
+let currentOrderId = null;
+
+function startPolling() {
+    console.log('Polling started');
+    pollingInterval = setInterval(pollPendingOrder, 5000);
+    pollPendingOrder();
+}
+
+function stopPolling() {
+    console.log('Polling stopped');
+    if (pollingInterval) clearInterval(pollingInterval);
+}
+
+async function pollPendingOrder() {
+    try {
+        const resp = await fetch('{{ route("mitra.api.pending-order") }}');
+        const data = await resp.json();
+
+        if (data.order) {
+            currentOrderId = data.order.id;
+            showIncomingOrder(data.order);
+        }
+    } catch (e) {
+        console.error('Polling error:', e);
+    }
+}
+
+// Show Incoming Order Popup
+function showIncomingOrder(order) {
+    const popup = document.getElementById('incoming-order');
+    if (!popup) return;
+
+    currentOrderId = order.id;
+    popup.dataset.trackingId = order.id;
+    document.getElementById('order-nama').textContent = order.pelanggan.nama;
+    document.getElementById('order-jenis').textContent = order.order_type;
+    document.getElementById('order-harga').textContent = 'Rp ' + formatCurrency(order.harga_jual);
+    popup.style.display = 'flex';
+    stopPolling();
+}
+
+function hideIncomingOrder() {
+    const popup = document.getElementById('incoming-order');
+    if (popup) popup.style.display = 'none';
+    startPolling();
+}
+
+// Accept Order
+async function acceptOrder() {
+    if (!currentOrderId) return;
+
+    try {
+        const resp = await fetch('{{ route("mitra.order.accept") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ tracking_id: currentOrderId })
+        });
+
+        const data = await resp.json();
+
+        if (data.success) {
+            hideIncomingOrder();
+            if (typeof showActiveOrder === 'function') {
+                showActiveOrder(currentOrderId);
+            }
+            if (typeof resetProgress === 'function') {
+                resetProgress();
+            }
+        } else {
+            alert(data.message);
+        }
+    } catch (e) {
+        console.error('Accept failed:', e);
+        alert('Gagal menerima order');
+    }
+}
+
+// Show Reject Reason Panel
+function showRejectOptions() {
+    const panel = document.getElementById('reject-panel');
+    if (panel) panel.style.display = 'block';
+}
+
+function hideRejectPanel() {
+    const panel = document.getElementById('reject-panel');
+    if (panel) panel.style.display = 'none';
+    hideIncomingOrder();
+}
+
+// Reject Order
+async function rejectOrder(reason) {
+    if (!reason || !reason.trim()) {
+        alert('Silakan pilih atau tulis alasan penolakan.');
+        return;
+    }
+
+    if (!currentOrderId) return;
+
+    try {
+        const resp = await fetch('{{ route("mitra.order.reject") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                tracking_id: currentOrderId,
+                pesan: reason.trim()
+            })
+        });
+
+        const data = await resp.json();
+
+        if (data.success) {
+            hideRejectPanel();
+            const customInput = document.getElementById('custom-reject');
+            if (customInput) customInput.value = '';
+            startPolling();
+        } else {
+            alert(data.message || 'Gagal menolak order.');
+        }
+    } catch (err) {
+        console.error('Reject failed:', err);
+        alert('Terjadi kesalahan. Coba lagi.');
+    }
+}
+
+// Format Currency
+function formatCurrency(value) {
+    return new Intl.NumberFormat('id-ID').format(value);
+}
+
+// Initialize polling on page load if mitra is online
+window.addEventListener('load', function() {
+    const toggleEl = document.getElementById('toggleStatus');
+    if (toggleEl && toggleEl.checked) {
+        startPolling();
+    }
+    console.log('Mitra page loaded. Polling will start if online.');
+});
+
 // Setup push notifications on page load
-window.addEventListener('load', setupPushNotifications);
+setupPushNotifications();
 </script>
 
 @stack('scripts')
