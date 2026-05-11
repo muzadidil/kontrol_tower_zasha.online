@@ -16,7 +16,6 @@ class PelangganPpobController extends Controller
 
     public function __construct(PpobService $ppobService)
     {
-        $this->middleware('auth:pelanggan');
         $this->ppobService = $ppobService;
     }
 
