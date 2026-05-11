@@ -44,6 +44,22 @@ class PelangganOrderTrackingController extends Controller
         return view('pelanggan.order-tracking', compact('tracking'));
     }
 
+    public function getStatus(OrderTracking $tracking)
+    {
+        $pelangganId = Auth::guard('pelanggan')->id();
+
+        if ($tracking->pelanggan_id !== $pelangganId) {
+            return abort(403, 'Anda tidak memiliki akses ke order ini.');
+        }
+
+        return response()->json([
+            'success' => true,
+            'status' => $tracking->status,
+            'mitra_nama' => $tracking->mitra->nama_panggilan ?? $tracking->mitra->nama_asli,
+            'updated_at' => $tracking->updated_at->diffForHumans(),
+        ]);
+    }
+
     public function confirmSelesai(Request $request)
     {
         $request->validate([
@@ -60,7 +76,7 @@ class PelangganOrderTrackingController extends Controller
 
             $this->orderTrackingService->pelangganConfirmSelesai($tracking);
 
-            return back()->with('success', 'Order berhasil dikonfirmasi selesai. Saldo mitra telah ditransfer.');
+            return redirect()->route('pelanggan.riwayat.index')->with('success', 'Pekerjaan selesai! Terima kasih telah menggunakan Zasha.');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         } catch (\Exception $e) {

@@ -163,6 +163,7 @@ Route::middleware('auth:pelanggan')->group(function () {
 
     // Order Tracking
     Route::get('/order-tracking/{tracking}', [PelangganOrderTrackingController::class, 'trackOrder'])->name('order-tracking');
+    Route::get('/order-tracking/{tracking}/status', [PelangganOrderTrackingController::class, 'getStatus'])->name('order-tracking.status');
     Route::post('/order-tracking/selesai', [PelangganOrderTrackingController::class, 'confirmSelesai'])->name('order-tracking.selesai');
     Route::post('/order-tracking/belum-selesai', [PelangganOrderTrackingController::class, 'belumSelesai'])->name('order-tracking.belum-selesai');
 });
