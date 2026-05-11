@@ -451,6 +451,158 @@
             border: 1px solid #475569;
         }
 
+        /* ──── Progress Tracker Styles ──── */
+        .progress-step {
+            display: flex;
+            gap: var(--fib-3);
+            position: relative;
+            margin-bottom: var(--fib-4);
+        }
+
+        .step-dot {
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            background: var(--line);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--line);
+            flex-shrink: 0;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .step-line {
+            position: absolute;
+            left: 10px;
+            top: 21px;
+            bottom: 0;
+            width: 2px;
+            background: var(--line);
+            transition: background-color 0.3s ease;
+        }
+
+        .progress-step:last-child .step-line {
+            display: none;
+        }
+
+        .step-content {
+            flex: 1;
+            padding-bottom: var(--fib-4);
+        }
+
+        .step-title {
+            font-size: var(--t-sm);
+            font-weight: 700;
+            color: var(--ink-soft);
+            transition: color 0.3s ease;
+        }
+
+        .step-btn {
+            display: none;
+            margin-top: var(--fib-2);
+            padding: var(--fib-2) var(--fib-3);
+            background: var(--mitra-blue);
+            color: white;
+            border: none;
+            border-radius: var(--r-md);
+            font-size: var(--t-xxs);
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .step-btn:hover {
+            background: var(--mitra-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Active step */
+        .progress-step.active .step-dot {
+            background: var(--mitra-blue);
+            box-shadow: 0 0 0 2px var(--mitra-blue);
+        }
+
+        .progress-step.active .step-title {
+            color: var(--ink);
+        }
+
+        .progress-step.active .step-btn {
+            display: inline-block;
+        }
+
+        /* Completed step */
+        .progress-step.completed .step-dot {
+            background: #10b981;
+            box-shadow: 0 0 0 2px #10b981;
+        }
+
+        .progress-step.completed .step-line {
+            background: #10b981;
+        }
+
+        .progress-step.completed .step-title {
+            color: #10b981;
+        }
+
+        /* Dark mode progress */
+        body.mitra-offline .progress-step.active .step-dot {
+            background: var(--mitra-blue);
+            box-shadow: 0 0 0 2px var(--mitra-blue);
+        }
+
+        body.mitra-offline .step-title {
+            color: #94a3b8;
+        }
+
+        body.mitra-offline .progress-step.active .step-title {
+            color: #cbd5e1;
+        }
+
+        /* ──── Reject Options Styles ──── */
+        .reject-opt {
+            width: 100%;
+            padding: var(--fib-3);
+            margin-bottom: var(--fib-2);
+            background: var(--bg-app);
+            border: 1.5px solid var(--line);
+            border-radius: var(--r-md);
+            font-size: var(--t-xs);
+            font-weight: 700;
+            color: var(--ink);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .reject-opt:hover {
+            background: var(--mitra-blue-tint);
+            border-color: var(--mitra-blue-light);
+        }
+
+        .reject-opt:active {
+            background: var(--mitra-blue-soft);
+            border-color: var(--mitra-blue);
+        }
+
+        .btn-reject-send {
+            padding: var(--fib-3);
+            background: var(--mitra-blue);
+            color: white;
+            border: none;
+            border-radius: var(--r-md);
+            font-size: var(--t-xs);
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .btn-reject-send:hover {
+            background: var(--mitra-blue-dark);
+            transform: translateY(-2px);
+        }
+
         /* Smooth transitions */
         body, .app-container, .z-card, .card-custom, .hero-mitra, .nav-bottom {
             transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
@@ -459,6 +611,11 @@
         body.mitra-offline .card-custom,
         body.mitra-offline .hero-mitra {
             transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .progress-step, .step-dot, .step-line, .step-title, .step-btn,
+        .reject-opt, .btn-reject-send {
+            transition: all 0.3s ease;
         }
     </style>
 
