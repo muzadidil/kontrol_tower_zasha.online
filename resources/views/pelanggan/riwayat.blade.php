@@ -71,7 +71,7 @@
 
             <div style="display:flex;align-items:center;gap:13px;margin-bottom:13px;">
                 <img src="{{ !empty($rj->foto_driver)
-                        ? asset('img/'.$rj->foto_driver)
+                        ? asset('storage/'.$rj->foto_driver)
                         : 'https://ui-avatars.com/api/?name='.urlencode($rj->nama_driver ?? 'D').'&background=00b4d8&color=fff&bold=true' }}"
                      class="mitra-ava">
                 <div style="flex:1;">

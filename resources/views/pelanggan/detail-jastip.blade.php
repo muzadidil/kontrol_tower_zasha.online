@@ -21,23 +21,23 @@
 
 {{-- Foto Driver --}}
 @php
-    $foto_url = !empty($driver->foto_driver)
-        ? asset('img/' . $driver->foto_driver)
-        : 'https://ui-avatars.com/api/?name=' . urlencode($driver->nama_driver ?? 'D') . '&background=002d72&color=fff&size=300';
+    $foto_url = !empty($driver->foto_mitra)
+        ? asset('storage/' . $driver->foto_mitra)
+        : 'https://ui-avatars.com/api/?name=' . urlencode($driver->nama_panggilan ?? 'D') . '&background=002d72&color=fff&size=300';
 @endphp
-<img src="{{ $foto_url }}" class="foto-hero" alt="{{ $driver->nama_driver }}">
+<img src="{{ $foto_url }}" class="foto-hero" alt="{{ $driver->nama_panggilan }}">
 
 {{-- Info Driver --}}
 <div class="card-driver-info">
     <div class="d-flex justify-content-between align-items-start">
         <div>
-            <h4 class="fw-bold mb-1">{{ $driver->nama_driver }}</h4>
+            <h4 class="fw-bold mb-1">{{ $driver->nama_panggilan }}</h4>
             <span class="badge bg-info bg-opacity-10 text-info fw-bold" style="font-size:0.7rem;">
                 <i class="bi bi-rocket-takeoff me-1"></i>JASTIP HUNTER
             </span>
         </div>
         <div>
-            @if(strtolower($driver->status_kerja ?? '') == 'aktif')
+            @if(($driver->status_online ?? '') === 'online')
                 <span class="badge bg-success fs-7">Online</span>
             @else
                 <span class="badge bg-secondary fs-7">Offline</span>
@@ -73,7 +73,7 @@
 
     <div class="info-row">
         <span class="text-muted"><i class="bi bi-shield-check me-2"></i>Status Verifikasi</span>
-        @if(($driver->status_verifikasi ?? '') == 'Verified')
+        @if(($driver->status_verifikasi ?? '') === 'active')
             <span class="badge bg-success">Terverifikasi</span>
         @else
             <span class="badge bg-warning text-dark">Menunggu</span>
@@ -112,7 +112,7 @@
 
 {{-- Sticky Order Button --}}
 <div class="sticky-order shadow-lg">
-    @if(strtolower($driver->status_kerja ?? '') == 'aktif')
+    @if(($driver->status_online ?? '') === 'online')
         <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold py-3 shadow"
                 data-bs-toggle="modal" data-bs-target="#modalPesanJastip">
             <i class="bi bi-cart-plus-fill me-2"></i>PESAN JASTIP SEKARANG
@@ -132,7 +132,7 @@
                 <h5 class="fw-bold mb-4 text-center">Form Pesan Jastip</h5>
                 <form action="{{ route('pelanggan.pesan') }}" method="POST">
                     @csrf
-                    <input type="hidden" name="id_mitra" value="{{ $driver->id_driver }}">
+                    <input type="hidden" name="id_mitra" value="{{ $driver->id_mitra }}">
                     <input type="hidden" name="tipe" value="jastip">
 
                     <div class="mb-3">

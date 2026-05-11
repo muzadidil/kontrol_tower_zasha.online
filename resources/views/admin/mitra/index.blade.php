@@ -194,7 +194,7 @@
                     @foreach($list_driver as $r)
                     <tr>
                         <td class="ps-4">
-                            <div class="fw-semibold" style="color:#1e293b;">{{ $r->nama_driver }}</div>
+                            <div class="fw-semibold" style="color:#1e293b;">{{ $r->nama_panggilan }}</div>
                             <span class="type-badge badge-driver">DRIVER JASTIP</span>
                         </td>
                         <td>
@@ -211,7 +211,7 @@
                         <td class="text-center pe-4">
                             <form action="{{ route('admin.verification.approve') }}" method="POST" onsubmit="return confirm('Setujui?')">
                                 @csrf
-                                <input type="hidden" name="target_id" value="{{ $r->id_driver }}">
+                                <input type="hidden" name="target_id" value="{{ $r->id_mitra }}">
                                 <input type="hidden" name="account_type" value="driver">
                                 <button class="btn btn-success btn-sm rounded-pill px-3 fw-bold">Approve</button>
                             </form>

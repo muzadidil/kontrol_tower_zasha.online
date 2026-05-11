@@ -60,7 +60,7 @@
                     @foreach($list_driver as $r)
                     <tr>
                         <td class="ps-4">
-                            <div class="fw-bold text-dark">{{ $r->nama_driver }}</div>
+                            <div class="fw-bold text-dark">{{ $r->nama_panggilan }}</div>
                             <span class="type-badge badge-driver mt-1 d-inline-block">DRIVER JASTIP</span>
                         </td>
                         <td>
@@ -78,9 +78,9 @@
                             <div class="text-muted" style="font-size: 10px;"><i class="bi bi-whatsapp me-1 text-success"></i>{{ $r->no_wa }}</div>
                         </td>
                         <td class="text-center pe-4">
-                            <form action="{{ route('admin.verification.approve') }}" method="POST" onsubmit="return confirm('Yakin setujui perubahan data untuk {{ $r->nama_driver }}?')">
+                            <form action="{{ route('admin.verification.approve') }}" method="POST" onsubmit="return confirm('Yakin setujui perubahan data untuk {{ $r->nama_panggilan }}?')">
                                 @csrf
-                                <input type="hidden" name="target_id" value="{{ $r->id_driver }}">
+                                <input type="hidden" name="target_id" value="{{ $r->id_mitra }}">
                                 <input type="hidden" name="account_type" value="driver">
                                 <button type="submit" class="btn btn-success btn-sm rounded-pill px-4 fw-bold shadow-sm btn-approve">
                                     APPROVE
@@ -93,7 +93,7 @@
                     @foreach($list_mitra as $m)
                     <tr>
                         <td class="ps-4">
-                            <div class="fw-bold text-dark">{{ $m->nama_mitra ?? 'Unknown' }}</div>
+                            <div class="fw-bold text-dark">{{ $m->nama_panggilan ?? $m->nama_asli ?? 'Unknown' }}</div>
                             <span class="type-badge badge-mitra mt-1 d-inline-block">MITRA LAYANAN</span>
                         </td>
                         <td>
@@ -116,7 +116,7 @@
                             <div class="text-muted" style="font-size: 10px;">{{ $m->no_wa }}</div>
                         </td>
                         <td class="text-center pe-4">
-                            <form action="{{ route('admin.verification.approve') }}" method="POST" onsubmit="return confirm('Konfirmasi verifikasi data mitra {{ $m->nama_mitra }}?')">
+                            <form action="{{ route('admin.verification.approve') }}" method="POST" onsubmit="return confirm('Konfirmasi verifikasi data mitra {{ $m->nama_panggilan ?? $m->nama_asli }}?')">
                                 @csrf
                                 <input type="hidden" name="target_id" value="{{ $m->id_mitra }}">
                                 <input type="hidden" name="account_type" value="mitra">
