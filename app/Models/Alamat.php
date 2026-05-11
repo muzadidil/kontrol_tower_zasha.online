@@ -13,6 +13,8 @@ class Alamat extends Model
         'nama_penerima',
         'no_wa_penerima',
         'alamat_lengkap',
+        'lat',
+        'lng',
         'is_utama',
     ];
 

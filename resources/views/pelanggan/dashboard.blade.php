@@ -15,7 +15,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
             <img src="{{ !empty($user->foto)
-                    ? $user->foto
+                    ? asset('storage/'.$user->foto)
                     : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=f0a500&color=002d72&bold=true' }}"
                  style="width:44px;height:44px;border-radius:13px;object-fit:cover;
                         border:2.5px solid rgba(240,165,0,.6); flex-shrink:0;">

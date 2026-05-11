@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
-use App\Support\ImageUploader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MitraDashboardController extends Controller
 {
@@ -107,22 +107,27 @@ class MitraDashboardController extends Controller
 
     public function uploadFoto(Request $request)
     {
-        $request->validate(['foto' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:5120']);
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
 
         $mitra = $this->mitra();
 
         try {
-            $path = ImageUploader::uploadWebp(
-                $request->file('foto'),
-                folder: 'profil-mitra',
-                maxDimension: 800,
-                quality: 85,
-                oldPath: $mitra->foto_mitra,
-            );
+            $file     = $request->file('foto');
+            $ext      = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+            $filename = 'profil_' . $mitra->id_mitra . '_' . time() . '.' . $ext;
+            $path     = $file->storeAs('profil-mitra', $filename, 'public');
+
+            $oldPath = $mitra->foto_mitra;
             $mitra->update(['foto_mitra' => $path]);
-        } catch (\RuntimeException $e) {
+
+            if ($oldPath && $oldPath !== $path && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        } catch (\Throwable $e) {
             Log::error('Upload foto mitra gagal', ['message' => $e->getMessage(), 'mitra_id' => $mitra->id_mitra]);
-            return back()->with('error', 'Gagal memproses foto: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menyimpan foto. Coba lagi.');
         }
 
         return back()->with('success', 'Foto profil berhasil diperbarui');

@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
 use App\Models\Alamat;
-use App\Support\ImageUploader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProfilController extends Controller
 {
@@ -36,22 +36,27 @@ class ProfilController extends Controller
 
     public function uploadFoto(Request $request)
     {
-        $request->validate(['foto' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:5120']);
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
 
         $pelanggan = Auth::guard('pelanggan')->user();
 
         try {
-            $path = ImageUploader::uploadWebp(
-                $request->file('foto'),
-                folder: 'profil',
-                maxDimension: 800,
-                quality: 85,
-                oldPath: $pelanggan->foto,
-            );
+            $file     = $request->file('foto');
+            $ext      = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+            $filename = 'profil_' . $pelanggan->id_pelanggan . '_' . time() . '.' . $ext;
+            $path     = $file->storeAs('profil', $filename, 'public');
+
+            $oldPath = $pelanggan->foto;
             $pelanggan->update(['foto' => $path]);
-        } catch (\RuntimeException $e) {
+
+            if ($oldPath && $oldPath !== $path && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        } catch (\Throwable $e) {
             Log::error('Upload foto pelanggan gagal', ['message' => $e->getMessage(), 'pelanggan_id' => $pelanggan->id_pelanggan]);
-            return back()->with('error', 'Gagal memproses foto: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menyimpan foto. Coba lagi.');
         }
 
         return back()->with('success', 'Foto profil berhasil diperbarui');

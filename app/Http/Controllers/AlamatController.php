@@ -24,6 +24,8 @@ class AlamatController extends Controller
             'nama_penerima'  => 'required|string|max:100',
             'no_wa_penerima' => 'required|string|max:20',
             'alamat_lengkap' => 'required|string',
+            'lat'            => 'nullable|numeric|between:-90,90',
+            'lng'            => 'nullable|numeric|between:-180,180',
         ]);
 
         $pelanggan_id = Auth::guard('pelanggan')->id();
@@ -38,6 +40,8 @@ class AlamatController extends Controller
             'nama_penerima'  => $request->nama_penerima,
             'no_wa_penerima' => $request->no_wa_penerima,
             'alamat_lengkap' => $request->alamat_lengkap,
+            'lat'            => $request->filled('lat') ? (float) $request->lat : null,
+            'lng'            => $request->filled('lng') ? (float) $request->lng : null,
             'is_utama'       => $request->boolean('is_utama'),
         ]);
 
@@ -51,6 +55,8 @@ class AlamatController extends Controller
             'nama_penerima'  => 'required|string|max:100',
             'no_wa_penerima' => 'required|string|max:20',
             'alamat_lengkap' => 'required|string',
+            'lat'            => 'nullable|numeric|between:-90,90',
+            'lng'            => 'nullable|numeric|between:-180,180',
         ]);
 
         $pelanggan_id = Auth::guard('pelanggan')->id();
@@ -60,9 +66,15 @@ class AlamatController extends Controller
             Alamat::where('id_pelanggan', $pelanggan_id)->update(['is_utama' => false]);
         }
 
-        $alamat->update($request->only([
-            'label_alamat', 'nama_penerima', 'no_wa_penerima', 'alamat_lengkap', 'is_utama',
-        ]));
+        $alamat->update([
+            'label_alamat'   => $request->label_alamat,
+            'nama_penerima'  => $request->nama_penerima,
+            'no_wa_penerima' => $request->no_wa_penerima,
+            'alamat_lengkap' => $request->alamat_lengkap,
+            'lat'            => $request->filled('lat') ? (float) $request->lat : null,
+            'lng'            => $request->filled('lng') ? (float) $request->lng : null,
+            'is_utama'       => $request->boolean('is_utama'),
+        ]);
 
         return back()->with('success', 'Alamat berhasil diperbarui!');
     }

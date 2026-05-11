@@ -3,7 +3,6 @@
 
 @section('content')
 <div class="container-fluid py-4" style="max-width: 760px;">
-    <a href="{{ route('admin.game-topup.index') }}" class="btn btn-link text-warning ps-0 mb-3"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
     <h4 class="fw-bold mb-1"><i class="fas fa-cloud-download-alt text-warning me-2"></i>Import Produk dari Digiflazz</h4>
     <p class="text-muted small mb-4">Fetch pricelist Digiflazz, filter by brand, dan simpan ke kategori produk.</p>
 

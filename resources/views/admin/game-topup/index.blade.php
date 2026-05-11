@@ -102,7 +102,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-footer bg-white">{{ $layanans->links() }}</div>
     </div>
 </div>
 @endsection

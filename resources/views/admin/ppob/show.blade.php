@@ -3,8 +3,6 @@
 
 @section('content')
 <div class="container py-4" style="max-width: 720px;">
-    <a href="{{ route('admin.ppob.index') }}" class="btn btn-link text-warning ps-0 mb-3"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
-
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             @php $bm = ['pending'=>'warning','sukses'=>'success','gagal'=>'danger']; @endphp

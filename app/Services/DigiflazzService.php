@@ -81,6 +81,13 @@ class DigiflazzService
                 throw new \RuntimeException('Format response Digiflazz tidak valid.');
             }
 
+            // Digiflazz error response: {"data":{"rc":"83","message":"..."}}.
+            // Pricelist sukses harus berupa list of products (numerically indexed).
+            if (isset($json['data']['rc']) && isset($json['data']['message'])) {
+                Log::warning('Digiflazz pricelist error', ['rc' => $json['data']['rc'], 'message' => $json['data']['message']]);
+                throw new \RuntimeException('Digiflazz: ' . $json['data']['message']);
+            }
+
             return $json['data'];
         } catch (\Exception $e) {
             Log::error('Digiflazz pricelist exception', ['message' => $e->getMessage()]);

@@ -88,16 +88,22 @@
     }
     .bs-overlay.open { opacity: 1; pointer-events: all; }
     .bs-sheet {
-        position: fixed; left: 0; right: 0; bottom: 0;
+        position: fixed; left: 50%; bottom: 0;
+        width: 100%; max-width: 480px;
+        transform: translate(-50%, 100%);
         z-index: 1051;
         background: #fff;
         border-radius: 21px 21px 0 0;
-        max-height: 92vh; overflow-y: auto;
-        transform: translateY(100%);
+        max-height: 90vh; overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
         padding-bottom: 34px;
     }
-    .bs-sheet.open { transform: translateY(0); }
+    .bs-sheet.open { transform: translate(-50%, 0); }
+    @media (max-width: 480px) {
+        .bs-sheet { max-width: 100%; }
+    }
     .bs-handle {
         width: 40px; height: 4px;
         background: #e2e8f0; border-radius: 2px;
@@ -108,16 +114,10 @@
     /* Map */
     #map-container { display: none; }
     #map-container.show { display: block; }
-    #map { width: 100%; height: 230px; border-radius: 13px; background: #f1f5f9; }
-    .map-search-wrap { position: relative; margin-bottom: 8px; }
-    #pac-input {
-        width: 100%; padding: 10px 14px 10px 38px;
-        border: 1.5px solid #e2e8f0; border-radius: 10px;
-        font-size: 0.82rem; outline: none; transition: border-color 0.2s;
-        box-sizing: border-box;
+    #map { width: 100%; height: 200px; border-radius: 13px; background: #f1f5f9; }
+    @media (max-height: 700px) {
+        #map { height: 160px; }
     }
-    #pac-input:focus { border-color: #f0a500; }
-    .map-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem; }
     .map-hint { font-size: 0.72rem; color: #94a3b8; margin-top: 6px; text-align: center; }
     #map-selected-address {
         background: #f0fdf4; border: 1.5px solid #bbf7d0;
@@ -208,7 +208,9 @@
                         '{{ addslashes($alamat->nama_penerima) }}',
                         '{{ addslashes($alamat->no_wa_penerima) }}',
                         '{{ addslashes($alamat->alamat_lengkap) }}',
-                        {{ $alamat->is_utama ? 'true' : 'false' }}
+                        {{ $alamat->is_utama ? 'true' : 'false' }},
+                        {{ $alamat->lat !== null ? $alamat->lat : 'null' }},
+                        {{ $alamat->lng !== null ? $alamat->lng : 'null' }}
                     )">
                     <i class="fas fa-pencil-alt me-1"></i>Edit
                 </button>
@@ -249,6 +251,8 @@
         <form id="formAlamat" method="POST" action="{{ route('pelanggan.alamat.store') }}" class="form-z">
             @csrf
             <input type="hidden" name="_method" id="formMethod" value="POST">
+            <input type="hidden" name="lat" id="inputLat" value="">
+            <input type="hidden" name="lng" id="inputLng" value="">
 
             {{-- Label --}}
             <div class="mb-3">
@@ -267,10 +271,7 @@
             @if($gmaps_api_key)
             <div id="map-container" class="mb-3">
                 <label>Pilih Lokasi di Peta</label>
-                <div class="map-search-wrap">
-                    <i class="fas fa-search map-search-icon"></i>
-                    <input id="pac-input" type="text" placeholder="Cari alamat atau nama tempat...">
-                </div>
+                <div id="autocomplete-container" style="width:100%; margin-bottom:8px;"></div>
                 <div id="map"></div>
                 <div class="map-hint"><i class="fas fa-hand-pointer me-1"></i>Seret pin untuk menyesuaikan lokasi</div>
                 <div id="map-selected-address"></div>
@@ -316,92 +317,147 @@
 @push('scripts')
 @if($gmaps_api_key)
 <script>
-let map, marker, autocomplete, mapsReady = false;
+// Google Maps dynamic loader (loading=async, required for new Places API).
+(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[t.toLowerCase()]),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.googleapis.com/maps/api/js?`+e;a.onerror=()=>n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a);d[q]=f}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+({key: "{{ $gmaps_api_key }}", v: "weekly"});
+</script>
 
-function initMap() {
-    mapsReady = true;
-    const defaultPos = { lat: -6.2088, lng: 106.8456 };
+<script>
+let map, marker, placeAutocomplete, geocoder;
+let AdvancedMarkerEl;
+let mapsReady = false;
 
-    map = new google.maps.Map(document.getElementById('map'), {
+async function initMap() {
+    const { Map }                      = await google.maps.importLibrary("maps");
+    const { AdvancedMarkerElement }    = await google.maps.importLibrary("marker");
+    const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
+    const { Geocoder }                 = await google.maps.importLibrary("geocoding");
+
+    AdvancedMarkerEl = AdvancedMarkerElement;
+    geocoder = new Geocoder();
+
+    const defaultPos = { lat: -2.5489, lng: 118.0149 };
+
+    map = new Map(document.getElementById('map'), {
         center: defaultPos,
-        zoom: 14,
-        disableDefaultUI: true,
-        zoomControl: true,
+        zoom: 5,
+        mapTypeControl: false,
+        mapId: 'zasha_map',
     });
 
-    marker = new google.maps.Marker({
+    marker = new AdvancedMarkerEl({
+        map: null,
         position: defaultPos,
-        map: map,
-        draggable: true,
-        animation: google.maps.Animation.DROP,
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#f0a500',
-            fillOpacity: 1,
-            strokeColor: '#fff',
-            strokeWeight: 2.5,
-        }
+        gmpDraggable: true,
     });
 
     marker.addListener('dragend', function() {
-        reverseGeocode(marker.getPosition());
+        const pos = marker.position;
+        const lat = (typeof pos.lat === 'function') ? pos.lat() : pos.lat;
+        const lng = (typeof pos.lng === 'function') ? pos.lng() : pos.lng;
+        setLatLng(lat, lng);
+        reverseGeocode(lat, lng);
     });
 
-    autocomplete = new google.maps.places.Autocomplete(
-        document.getElementById('pac-input'),
-        { componentRestrictions: { country: 'id' } }
-    );
-    autocomplete.bindTo('bounds', map);
-    autocomplete.addListener('place_changed', function() {
-        const place = autocomplete.getPlace();
-        if (!place.geometry) return;
-        map.setCenter(place.geometry.location);
-        map.setZoom(17);
-        marker.setPosition(place.geometry.location);
-        setAlamatFromPlace(place.formatted_address || document.getElementById('pac-input').value);
+    map.addListener('click', function(e) {
+        marker.position = e.latLng;
+        marker.map = map;
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        setLatLng(lat, lng);
+        reverseGeocode(lat, lng);
     });
+
+    placeAutocomplete = new PlaceAutocompleteElement({
+        componentRestrictions: { country: 'id' },
+    });
+    placeAutocomplete.style.width = '100%';
+    document.getElementById('autocomplete-container').appendChild(placeAutocomplete);
+
+    placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
+        const place = placePrediction.toPlace();
+        await place.fetchFields({
+            fields: ['location', 'formattedAddress', 'addressComponents', 'displayName'],
+        });
+
+        const lat = place.location.lat();
+        const lng = place.location.lng();
+
+        map.setCenter({ lat, lng });
+        map.setZoom(17);
+        marker.position = { lat, lng };
+        marker.map = map;
+
+        fillForm(lat, lng, place.formattedAddress);
+    });
+
+    mapsReady = true;
 }
 
-function reverseGeocode(latLng) {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: latLng }, function(results, status) {
+function reverseGeocode(lat, lng) {
+    if (!geocoder) return;
+    geocoder.geocode({ location: { lat, lng } }, function(results, status) {
         if (status === 'OK' && results[0]) {
-            setAlamatFromPlace(results[0].formatted_address);
+            fillForm(lat, lng, results[0].formatted_address);
+        } else {
+            setLatLng(lat, lng);
         }
     });
 }
 
-function setAlamatFromPlace(address) {
-    document.getElementById('inputAlamat').value = address;
-    const box = document.getElementById('map-selected-address');
-    box.textContent = address;
-    box.classList.add('show');
+function fillForm(lat, lng, formattedAddress) {
+    setLatLng(lat, lng);
+
+    if (formattedAddress) {
+        document.getElementById('inputAlamat').value = formattedAddress;
+        const box = document.getElementById('map-selected-address');
+        box.textContent = formattedAddress;
+        box.classList.add('show');
+    }
 }
 
-function refreshMap(existingAddress) {
+function setLatLng(lat, lng) {
+    document.getElementById('inputLat').value = (lat !== null && lat !== undefined && lat !== '') ? Number(lat).toFixed(7) : '';
+    document.getElementById('inputLng').value = (lng !== null && lng !== undefined && lng !== '') ? Number(lng).toFixed(7) : '';
+}
+
+function refreshMap(existingAddress, existingLat, existingLng) {
     const mc = document.getElementById('map-container');
     mc.classList.add('show');
     setTimeout(function() {
-        if (mapsReady && map) {
-            google.maps.event.trigger(map, 'resize');
-            if (existingAddress) {
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ address: existingAddress }, function(results, status) {
-                    if (status === 'OK' && results[0]) {
-                        map.setCenter(results[0].geometry.location);
-                        map.setZoom(16);
-                        marker.setPosition(results[0].geometry.location);
-                    }
-                });
-            }
-        } else {
-            initMap();
+        if (!mapsReady || !map) {
+            // Map belum siap, initMap akan jalan sendiri saat SDK ready.
+            return;
+        }
+        google.maps.event.trigger(map, 'resize');
+
+        const hasCoords = (existingLat !== null && existingLat !== undefined && existingLat !== '' &&
+                           existingLng !== null && existingLng !== undefined && existingLng !== '');
+        if (hasCoords) {
+            const pos = { lat: Number(existingLat), lng: Number(existingLng) };
+            map.setCenter(pos);
+            map.setZoom(17);
+            marker.position = pos;
+            marker.map = map;
+            setLatLng(pos.lat, pos.lng);
+        } else if (existingAddress && geocoder) {
+            geocoder.geocode({ address: existingAddress }, function(results, status) {
+                if (status === 'OK' && results[0]) {
+                    const loc = results[0].geometry.location;
+                    map.setCenter(loc);
+                    map.setZoom(16);
+                    marker.position = loc;
+                    marker.map = map;
+                    setLatLng(loc.lat(), loc.lng());
+                }
+            });
         }
     }, 350);
 }
+
+// Auto-init on load (loader bertanggung jawab fetch SDK).
+initMap();
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ $gmaps_api_key }}&libraries=places&callback=initMap" async defer></script>
 @endif
 
 <script>
@@ -415,20 +471,24 @@ function bukaModal() {
     document.getElementById('inputNama').value = '';
     document.getElementById('inputWa').value = '';
     document.getElementById('inputUtama').checked = false;
+    document.getElementById('inputLat').value = '';
+    document.getElementById('inputLng').value = '';
     document.querySelectorAll('.label-chip').forEach(c => c.classList.remove('active'));
 
     @if($gmaps_api_key)
     const box = document.getElementById('map-selected-address');
     box.textContent = '';
     box.classList.remove('show');
-    document.getElementById('pac-input').value = '';
+    if (typeof placeAutocomplete !== 'undefined' && placeAutocomplete) {
+        try { placeAutocomplete.value = ''; } catch (e) { /* property may be read-only on some builds */ }
+    }
     refreshMap(null);
     @endif
 
     openSheet();
 }
 
-function bukaModalEdit(id, label, nama, wa, alamat, isUtama) {
+function bukaModalEdit(id, label, nama, wa, alamat, isUtama, lat, lng) {
     document.getElementById('bsTitle').textContent = 'Edit Alamat';
     document.getElementById('btnSubmitText').textContent = 'Perbarui Alamat';
     document.getElementById('formAlamat').action = '/alamat/' + id;
@@ -438,6 +498,8 @@ function bukaModalEdit(id, label, nama, wa, alamat, isUtama) {
     document.getElementById('inputNama').value = nama;
     document.getElementById('inputWa').value = wa;
     document.getElementById('inputUtama').checked = isUtama;
+    document.getElementById('inputLat').value = (lat !== null && lat !== undefined) ? lat : '';
+    document.getElementById('inputLng').value = (lng !== null && lng !== undefined) ? lng : '';
     document.querySelectorAll('.label-chip').forEach(c => {
         c.classList.toggle('active', c.textContent.trim().replace(/^\S+\s*/, '').includes(label));
     });
@@ -448,7 +510,7 @@ function bukaModalEdit(id, label, nama, wa, alamat, isUtama) {
         box.textContent = alamat;
         box.classList.add('show');
     }
-    refreshMap(alamat);
+    refreshMap(alamat, lat, lng);
     @endif
 
     openSheet();
