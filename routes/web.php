@@ -170,6 +170,7 @@ Route::match(['get','post'], '/mitra/logout', [MitraLoginController::class, 'log
 // Mitra Dashboard Routes (butuh login mitra)
 Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/dashboard', [MitraDashboardController::class, 'dashboard'])->name('dashboard');
+    Route::post('/toggle-status', [MitraDashboardController::class, 'toggleStatus'])->name('toggle-status');
     Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])->name('pesanan');
     Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
     Route::post('/saldo/topup', [MitraDashboardController::class, 'topup'])->name('saldo.topup');

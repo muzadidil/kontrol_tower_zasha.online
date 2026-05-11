@@ -19,6 +19,29 @@
         </span>
     </div>
 
+    {{-- Status Online/Offline Toggle --}}
+    <div class="card-custom" style="padding: var(--fib-3); display: flex; align-items: center; justify-content: space-between;">
+        <div style="flex: 1;">
+            <div class="label-up" style="margin-bottom: 2px;">Status Kamu</div>
+            <div id="status-label" style="font-size: var(--t-xs); font-weight: 700; margin-top: var(--fib-1);"
+                 class="{{ $mitra->status_online === 'online' ? 'text-success' : 'text-secondary' }}">
+                @if($mitra->status_online === 'online')
+                    🟢 Online — Siap terima order
+                @elseif($mitra->status_online === 'sibuk')
+                    🟣 Sibuk — Sedang mengerjakan
+                @else
+                    ⚫ Offline — Tidak menerima order
+                @endif
+            </div>
+        </div>
+        <div class="form-check form-switch" style="padding-left: 0; margin-left: var(--fib-3);">
+            <input class="form-check-input" type="checkbox" role="switch"
+                   id="toggleStatus"
+                   {{ $mitra->status_online === 'online' ? 'checked' : '' }}
+                   style="width: 48px; height: 24px; cursor: pointer;">
+        </div>
+    </div>
+
     {{-- Hero Saldo (Golden Ratio: padding fib-4, content centered) --}}
     <div class="hero-mitra">
         <div class="hero-content">
@@ -132,4 +155,45 @@
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+document.getElementById('toggleStatus').addEventListener('change', async function() {
+    const isOnline = this.checked;
+    const label = document.getElementById('status-label');
+
+    try {
+        const response = await fetch('{{ route("mitra.toggle-status") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ status: isOnline ? 'online' : 'offline' })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            if (isOnline) {
+                label.className = 'text-success';
+                label.textContent = '🟢 Online — Siap terima order';
+            } else {
+                label.className = 'text-secondary';
+                label.textContent = '⚫ Offline — Tidak menerima order';
+            }
+        } else {
+            this.checked = !isOnline;
+            alert('Gagal mengubah status: ' + data.message);
+        }
+    } catch (err) {
+        this.checked = !isOnline;
+        console.error('Toggle failed:', err);
+        alert('Gagal mengubah status. Coba lagi.');
+    }
+});
+</script>
+@endpush
+
 @endsection

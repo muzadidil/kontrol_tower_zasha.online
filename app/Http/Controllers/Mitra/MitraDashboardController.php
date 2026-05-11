@@ -132,4 +132,34 @@ class MitraDashboardController extends Controller
 
         return back()->with('success', 'Foto profil berhasil diperbarui');
     }
+
+    public function toggleStatus(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:online,offline',
+        ]);
+
+        $mitra = $this->mitra();
+        $newStatus = $request->input('status');
+
+        try {
+            $mitra->update(['status_online' => $newStatus]);
+
+            return response()->json([
+                'success' => true,
+                'status' => $newStatus,
+                'message' => $newStatus === 'online' ? 'Status diubah ke online' : 'Status diubah ke offline',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Toggle mitra status gagal', [
+                'message' => $e->getMessage(),
+                'mitra_id' => $mitra->id_mitra,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengubah status',
+            ], 500);
+        }
+    }
 }
