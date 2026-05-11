@@ -118,15 +118,13 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::get('/', [PelangganPpobNewController::class, 'index'])->name('index');
         Route::get('/beli', [PelangganPpobNewController::class, 'form'])->name('form');
         Route::post('/transaksi', [PelangganPpobNewController::class, 'transaksi'])->name('transaksi');
-        Route::get('/{trx}', [PelangganPpobNewController::class, 'show'])->name('show');
-        // New routes untuk kategori, produk, checkout
+        Route::post('/checkout', [PelangganPpobController::class, 'checkout'])->name('checkout');
+        Route::get('/produk/{kategori:kode}', [PelangganPpobController::class, 'produk'])->name('produk');
+        // Harus di atas /{trx} agar constraint where() bisa match lebih dulu
         Route::get('/{tipe}', [PelangganPpobController::class, 'kategori'])
             ->name('kategori')
             ->where('tipe', 'pulsa|token|game|ewallet');
-        Route::get('/produk/{kategori:kode}', [PelangganPpobController::class, 'produk'])
-            ->name('produk');
-        Route::post('/checkout', [PelangganPpobController::class, 'checkout'])
-            ->name('checkout');
+        Route::get('/{trx}', [PelangganPpobNewController::class, 'show'])->name('show');
     });
 
     // Topup pelanggan (Tokopay)
