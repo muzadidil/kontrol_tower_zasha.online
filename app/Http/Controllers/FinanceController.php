@@ -16,9 +16,9 @@ class FinanceController extends Controller
             ->where('status_pesanan', 'Selesai')
             ->sum('total_pesanan');
 
-        $totalCuanZasha = DB::table('pesanan_jastip')
-            ->where('status_jastip', 'Selesai')
-            ->sum(DB::raw('(ongkir * 0.1) + (total_admin_lokasi * 0.5)'));
+        $totalCuanZasha = DB::table('jastip_orders')
+            ->where('status', 'selesai')
+            ->sum('komisi_zasha');
 
         try {
             $totalProfitPpob = PpobTransaction::select(DB::raw('SUM(margin_zasha) as profit'))->value('profit') ?? 0;

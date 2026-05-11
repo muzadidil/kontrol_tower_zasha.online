@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\NotifHelper;
 
 class RiwayatController extends Controller
@@ -34,15 +35,26 @@ class RiwayatController extends Controller
             ->orderBy('p.id_pesanan', 'desc')
             ->get();
 
-        // Query Jastip
-        $query_jastip = DB::table('pesanan_jastip as pj')
-            ->leftJoin('mitra_jastip as mj', 'pj.id_mitra', '=', 'mj.id_driver')
-            ->select('pj.*', 'mj.nama_driver', 'mj.foto_driver')
-            ->where('pj.id_pelanggan', $id_pelanggan)
+        // Query Jastip — pakai jastip_orders (modul baru) + JOIN ke mitra
+        $query_jastip = DB::table('jastip_orders as jo')
+            ->leftJoin('mitra as m', 'jo.mitra_id', '=', 'm.id_mitra')
+            ->select(
+                'jo.id as id_jastip',
+                'jo.pelanggan_id as id_pelanggan',
+                'jo.mitra_id as id_mitra',
+                'jo.status as status_jastip',
+                'jo.ongkos_jasa as ongkir',
+                'jo.actual_total_barang as total_harga_barang',
+                'jo.komisi_zasha as total_admin_lokasi',
+                'jo.created_at as waktu_order',
+                'm.nama_panggilan as nama_driver',
+                'm.foto_mitra as foto_driver'
+            )
+            ->where('jo.pelanggan_id', $id_pelanggan)
             ->when($status_filter != 'semua', function ($q) use ($status_filter) {
-                return $q->where('pj.status_jastip', $status_filter);
+                return $q->where('jo.status', $status_filter);
             })
-            ->orderBy('pj.id_jastip', 'desc')
+            ->orderByDesc('jo.id')
             ->get();
 
         return view('pelanggan.riwayat', [
@@ -61,12 +73,22 @@ class RiwayatController extends Controller
         $type = $request->get('type', 'jasa');
 
         if ($type == 'jastip') {
-            $status_baru = ($aksi == 'selesai') ? 'Selesai' : (($aksi == 'batal') ? 'Dibatalkan' : '');
+            // Map aksi pelanggan ke enum jastip_orders.status (modul baru)
+            $status_baru = ($aksi == 'selesai') ? 'selesai' : (($aksi == 'batal') ? 'ditolak' : '');
             if (!empty($status_baru)) {
-                DB::table('pesanan_jastip')
-                    ->where('id_jastip', $id_o)
-                    ->where('id_pelanggan', $id_pelanggan)
-                    ->update(['status_jastip' => $status_baru]);
+                try {
+                    DB::table('jastip_orders')
+                        ->where('id', $id_o)
+                        ->where('pelanggan_id', $id_pelanggan)
+                        ->update(['status' => $status_baru]);
+                } catch (\Exception $e) {
+                    Log::error('Riwayat update jastip gagal', [
+                        'message'      => $e->getMessage(),
+                        'id_jastip'    => $id_o,
+                        'id_pelanggan' => $id_pelanggan,
+                        'aksi'         => $aksi,
+                    ]);
+                }
             }
         } else {
             $status_baru = ($aksi == 'selesai') ? 'Selesai' : (($aksi == 'batal') ? 'Batal' : '');

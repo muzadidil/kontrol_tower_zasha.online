@@ -214,8 +214,12 @@ class PelangganController extends Controller
 
     public function detailJastip($id)
     {
-        $driver = DB::table('mitra_jastip')->where('id_driver', $id)->first();
-        if (!$driver) abort(404);
+        // Driver jastip = mitra dengan kategori_kode = 'JST'
+        $driver = DB::table('mitra')
+            ->where('id_mitra', $id)
+            ->where('kategori_kode', 'JST')
+            ->first();
+        if (! $driver) abort(404);
 
         return view('pelanggan.detail-jastip', compact('driver'));
     }

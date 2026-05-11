@@ -19,26 +19,39 @@ class MitraController extends Controller
         $categories = DB::table('kategori_pekerjaan')->orderBy('id_kategori', 'desc')->get();
         $units      = DB::table('master_satuan')->orderBy('nama_satuan')->get();
 
-        // Verifikasi
-        $list_driver = DB::table('mitra_jastip')->where('status_verifikasi', 'Pending')->get();
+        // Verifikasi — driver = mitra dengan kategori_kode='JST'
+        $list_driver = DB::table('mitra')
+            ->where('kategori_kode', 'JST')
+            ->where('status_verifikasi', 'pending_review')
+            ->get();
         $list_mitra_verif = DB::table('mitra')
             ->where(function ($q) {
-                $q->where('status_verifikasi', 'Pending')
+                $q->where('status_verifikasi', 'pending_review')
                   ->orWhereNotNull('plat_pengajuan');
             })
             ->get();
 
-        // Jastip
-        $cuan_zasha     = DB::table('pesanan_jastip')->where('status_jastip', 'Selesai')
-                            ->sum(DB::raw('(ongkir * 0.1) + (total_admin_lokasi * 0.5)'));
-        $order_hari_ini = DB::table('pesanan_jastip')->whereDate('waktu_order', date('Y-m-d'))->count();
-        $driver_aktif   = DB::table('mitra_jastip')->where('status_kerja', 'Aktif')->count();
-        $total_pending  = DB::table('pesanan_jastip')->where('status_jastip', 'Mencari Driver')->count();
-        $all_jastip     = DB::table('pesanan_jastip as pj')
-                            ->join('pelanggans as pl', 'pj.id_pelanggan', '=', 'pl.id_pelanggan')
-                            ->leftJoin('mitra_jastip as mj', 'pj.id_mitra', '=', 'mj.id_driver')
-                            ->select('pj.*', 'pl.nama_pelanggan', 'pl.no_wa', 'mj.nama_driver')
-                            ->orderByDesc('pj.waktu_order')
+        // Jastip — pakai jastip_orders & komisi_zasha dari snapshot saat order dibuat
+        $cuan_zasha     = DB::table('jastip_orders')->where('status', 'selesai')->sum('komisi_zasha');
+        $order_hari_ini = DB::table('jastip_orders')->whereDate('created_at', date('Y-m-d'))->count();
+        $driver_aktif   = DB::table('mitra')->where('kategori_kode', 'JST')->where('status_online', 'online')->count();
+        $total_pending  = DB::table('jastip_orders')->where('status', 'menunggu_mitra')->count();
+        $all_jastip     = DB::table('jastip_orders as jo')
+                            ->join('pelanggans as pl', 'jo.pelanggan_id', '=', 'pl.id_pelanggan')
+                            ->leftJoin('mitra as m', 'jo.mitra_id', '=', 'm.id_mitra')
+                            ->select(
+                                'jo.id as id_jastip',
+                                'jo.pelanggan_id as id_pelanggan',
+                                'jo.mitra_id as id_mitra',
+                                'jo.status as status_jastip',
+                                'jo.ongkos_jasa as ongkir',
+                                'jo.actual_total_barang as total_harga_barang',
+                                'jo.komisi_zasha as total_admin_lokasi',
+                                'jo.created_at as waktu_order',
+                                'pl.nama_pelanggan', 'pl.no_wa',
+                                'm.nama_panggilan as nama_driver'
+                            )
+                            ->orderByDesc('jo.created_at')
                             ->get();
 
         // Radar

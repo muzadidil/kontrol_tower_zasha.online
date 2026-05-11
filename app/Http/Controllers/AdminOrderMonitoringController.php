@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminOrderMonitoringController extends Controller
 {
@@ -12,15 +13,16 @@ class AdminOrderMonitoringController extends Controller
         $filter_status = $request->query('status', '');
         $search = $request->query('search', '');
 
-        // QUERY UNION SAKTI (TIDAK DIUBAH)
+        // UNION jasa (pesanan) + jastip (jastip_orders modul baru).
+        // Kolom yang tidak ada di skema baru di-cast jadi placeholder agar shape kolom sama.
         $query_text = "
-            (SELECT 
-                CAST(p.id_pesanan AS CHAR) COLLATE utf8mb4_general_ci as id, 
-                p.tanggal_pesanan as tgl, 
-                p.status_pesanan COLLATE utf8mb4_general_ci as status, 
+            (SELECT
+                CAST(p.id_pesanan AS CHAR) COLLATE utf8mb4_general_ci as id,
+                p.tanggal_pesanan as tgl,
+                p.status_pesanan COLLATE utf8mb4_general_ci as status,
                 p.metode_pembayaran COLLATE utf8mb4_general_ci as metode,
                 'JASA' COLLATE utf8mb4_general_ci as tipe_order,
-                plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan, 
+                plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan,
                 COALESCE(m.nama_asli, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
                 p.kategori_jasa COLLATE utf8mb4_general_ci as detail,
                 (p.biaya_jasa + p.ongkir + p.kode_unik) as total_biaya
@@ -28,23 +30,23 @@ class AdminOrderMonitoringController extends Controller
             JOIN pelanggan plg ON p.id_pelanggan = plg.id_pelanggan
             LEFT JOIN mitra m ON p.id_mitra = m.id_mitra
             WHERE p.status_pesanan NOT IN ('Selesai', 'Batal'))
-            
+
             UNION ALL
-            
-            (SELECT 
-                CAST(pj.id_jastip AS CHAR) COLLATE utf8mb4_general_ci as id, 
-                pj.waktu_order as tgl, 
-                pj.status_jastip COLLATE utf8mb4_general_ci as status, 
-                pj.metode_pembayaran COLLATE utf8mb4_general_ci as metode,
+
+            (SELECT
+                CAST(jo.id AS CHAR) COLLATE utf8mb4_general_ci as id,
+                jo.created_at as tgl,
+                jo.status COLLATE utf8mb4_general_ci as status,
+                IF(jo.cod_eligible = 1, 'COD', 'Saldo') COLLATE utf8mb4_general_ci as metode,
                 'JASTIP' COLLATE utf8mb4_general_ci as tipe_order,
-                plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan, 
-                COALESCE(mj.nama_asli, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
-                pj.lokasi_asal COLLATE utf8mb4_general_ci as detail,
-                (pj.total_harga_barang + pj.ongkir) as total_biaya
-            FROM pesanan_jastip pj
-            JOIN pelanggan plg ON pj.id_pelanggan = plg.id_pelanggan
-            LEFT JOIN mitra mj ON pj.id_mitra = mj.id_mitra
-            WHERE pj.status_jastip NOT IN ('Selesai', 'Batal'))
+                plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan,
+                COALESCE(m.nama_asli, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
+                jo.delivery_address COLLATE utf8mb4_general_ci as detail,
+                (jo.actual_total_barang + jo.ongkos_jasa) as total_biaya
+            FROM jastip_orders jo
+            JOIN pelanggan plg ON jo.pelanggan_id = plg.id_pelanggan
+            LEFT JOIN mitra m ON jo.mitra_id = m.id_mitra
+            WHERE jo.status NOT IN ('selesai', 'ditolak'))
         ";
 
         $final_query = "SELECT * FROM ($query_text) as gabungan WHERE 1=1";
@@ -62,7 +64,7 @@ class AdminOrderMonitoringController extends Controller
             $bindings[] = $like;
         }
 
-        $final_query .= " ORDER BY FIELD(status, 'Menunggu Konfirmasi', 'Proses', 'Pending', 'Lunas'), tgl DESC";
+        $final_query .= " ORDER BY FIELD(status, 'Menunggu Konfirmasi', 'Proses', 'Pending', 'Lunas', 'menunggu_mitra', 'belanja', 'menuju_pengantaran', 'diantar'), tgl DESC";
 
         $orders = DB::select($final_query, $bindings);
 
@@ -77,14 +79,26 @@ class AdminOrderMonitoringController extends Controller
             'status_baru' => 'required|string|max:50',
         ]);
 
-        $table         = ($request->tipe_order == 'JASA') ? 'pesanan' : 'pesanan_jastip';
-        $id_column     = ($request->tipe_order == 'JASA') ? 'id_pesanan' : 'id_jastip';
-        $status_column = ($request->tipe_order == 'JASA') ? 'status_pesanan' : 'status_jastip';
+        try {
+            if ($request->tipe_order == 'JASA') {
+                DB::table('pesanan')
+                    ->where('id_pesanan', $request->id_pesanan)
+                    ->update(['status_pesanan' => $request->status_baru]);
+            } else {
+                DB::table('jastip_orders')
+                    ->where('id', $request->id_pesanan)
+                    ->update(['status' => $request->status_baru]);
+            }
 
-        DB::table($table)->where($id_column, $request->id_pesanan)->update([
-            $status_column => $request->status_baru,
-        ]);
-
-        return redirect()->back()->with('pesan', 'Status berhasil diperbarui!');
+            return redirect()->back()->with('pesan', 'Status berhasil diperbarui!');
+        } catch (\Exception $e) {
+            Log::error('Admin update order status error', [
+                'message'     => $e->getMessage(),
+                'tipe_order'  => $request->tipe_order,
+                'id_pesanan'  => $request->id_pesanan,
+                'status_baru' => $request->status_baru,
+            ]);
+            return back()->with('pesan', 'Gagal update status.');
+        }
     }
 }
