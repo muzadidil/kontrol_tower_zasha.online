@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class AdminJastipController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $filter_status = $request->query('status', '');
+
         // 1. Cuan Zasha — komisi sudah dihitung & disimpan saat order dibuat
         $cuan_zasha = DB::table('jastip_orders')
             ->where('status', 'selesai')
@@ -30,7 +32,7 @@ class AdminJastipController extends Controller
             ->where('status', 'menunggu_mitra')
             ->count();
 
-        // 5. Ambil Semua Data Jastip
+        // 5. Ambil Semua Data Jastip dengan filter & pagination
         $all_jastip = DB::table('jastip_orders as jo')
             ->join('pelanggan as pl', 'jo.pelanggan_id', '=', 'pl.id_pelanggan')
             ->leftJoin('mitra as m', 'jo.mitra_id', '=', 'm.id_mitra')
@@ -47,11 +49,13 @@ class AdminJastipController extends Controller
                 'pl.no_wa',
                 'm.nama_panggilan as nama_driver'
             )
+            ->when($filter_status !== '', fn($q) => $q->where('jo.status', $filter_status))
             ->orderByDesc('jo.created_at')
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.jastip', compact(
-            'cuan_zasha', 'order_hari_ini', 'driver_aktif', 'total_pending', 'all_jastip'
+            'cuan_zasha', 'order_hari_ini', 'driver_aktif', 'total_pending', 'all_jastip', 'filter_status'
         ));
     }
 }

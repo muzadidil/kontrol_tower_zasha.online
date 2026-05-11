@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Helpers\NotifHelper;
 
 class PelangganController extends Controller
@@ -229,8 +232,12 @@ class PelangganController extends Controller
         $id_pelanggan = auth('pelanggan')->id();
         $mitra        = DB::table('mitra')->where('id_mitra', $request->id_mitra)->first();
 
-        if (!$mitra) {
+        if (! $mitra) {
             return back()->with('error', 'Mitra tidak ditemukan.');
+        }
+
+        if ($request->input('tipe') === 'jastip') {
+            return $this->simpanPesananJastip($request, $id_pelanggan, $mitra);
         }
 
         $id_pesanan = DB::table('pesanan')->insertGetId([
@@ -251,6 +258,100 @@ class PelangganController extends Controller
         );
 
         return redirect()->route('pelanggan.invoice', $id_pesanan);
+    }
+
+    /**
+     * Buat order jastip baru di tabel jastip_orders.
+     * Form sederhana — koordinat & breakdown ongkos diisi placeholder
+     * (akan dilengkapi mitra saat menerima order).
+     */
+    private function simpanPesananJastip(Request $request, int $id_pelanggan, object $mitra)
+    {
+        $request->validate([
+            'lokasi_asal'        => 'required|string|max:255',
+            'daftar_belanja'     => 'required|string|max:2000',
+            'total_harga_barang' => 'nullable|numeric|min:0',
+            'metode_pembayaran'  => 'nullable|in:COD,Transfer,Saldo',
+        ]);
+
+        $pelanggan = Auth::guard('pelanggan')->user();
+        $estimasiBarang = (int) ($request->input('total_harga_barang') ?? 0);
+        $codEligible    = ($request->input('metode_pembayaran') === 'COD');
+
+        try {
+            $orderId = DB::transaction(function () use ($request, $id_pelanggan, $mitra, $estimasiBarang, $codEligible, $pelanggan) {
+                $now = now();
+
+                $orderId = DB::table('jastip_orders')->insertGetId([
+                    'mitra_id'              => $mitra->id_mitra,
+                    'order_code'            => 'JST-' . strtoupper(Str::random(8)),
+                    'pelanggan_id'          => $id_pelanggan,
+                    'delivery_address'      => $request->lokasi_asal,
+                    'delivery_lat'          => 0,
+                    'delivery_lng'          => 0,
+                    'total_jarak_km'        => 0,
+                    'total_stops'           => 1,
+                    'tarif_per_km'          => 0,
+                    'biaya_stop'            => 0,
+                    'ongkos_jasa'           => 0,
+                    'komisi_zasha'          => 0,
+                    'pendapatan_mitra'      => 0,
+                    'estimasi_total_barang' => $estimasiBarang,
+                    'actual_total_barang'   => 0,
+                    'saldo_mitra_snapshot'  => $mitra->saldo ?? 0,
+                    'cod_eligible'          => $codEligible,
+                    'status'                => 'menunggu_mitra',
+                    'mitra_notified_at'     => $now,
+                    'created_at'            => $now,
+                    'updated_at'            => $now,
+                ]);
+
+                $stopId = DB::table('jastip_stops')->insertGetId([
+                    'jastip_order_id'    => $orderId,
+                    'urutan'             => 1,
+                    'nama_lokasi'        => $request->lokasi_asal,
+                    'alamat_lokasi'      => $request->lokasi_asal,
+                    'lat'                => 0,
+                    'lng'                => 0,
+                    'jarak_dari_prev_km' => 0,
+                    'created_at'         => $now,
+                    'updated_at'         => $now,
+                ]);
+
+                DB::table('jastip_order_items')->insert([
+                    'jastip_order_id' => $orderId,
+                    'jastip_stop_id'  => $stopId,
+                    'urutan'          => 1,
+                    'nama_barang'     => 'Daftar belanjaan (lihat catatan)',
+                    'harga_perkiraan' => $estimasiBarang,
+                    'is_checked'      => false,
+                    'catatan'         => $request->daftar_belanja,
+                    'created_at'      => $now,
+                    'updated_at'      => $now,
+                ]);
+
+                return $orderId;
+            });
+
+            NotifHelper::kirim(
+                $id_pelanggan,
+                'Order Jastip Dibuat',
+                'Order jastip #' . $orderId . ' ke ' . $mitra->nama_panggilan . ' telah dibuat dan menunggu konfirmasi mitra.',
+                'pesanan',
+                route('pelanggan.riwayat.index')
+            );
+
+            return redirect()->route('pelanggan.riwayat.index')
+                ->with('success', 'Order jastip berhasil dibuat. Menunggu konfirmasi mitra.');
+        } catch (\Exception $e) {
+            Log::error('Simpan order jastip gagal', [
+                'message'      => $e->getMessage(),
+                'pelanggan_id' => $id_pelanggan,
+                'mitra_id'     => $mitra->id_mitra,
+                'lokasi_asal'  => $request->lokasi_asal,
+            ]);
+            return back()->with('error', 'Gagal menyimpan order jastip. Silakan coba lagi.');
+        }
     }
 
     public function notifikasi()
