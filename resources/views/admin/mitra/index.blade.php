@@ -53,7 +53,7 @@
     <div class="card-zasha card overflow-hidden">
         <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
             <h6 class="fw-bold mb-0" style="color:#1e293b;">Daftar Mitra Terdaftar</h6>
-            <a href="{{ route('mitra.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold btn-sm">
+            <a href="{{ route('admin.mitra.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold btn-sm">
                 <i class="fas fa-plus me-1"></i>Tambah Mitra
             </a>
         </div>
@@ -85,8 +85,8 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-flex justify-content-end gap-1">
-                                <a href="{{ route('mitra.edit', $m->id_mitra) }}" class="btn-tbl" style="background:#eff6ff;color:#005aa9;"><i class="fas fa-pencil-alt"></i>Edit</a>
-                                <form action="{{ route('mitra.destroy', $m->id_mitra) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus mitra {{ $m->nama_panggilan }}?')">
+                                <a href="{{ route('admin.mitra.edit', $m->id_mitra) }}" class="btn-tbl" style="background:#eff6ff;color:#005aa9;"><i class="fas fa-pencil-alt"></i>Edit</a>
+                                <form action="{{ route('admin.mitra.destroy', $m->id_mitra) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus mitra {{ $m->nama_panggilan }}?')">
                                     @csrf @method('DELETE')
                                     <button class="btn-tbl" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-trash"></i>Hapus</button>
                                 </form>

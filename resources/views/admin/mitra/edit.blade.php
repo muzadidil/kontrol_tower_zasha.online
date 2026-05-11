@@ -5,7 +5,7 @@
         <h1 class="h3 mb-4 text-gray-800">Edit Mitra</h1>
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('mitra.update', $mitra->id) }}" method="POST">
+                <form action="{{ route('admin.mitra.update', $mitra->id) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="mb-3">
@@ -40,7 +40,7 @@
                         <input type="number" name="biaya_service_standar" class="form-control" value="{{ $mitra->biaya_service_standar }}" step="0.01">
                     </div>
                     <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    <a href="{{ route('mitra.index') }}" class="btn btn-secondary">Batal</a>
+                    <a href="{{ route('admin.mitra.index') }}" class="btn btn-secondary">Batal</a>
                 </form>
             </div>
         </div>

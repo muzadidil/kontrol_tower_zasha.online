@@ -75,12 +75,42 @@ class RiwayatController extends Controller
         if ($type == 'jastip') {
             // Map aksi pelanggan ke enum jastip_orders.status (modul baru)
             $status_baru = ($aksi == 'selesai') ? 'selesai' : (($aksi == 'batal') ? 'ditolak' : '');
-            if (!empty($status_baru)) {
+            if (! empty($status_baru)) {
                 try {
-                    DB::table('jastip_orders')
-                        ->where('id', $id_o)
-                        ->where('pelanggan_id', $id_pelanggan)
-                        ->update(['status' => $status_baru]);
+                    DB::transaction(function () use ($id_o, $id_pelanggan, $aksi, $status_baru) {
+                        $order = DB::table('jastip_orders')
+                            ->where('id', $id_o)
+                            ->where('pelanggan_id', $id_pelanggan)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if (! $order) {
+                            throw new \RuntimeException('Order tidak ditemukan.');
+                        }
+
+                        // Refund escrow saldo HANYA kalau pelanggan cancel order
+                        // yang belum diambil mitra (status masih menunggu_mitra).
+                        if ($aksi === 'batal') {
+                            if ($order->status !== 'menunggu_mitra') {
+                                throw new \RuntimeException('Order tidak bisa dibatalkan karena sudah diproses mitra.');
+                            }
+
+                            $escrow = (int) ($order->estimasi_total_barang ?? 0);
+                            if ($escrow > 0) {
+                                \App\Models\Pelanggan::where('id_pelanggan', $id_pelanggan)
+                                    ->lockForUpdate()
+                                    ->firstOrFail()
+                                    ->increment('saldo', $escrow);
+                            }
+                        }
+
+                        DB::table('jastip_orders')
+                            ->where('id', $id_o)
+                            ->where('pelanggan_id', $id_pelanggan)
+                            ->update(['status' => $status_baru, 'updated_at' => now()]);
+                    });
+                } catch (\RuntimeException $e) {
+                    return redirect()->route('pelanggan.riwayat.index')->with('error', $e->getMessage());
                 } catch (\Exception $e) {
                     Log::error('Riwayat update jastip gagal', [
                         'message'      => $e->getMessage(),
@@ -88,6 +118,7 @@ class RiwayatController extends Controller
                         'id_pelanggan' => $id_pelanggan,
                         'aksi'         => $aksi,
                     ]);
+                    return redirect()->route('pelanggan.riwayat.index')->with('error', 'Terjadi kesalahan saat memproses order.');
                 }
             }
         } else {

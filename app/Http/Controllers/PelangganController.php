@@ -274,13 +274,25 @@ class PelangganController extends Controller
             'metode_pembayaran'  => 'nullable|in:COD,Transfer,Saldo',
         ]);
 
-        $pelanggan = Auth::guard('pelanggan')->user();
         $estimasiBarang = (int) ($request->input('total_harga_barang') ?? 0);
         $codEligible    = ($request->input('metode_pembayaran') === 'COD');
 
         try {
-            $orderId = DB::transaction(function () use ($request, $id_pelanggan, $mitra, $estimasiBarang, $codEligible, $pelanggan) {
+            $orderId = DB::transaction(function () use ($request, $id_pelanggan, $mitra, $estimasiBarang, $codEligible) {
                 $now = now();
+
+                // Escrow: kunci pelanggan, cek saldo, decrement.
+                // Skip cek kalau estimasi=0 — pelanggan belum tahu total, mitra akan top-up actual nanti.
+                $pelangganLocked = \App\Models\Pelanggan::where('id_pelanggan', $id_pelanggan)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($estimasiBarang > 0) {
+                    if ($pelangganLocked->saldo < $estimasiBarang) {
+                        throw new \RuntimeException('Saldo tidak cukup untuk escrow order ini.');
+                    }
+                    $pelangganLocked->decrement('saldo', $estimasiBarang);
+                }
 
                 $orderId = DB::table('jastip_orders')->insertGetId([
                     'mitra_id'              => $mitra->id_mitra,
@@ -343,6 +355,8 @@ class PelangganController extends Controller
 
             return redirect()->route('pelanggan.riwayat.index')
                 ->with('success', 'Order jastip berhasil dibuat. Menunggu konfirmasi mitra.');
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage())->withInput();
         } catch (\Exception $e) {
             Log::error('Simpan order jastip gagal', [
                 'message'      => $e->getMessage(),

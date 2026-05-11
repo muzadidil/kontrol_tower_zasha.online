@@ -88,7 +88,7 @@ class MitraController extends Controller
             'tarif_per_jam', 'tarif_per_hari', 'biaya_service_standar',
             'status_mitra', 'deskripsi_singkat', 'alamat',
         ]));
-        return redirect()->route('mitra.index')->with('success', 'Mitra berhasil ditambahkan.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Mitra berhasil ditambahkan.');
     }
 
     /**
@@ -125,7 +125,7 @@ class MitraController extends Controller
             'tarif_per_jam', 'tarif_per_hari', 'biaya_service_standar',
             'status_mitra', 'deskripsi_singkat', 'alamat',
         ]));
-        return redirect()->route('mitra.index')->with('success', 'Mitra berhasil diperbarui.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Mitra berhasil diperbarui.');
     }
 
     /**
@@ -135,7 +135,7 @@ class MitraController extends Controller
     {
         $mitra = Mitra::findOrFail($id);
         $mitra->delete();
-        return redirect()->route('mitra.index')->with('success', 'Mitra berhasil dihapus.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Mitra berhasil dihapus.');
     }
 
     public function dashboard()

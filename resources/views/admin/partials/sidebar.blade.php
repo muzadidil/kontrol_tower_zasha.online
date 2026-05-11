@@ -11,7 +11,7 @@
         {{-- ── MITRA ────────────────────────────────────────── --}}
         <li class="sidebar-divider">Mitra</li>
         <li>
-            <a href="{{ route('mitra.index') }}" class="nav-link {{ request()->is('admin/mitra*') ? 'active' : '' }}">
+            <a href="{{ route('admin.mitra.index') }}" class="nav-link {{ request()->is('admin/mitra*') ? 'active' : '' }}">
                 <i class="fas fa-users me-2"></i> Manajemen Mitra
             </a>
         </li>

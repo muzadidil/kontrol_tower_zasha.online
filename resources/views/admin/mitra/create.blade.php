@@ -5,7 +5,7 @@
         <h1 class="h3 mb-4 text-gray-800">Tambah Mitra</h1>
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('mitra.store') }}" method="POST">
+                <form action="{{ route('admin.mitra.store') }}" method="POST">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Nama</label>
@@ -43,7 +43,7 @@
                         <input type="number" name="biaya_service_standar" class="form-control" step="0.01">
                     </div>
                     <button type="submit" class="btn btn-primary">Simpan Mitra</button>
-                    <a href="{{ route('mitra.index') }}" class="btn btn-secondary">Batal</a>
+                    <a href="{{ route('admin.mitra.index') }}" class="btn btn-secondary">Batal</a>
                 </form>
             </div>
         </div>
