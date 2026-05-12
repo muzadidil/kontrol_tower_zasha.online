@@ -259,15 +259,10 @@
         </div>
     </div>
 
-    {{-- Footer spacer (isi ruang kosong di bawah menu, golden ratio) --}}
-    <div style="margin-top: var(--fib-7); padding: var(--fib-4) var(--fib-3); text-align: center;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: var(--fib-3); margin-bottom: var(--fib-3);">
-            <div style="width: var(--fib-5); height: 1px; background: var(--line);"></div>
-            <div style="width: var(--fib-2); height: var(--fib-2); border-radius: 50%; background: var(--mitra-gold); opacity: 0.6;"></div>
-            <div style="width: var(--fib-5); height: 1px; background: var(--line);"></div>
-        </div>
-        <div style="font-size: var(--t-xxs); color: var(--ink-soft); letter-spacing: 0.08em; text-transform: uppercase;">
-            v1.0 · &copy; {{ date('Y') }} ZaSha.Online
+    {{-- Footer minimal --}}
+    <div style="margin-top: var(--fib-4); padding: var(--fib-2) 0; text-align: center;">
+        <div style="font-size: var(--t-xxs); color: var(--ink-soft); opacity: 0.6; letter-spacing: 0.05em;">
+            &copy; {{ date('Y') }} ZaSha.Online
         </div>
     </div>
 

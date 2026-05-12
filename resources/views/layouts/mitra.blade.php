@@ -91,8 +91,8 @@
             min-height: 100vh;
             position: relative;
             box-shadow: 0 0 var(--fib-5) rgba(0,0,0,0.06);
-            /* Buffer fib-8 + fib-6 (144 + 55 = 199px) agar tombol/menu terakhir tidak tertutup nav-bottom */
-            padding-bottom: calc(var(--nav-height) + var(--fib-8) + var(--fib-6) + env(safe-area-inset-bottom));
+            /* Buffer fib-4 (21px) agar konten terakhir tidak tertutup nav-bottom — cukup ringkas */
+            padding-bottom: calc(var(--nav-height) + var(--fib-4) + env(safe-area-inset-bottom));
             padding-top: env(safe-area-inset-top);
             overflow-x: hidden;
         }
