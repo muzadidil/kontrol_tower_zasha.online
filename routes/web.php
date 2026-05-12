@@ -29,6 +29,7 @@ use App\Http\Controllers\Mitra\MitraRatingController;
 use App\Http\Controllers\Mitra\MitraJadwalController;
 use App\Http\Controllers\Mitra\IndenController as MitraIndenController;
 use App\Http\Controllers\Mitra\MitraPortfolioController;
+use App\Http\Controllers\Mitra\MitraSparepartController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -185,6 +186,18 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
             ->middleware('feature:laporan-harian')->name('harian');
         Route::get('/bulanan', [MitraLaporanController::class, 'bulanan'])
             ->middleware('feature:laporan-bulanan')->name('bulanan');
+    });
+
+    // Sparepart inventory (butuh verified + fitur sparepart)
+    Route::prefix('sparepart')->name('sparepart.')->middleware(['verified.mitra', 'feature:sparepart'])->group(function () {
+        Route::get('/', [MitraSparepartController::class, 'index'])->name('index');
+        Route::get('/create', [MitraSparepartController::class, 'create'])->name('create');
+        Route::post('/', [MitraSparepartController::class, 'store'])->name('store');
+        Route::get('/{sparepart}/edit', [MitraSparepartController::class, 'edit'])->name('edit');
+        Route::put('/{sparepart}', [MitraSparepartController::class, 'update'])->name('update');
+        Route::post('/{sparepart}/stok', [MitraSparepartController::class, 'ubahStok'])->name('ubahStok');
+        Route::post('/{sparepart}/toggle-aktif', [MitraSparepartController::class, 'toggleAktif'])->name('toggleAktif');
+        Route::delete('/{sparepart}', [MitraSparepartController::class, 'destroy'])->name('destroy');
     });
 
     // Portfolio (butuh verified + fitur portfolio)
