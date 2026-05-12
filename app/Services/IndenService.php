@@ -27,7 +27,7 @@ class IndenService
             return IndenOrder::create([
                 'order_code'           => IndenOrder::generateCode(),
                 'pelanggan_id'         => $pelangganId,
-                'mitra_id'             => $data['mitra_id'],
+                'mitra_id'             => (int) $data['mitra_id'],
                 'tanggal_pelaksanaan'  => $data['tanggal_pelaksanaan'],
                 'tipe_durasi'          => $data['tipe_durasi'],
                 'durasi'               => $data['durasi'],

@@ -265,7 +265,7 @@ class PelangganController extends Controller
         // Create order tracking untuk polling mitra
         try {
             OrderTracking::create([
-                'mitra_id'      => $request->id_mitra,
+                'mitra_id'      => (int) $request->id_mitra,
                 'order_type'    => 'pesanan',
                 'order_id'      => $id_pesanan,
                 'pelanggan_id'  => $id_pelanggan,
@@ -278,11 +278,12 @@ class PelangganController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to create order tracking for pesanan', [
                 'message'      => $e->getMessage(),
+                'trace'        => $e->getTraceAsString(),
                 'pesanan_id'   => $id_pesanan,
                 'pelanggan_id' => $id_pelanggan,
                 'mitra_id'     => $request->id_mitra,
             ]);
-            // Don't throw — order creation is already successful
+            return back()->with('error', 'Gagal membuat order tracking.')->withInput();
         }
 
         NotifHelper::kirim(

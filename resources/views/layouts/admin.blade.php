@@ -10,20 +10,18 @@
     <link rel="stylesheet" href="{{ asset('css/admin-zasha.css') }}">
 </head>
 <body>
-
-    
     
     <header class="navbar-custom shadow-sm">
         @include('admin.partials.navbar')
     </header>
-@include('admin.partials.lock-screen')
+
+    @include('admin.partials.lock-screen')
+
     <div id="wrapper">
         @include('admin.partials.sidebar')
         
         <main id="main-content">
-            <div class="container-fluid">
-                @yield('content')
-            </div>
+            @yield('content')
         </main>
     </div>
     
