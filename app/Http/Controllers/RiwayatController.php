@@ -23,11 +23,22 @@ class RiwayatController extends Controller
         $id_pelanggan = auth('pelanggan')->id(); // Menggunakan auth('pelanggan')->id()
         $status_filter = $request->get('status', 'semua');
 
-        // Query Jasa (Pesanan Mitra)
-        $query_jasa = DB::table('pesanan_mitra as p')
+        // Query Jasa (tabel pesanan) + JOIN order_trackings untuk link tracking page
+        $query_jasa = DB::table('pesanan as p')
             ->leftJoin('mitra as m', 'p.id_mitra', '=', 'm.id_mitra')
             ->leftJoin('kategori_pekerjaan as k', 'm.id_kategori', '=', 'k.id_kategori')
-            ->select('p.*', 'm.nama_panggilan as nama_mitra', 'm.foto_mitra', 'k.nama_kategori')
+            ->leftJoin('order_trackings as ot', function ($join) {
+                $join->on('ot.order_id', '=', 'p.id_pesanan')
+                     ->where('ot.order_type', '=', 'pesanan');
+            })
+            ->select(
+                'p.*',
+                'm.nama_panggilan as nama_mitra',
+                'm.foto_mitra',
+                'k.nama_kategori',
+                'ot.id as tracking_id',
+                'ot.status as tracking_status'
+            )
             ->where('p.id_pelanggan', $id_pelanggan)
             ->when($status_filter != 'semua', function ($q) use ($status_filter) {
                 return $q->where('p.status_pesanan', $status_filter);
@@ -124,7 +135,7 @@ class RiwayatController extends Controller
         } else {
             $status_baru = ($aksi == 'selesai') ? 'Selesai' : (($aksi == 'batal') ? 'Batal' : '');
             if (!empty($status_baru)) {
-                DB::table('pesanan_mitra')
+                DB::table('pesanan')
                     ->where('id_pesanan', $id_o)
                     ->where('id_pelanggan', $id_pelanggan)
                     ->update(['status_pesanan' => $status_baru]);
@@ -163,7 +174,7 @@ class RiwayatController extends Controller
         ]);
 
         // whereNull('rating') mencegah overwrite ulasan yang sudah pernah dikirim
-        DB::table('pesanan_mitra')
+        DB::table('pesanan')
             ->where('id_pesanan', $request->id_order)
             ->where('id_pelanggan', $id_pelanggan)
             ->whereNull('rating')

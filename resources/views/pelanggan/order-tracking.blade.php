@@ -102,14 +102,14 @@
                 Silakan cek terlebih dahulu hasil kerjanya. Setelah dikonfirmasi selesai, pembayaran akan diteruskan ke mitra.
             </p>
             <div class="d-flex gap-2">
-                <form action="{{ route('pelanggan.order-tracking.belum-selesai') }}" method="POST" class="w-100">
+                <form action="{{ route('order-tracking.belum-selesai') }}" method="POST" class="w-100">
                     @csrf
                     <input type="hidden" name="tracking_id" value="{{ $tracking->id }}">
                     <button type="submit" class="btn-z-ghost w-100" style="padding:var(--s2) var(--s3);color:var(--red);border:1.5px solid var(--red);background:transparent;border-radius:var(--r2);font-weight:800;font-size:13px;cursor:pointer;">
                         <i class="bi bi-x-circle me-1"></i>Belum Selesai
                     </button>
                 </form>
-                <form action="{{ route('pelanggan.order-tracking.selesai') }}" method="POST" class="w-100">
+                <form action="{{ route('order-tracking.selesai') }}" method="POST" class="w-100">
                     @csrf
                     <input type="hidden" name="tracking_id" value="{{ $tracking->id }}">
                     <button type="submit" class="btn-z-primary w-100" style="padding:var(--s2) var(--s3);background:var(--green);color:white;border:none;border-radius:var(--r2);font-weight:800;font-size:13px;cursor:pointer;">

@@ -144,15 +144,22 @@
             </div>
 
             <div style="border-top:1px solid var(--border);padding-top:13px;">
-                @if(in_array($st, ['menunggu','pending']))
-                    <a href="{{ route('pelanggan.riwayat.update', ['aksi'=>'batal','id_order'=>$r->id_pesanan]) }}"
-                       style="display:block;width:100%;text-align:center;border:1.5px solid #fca5a5;
-                              color:#ef4444;border-radius:34px;padding:10px;font-size:12px;font-weight:800;
-                              text-decoration:none;"
-                       onclick="return confirm('Batalkan pesanan ini?')">
-                        BATALKAN PESANAN
-                    </a>
-                @elseif($st == 'selesai')
+                @php
+                    $hasTracking = !empty($r->tracking_id);
+                    $tStatus = $r->tracking_status ?? null;
+                    // Order sudah benar-benar selesai (escrow released)
+                    $isSelesai = $st == 'selesai' || $tStatus === 'selesai';
+                    // Mitra sudah selesai kerja, menunggu konfirmasi pelanggan
+                    $isMenungguKonfirmasi = $tStatus === 'selesai_mitra';
+                    // Order ditolak/dibatalkan
+                    $isCancelled = in_array($tStatus, ['ditolak_mitra', 'dibatalkan']) || in_array($st, ['batal','dibatalkan']);
+                    // Order sedang aktif (sudah accepted, belum selesai)
+                    $isAktif = $hasTracking && in_array($tStatus, ['accepted','menuju_lokasi','di_lokasi','dikerjakan','belum_selesai']);
+                    // Order baru, belum ada respons mitra
+                    $isMenungguMitra = !$hasTracking || $tStatus === 'pending';
+                @endphp
+
+                @if($isSelesai)
                     @if(!$r->rating)
                         <button onclick="bukaRating('{{ $r->id_pesanan }}','{{ $r->nama_mitra }}')"
                                 style="width:100%;background:var(--gold);color:#002d72;border:none;
@@ -165,12 +172,37 @@
                             <i class="bi bi-patch-check-fill me-1"></i>Penilaian Sudah Dikirim
                         </div>
                     @endif
-                @else
-                    <a href="{{ route('pelanggan.riwayat.update', ['aksi'=>'selesai','id_order'=>$r->id_pesanan]) }}"
-                       class="btn-z-primary d-block text-center text-decoration-none" style="padding:12px;"
-                       onclick="return confirm('Konfirmasi pekerjaan sudah selesai?')">
-                        KONFIRMASI SELESAI
+                @elseif($isMenungguKonfirmasi)
+                    {{-- Mitra selesai kerja → tombol konfirmasi pekerjaan --}}
+                    <a href="{{ route('order-tracking', $r->tracking_id) }}"
+                       style="display:block;width:100%;text-align:center;background:var(--green);
+                              color:white;border-radius:34px;padding:12px;font-size:13px;font-weight:800;
+                              text-decoration:none;">
+                        <i class="bi bi-check-circle-fill me-1"></i>KONFIRMASI SELESAI
                     </a>
+                @elseif($isAktif)
+                    {{-- Order sedang berjalan → tombol lacak --}}
+                    <a href="{{ route('order-tracking', $r->tracking_id) }}"
+                       class="btn-z-primary d-block text-center text-decoration-none" style="padding:12px;">
+                        <i class="bi bi-geo-alt-fill me-1"></i>LACAK ORDER
+                    </a>
+                @elseif($isCancelled)
+                    <div style="text-align:center;color:#ef4444;font-size:13px;font-weight:700;padding:5px;">
+                        <i class="bi bi-x-circle-fill me-1"></i>Order Dibatalkan
+                    </div>
+                @elseif($isMenungguMitra)
+                    {{-- Order belum diterima mitra → bisa dibatalkan --}}
+                    <a href="{{ route('pelanggan.riwayat.update', ['aksi'=>'batal','id_order'=>$r->id_pesanan]) }}"
+                       style="display:block;width:100%;text-align:center;border:1.5px solid #fca5a5;
+                              color:#ef4444;border-radius:34px;padding:10px;font-size:12px;font-weight:800;
+                              text-decoration:none;"
+                       onclick="return confirm('Batalkan pesanan ini?')">
+                        BATALKAN PESANAN
+                    </a>
+                @else
+                    <div style="text-align:center;color:var(--text-faint);font-size:12px;padding:5px;">
+                        {{ $r->status_pesanan }}
+                    </div>
                 @endif
             </div>
         </div>
