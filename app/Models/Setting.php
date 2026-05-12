@@ -27,4 +27,10 @@ class Setting extends Model
             ['value', 'updated_at']
         );
     }
+
+    /** Komisi Zasha dalam persen (default 10). */
+    public static function komisiPersen(): float
+    {
+        return (float) (static::get('komisi_zasha_persen', '10') ?: 10);
+    }
 }

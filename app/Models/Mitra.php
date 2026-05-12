@@ -81,6 +81,16 @@ class Mitra extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function tarifs(): HasMany
+    {
+        return $this->hasMany(TarifMitra::class, 'mitra_id', 'id_mitra');
+    }
+
+    public function verifikasiDokumens(): HasMany
+    {
+        return $this->hasMany(MitraVerifikasi::class, 'mitra_id', 'id_mitra');
+    }
+
     /**
      * Cek apakah mitra punya akses ke fitur tertentu via role-nya.
      * Mitra tanpa role = tidak punya akses fitur apapun.
