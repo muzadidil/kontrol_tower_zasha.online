@@ -521,6 +521,11 @@ function updateStatusToBusy() {
 }
 
 function showRejectOptions() {
+    // Sembunyikan incoming-order overlay agar tidak menghalangi click ke reject-panel
+    const incoming = document.getElementById('incoming-order');
+    if (incoming) {
+        incoming.style.display = 'none';
+    }
     const rejectPanel = document.getElementById('reject-panel');
     if (rejectPanel) {
         rejectPanel.style.display = 'block';
@@ -531,6 +536,13 @@ function hideRejectPanel() {
     const rejectPanel = document.getElementById('reject-panel');
     if (rejectPanel) {
         rejectPanel.style.display = 'none';
+    }
+    // Munculkan kembali incoming-order kalau order masih ada (user cancel reject)
+    if (currentOrderId) {
+        const incoming = document.getElementById('incoming-order');
+        if (incoming) {
+            incoming.style.display = 'flex';
+        }
     }
 }
 

@@ -245,6 +245,12 @@
 
         .allow-select { -webkit-user-select: text; user-select: text; }
 
+        /* Form inputs harus selalu allow text selection (override body user-select:none) */
+        input, textarea, select, [contenteditable="true"] {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+        }
+
         /* ── Bootstrap utility override untuk konsistensi biru di modul (wfh/jastip/tenaga/service) ── */
         .app-container .btn-warning,
         .app-container .btn-warning:focus,
