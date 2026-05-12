@@ -17,7 +17,7 @@ class RoleSeeder extends Seeder
                 'icon_color' => '#f59e0b',
                 'features' => [
                     'order-tenaga', 'order-inden',
-                    'maps',
+                    'maps', 'kamera',
                     'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],
@@ -28,7 +28,7 @@ class RoleSeeder extends Seeder
                 'icon_color' => '#10b981',
                 'features' => [
                     'order-jastip', 'order-inden',
-                    'maps',
+                    'maps', 'kamera',
                     'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],
@@ -50,7 +50,7 @@ class RoleSeeder extends Seeder
                 'icon_color' => '#0ea5e9',
                 'features' => [
                     'order-service', 'order-inden',
-                    'sparepart', 'maps',
+                    'sparepart', 'maps', 'kamera',
                     'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],

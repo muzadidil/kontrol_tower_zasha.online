@@ -30,6 +30,7 @@ use App\Http\Controllers\Mitra\MitraJadwalController;
 use App\Http\Controllers\Mitra\IndenController as MitraIndenController;
 use App\Http\Controllers\Mitra\MitraPortfolioController;
 use App\Http\Controllers\Mitra\MitraSparepartController;
+use App\Http\Controllers\Mitra\MitraFotoBuktiController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -186,6 +187,13 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
             ->middleware('feature:laporan-harian')->name('harian');
         Route::get('/bulanan', [MitraLaporanController::class, 'bulanan'])
             ->middleware('feature:laporan-bulanan')->name('bulanan');
+    });
+
+    // Foto Bukti per order (butuh verified + fitur kamera)
+    Route::prefix('foto-bukti')->name('foto-bukti.')->middleware(['verified.mitra', 'feature:kamera'])->group(function () {
+        Route::get('/{tracking}', [MitraFotoBuktiController::class, 'index'])->name('index');
+        Route::post('/{tracking}/upload', [MitraFotoBuktiController::class, 'upload'])->name('upload');
+        Route::delete('/{foto}', [MitraFotoBuktiController::class, 'destroy'])->name('destroy');
     });
 
     // Sparepart inventory (butuh verified + fitur sparepart)
