@@ -267,23 +267,24 @@ class PelangganController extends Controller
             OrderTracking::create([
                 'mitra_id'      => (int) $request->id_mitra,
                 'order_type'    => 'pesanan',
-                'order_id'      => $id_pesanan,
-                'pelanggan_id'  => $id_pelanggan,
+                'order_id'      => (int) $id_pesanan,
+                'pelanggan_id'  => (int) $id_pelanggan,
                 'status'        => 'pending',
                 'harga_jual'    => $total_pesanan,
-                'harga_modal'   => $total_pesanan * 0.95, // 5% komisi
-                'komisi_zasha'  => $total_pesanan * 0.05,
+                'harga_modal'   => round($total_pesanan * 0.95, 2),
+                'komisi_zasha'  => round($total_pesanan * 0.05, 2),
                 'escrow_status' => 'held',
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to create order tracking for pesanan', [
+            Log::error('Failed to create OrderTracking', [
                 'message'      => $e->getMessage(),
-                'trace'        => $e->getTraceAsString(),
+                'file'         => $e->getFile(),
+                'line'         => $e->getLine(),
                 'pesanan_id'   => $id_pesanan,
                 'pelanggan_id' => $id_pelanggan,
                 'mitra_id'     => $request->id_mitra,
             ]);
-            return back()->with('error', 'Gagal membuat order tracking.')->withInput();
+            // Jangan throw — order tetap berhasil meski tracking gagal
         }
 
         NotifHelper::kirim(
@@ -381,17 +382,29 @@ class PelangganController extends Controller
 
                 // Create order tracking untuk polling mitra
                 // Gunakan estimasi harga barang sebagai harga_jual (akan diupdate nanti)
-                OrderTracking::create([
-                    'mitra_id'      => $mitra->id_mitra,
-                    'order_type'    => 'jastip',
-                    'order_id'      => $orderId,
-                    'pelanggan_id'  => $id_pelanggan,
-                    'status'        => 'pending',
-                    'harga_jual'    => $estimasiBarang > 0 ? $estimasiBarang : 1000, // minimal 1000 kalau 0
-                    'harga_modal'   => $estimasiBarang > 0 ? round($estimasiBarang * 0.95, 0) : 950,
-                    'komisi_zasha'  => $estimasiBarang > 0 ? round($estimasiBarang * 0.05, 0) : 50,
-                    'escrow_status' => 'held',
-                ]);
+                try {
+                    OrderTracking::create([
+                        'mitra_id'      => (int) $mitra->id_mitra,
+                        'order_type'    => 'jastip',
+                        'order_id'      => (int) $orderId,
+                        'pelanggan_id'  => (int) $id_pelanggan,
+                        'status'        => 'pending',
+                        'harga_jual'    => $estimasiBarang > 0 ? $estimasiBarang : 1000,
+                        'harga_modal'   => $estimasiBarang > 0 ? round($estimasiBarang * 0.95, 2) : 950,
+                        'komisi_zasha'  => $estimasiBarang > 0 ? round($estimasiBarang * 0.05, 2) : 50,
+                        'escrow_status' => 'held',
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to create OrderTracking (jastip)', [
+                        'message'      => $e->getMessage(),
+                        'file'         => $e->getFile(),
+                        'line'         => $e->getLine(),
+                        'order_id'     => $orderId,
+                        'pelanggan_id' => $id_pelanggan,
+                        'mitra_id'     => $mitra->id_mitra,
+                    ]);
+                    // Jangan throw — order tetap berhasil meski tracking gagal
+                }
 
                 return $orderId;
             });
