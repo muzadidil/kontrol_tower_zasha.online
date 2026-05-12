@@ -227,11 +227,16 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::post('/order/progress', [MitraOrderController::class, 'updateProgress'])
         ->middleware('verified.mitra')->name('order.progress');
 
-    Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])->name('pesanan');
-    Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
-    Route::post('/saldo/topup', [MitraDashboardController::class, 'topup'])->name('saldo.topup');
-    Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
-    Route::post('/profil/foto', [MitraDashboardController::class, 'uploadFoto'])->name('profil.foto');
+    Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])
+        ->middleware('feature:pesanan-list')->name('pesanan');
+    Route::get('/saldo', [MitraDashboardController::class, 'saldo'])
+        ->middleware('feature:saldo')->name('saldo');
+    Route::post('/saldo/topup', [MitraDashboardController::class, 'topup'])
+        ->middleware('feature:topup')->name('saldo.topup');
+    Route::get('/profil', [MitraDashboardController::class, 'profil'])
+        ->middleware('feature:profil')->name('profil');
+    Route::post('/profil/foto', [MitraDashboardController::class, 'uploadFoto'])
+        ->middleware('feature:profil')->name('profil.foto');
 
     // WFH Orders (butuh verified + fitur order-wfh)
     Route::prefix('wfh')->name('wfh.')->middleware(['verified.mitra', 'feature:order-wfh'])->group(function () {
@@ -254,8 +259,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{jastipOrder}/diantar', [MitraJastipController::class, 'diantar'])->name('diantar');
     });
 
-    // Topup mitra
-    Route::prefix('topup-saldo')->name('topup.')->group(function () {
+    // Topup mitra (butuh fitur topup)
+    Route::prefix('topup-saldo')->name('topup.')->middleware('feature:topup')->group(function () {
         Route::get('/', [TopupController::class, 'mitraForm'])->name('form');
         Route::post('/', [TopupController::class, 'mitraStore'])->name('store');
         Route::get('/riwayat', [TopupController::class, 'mitraIndex'])->name('index');

@@ -184,18 +184,21 @@
     </div>
 
     @php
-        // Menu tiles dynamic by feature. Tile statis (Pesanan, Saldo, Profil) selalu tampil.
-        // Tile feature-gated hanya muncul bila role mitra punya fitur tsb.
+        // Semua tile feature-gated. Mitra tanpa fitur tidak lihat tile-nya (juga route 403).
         $featureTiles = [
             // [feature_key, route_name, icon, title, subtitle, bg_var, color_var]
-            ['order-jastip',  'mitra.jastip.index',  'bi-motorcycle',      'Jastip',    'Order antar',   'var(--mitra-blue-soft)', 'var(--mitra-blue)'],
-            ['order-wfh',     'mitra.wfh.index',     'bi-laptop',          'WFH',       'Order digital', 'var(--mitra-blue-tint)', 'var(--mitra-blue-mid)'],
-            ['order-tenaga',  'mitra.tenaga.index',  'bi-people-fill',     'Tenaga',    'Order tenaga',  'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
-            ['order-service',   'mitra.service.index',   'bi-tools',           'Service',   'Order teknisi', 'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
-            ['order-inden',     'mitra.inden.index',     'bi-calendar-event',  'Inden',     'Order booking', 'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
-            ['tarif',           'mitra.tarif.index',     'bi-cash-coin',       'Tarif',     'Atur harga',    'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
-            ['laporan-harian',  'mitra.laporan.harian',  'bi-calendar-day',    'Harian',    'Cuan hari ini', 'var(--mitra-blue-tint)', 'var(--mitra-blue-dark)'],
-            ['laporan-bulanan', 'mitra.laporan.bulanan', 'bi-bar-chart-fill',  'Bulanan',   'Cuan bulan ini','var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
+            ['pesanan-list',    'mitra.pesanan',         'bi-clipboard-check', 'Pesanan',   'Lihat semua',     'var(--mitra-blue-soft)', 'var(--mitra-blue)'],
+            ['saldo',           'mitra.saldo',           'bi-wallet2',         'Saldo',     'Tarik & riwayat', 'var(--mitra-blue-tint)', 'var(--mitra-blue-mid)'],
+            ['profil',          'mitra.profil',          'bi-person-circle',   'Profil',    'Data akun',       'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
+            ['order-jastip',    'mitra.jastip.index',    'bi-motorcycle',      'Jastip',    'Order antar',     'var(--mitra-blue-soft)', 'var(--mitra-blue)'],
+            ['order-wfh',       'mitra.wfh.index',       'bi-laptop',          'WFH',       'Order digital',   'var(--mitra-blue-tint)', 'var(--mitra-blue-mid)'],
+            ['order-tenaga',    'mitra.tenaga.index',    'bi-people-fill',     'Tenaga',    'Order tenaga',    'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
+            ['order-service',   'mitra.service.index',   'bi-tools',           'Service',   'Order teknisi',   'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
+            ['order-inden',     'mitra.inden.index',     'bi-calendar-event',  'Inden',     'Order booking',   'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
+            ['tarif',           'mitra.tarif.index',     'bi-cash-coin',       'Tarif',     'Atur harga',      'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
+            ['topup',           'mitra.topup.form',      'bi-plus-circle-fill','Topup',     'Isi saldo',       'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
+            ['laporan-harian',  'mitra.laporan.harian',  'bi-calendar-day',    'Harian',    'Cuan hari ini',   'var(--mitra-blue-tint)', 'var(--mitra-blue-dark)'],
+            ['laporan-bulanan', 'mitra.laporan.bulanan', 'bi-bar-chart-fill',  'Bulanan',   'Cuan bulan ini',  'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
             ['rating',          'mitra.rating.index',    'bi-star-fill',       'Ulasan',    'Rating pelanggan','var(--mitra-blue-tint)', 'var(--mitra-blue)'],
             ['jadwal',          'mitra.jadwal.index',    'bi-calendar-week',   'Jadwal',    'Jam & libur',     'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
         ];
@@ -204,39 +207,16 @@
             return $mitra->hasFeature($t[0]) && \Route::has($t[1]);
         })->values();
 
-        // Tile static yang selalu ada
-        $staticTiles = [
-            ['mitra.pesanan', 'bi-clipboard-check', 'Pesanan', 'Lihat semua',    'var(--mitra-blue-soft)', 'var(--mitra-blue)'],
-            ['mitra.saldo',   'bi-wallet2',         'Saldo',   'Tarik & riwayat','var(--mitra-blue-tint)', 'var(--mitra-blue-mid)'],
-            ['mitra.profil',  'bi-person-circle',   'Profil',  'Data akun',      'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
-        ];
-
-        $totalMenus = count($staticTiles) + $activeTiles->count();
+        $totalMenus = $activeTiles->count();
     @endphp
 
-    {{-- Menu Tiles dynamic by feature --}}
+    {{-- Menu Tiles fully dynamic by feature --}}
     <div style="margin-bottom: var(--fib-7);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
             <h6 class="label-up mb-0">Fitur</h6>
             <span class="t-xs" style="color: var(--ink-soft);">{{ $totalMenus }} menu</span>
         </div>
         <div class="row g-3">
-            {{-- Static tiles --}}
-            @foreach($staticTiles as $tile)
-                <div class="col-6">
-                    <a href="{{ route($tile[0]) }}" class="menu-tile">
-                        <div class="menu-tile-icon" style="background: {{ $tile[4] }}; color: {{ $tile[5] }};">
-                            <i class="bi {{ $tile[1] }}"></i>
-                        </div>
-                        <div>
-                            <div class="fw-bold t-sm">{{ $tile[2] }}</div>
-                            <div class="t-xxs" style="color: var(--ink-soft);">{{ $tile[3] }}</div>
-                        </div>
-                    </a>
-                </div>
-            @endforeach
-
-            {{-- Feature-gated tiles --}}
             @foreach($activeTiles as $tile)
                 <div class="col-6">
                     <a href="{{ route($tile[1]) }}" class="menu-tile">

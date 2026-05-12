@@ -653,18 +653,24 @@
             <i class="bi bi-house-door-fill"></i>
             <span>Beranda</span>
         </a>
+        @if($mitraUser?->hasFeature('pesanan-list'))
         <a href="{{ route('mitra.pesanan') }}" class="nav-link-custom {{ request()->routeIs('mitra.pesanan*') ? 'active' : '' }}">
             <i class="bi bi-clipboard-check"></i>
             <span>Pesanan</span>
         </a>
+        @endif
+        @if($mitraUser?->hasFeature('saldo'))
         <a href="{{ route('mitra.saldo') }}" class="nav-link-custom {{ request()->routeIs('mitra.saldo*') ? 'active' : '' }}">
             <i class="bi bi-wallet2"></i>
             <span>Saldo</span>
         </a>
+        @endif
+        @if($mitraUser?->hasFeature('profil'))
         <a href="{{ route('mitra.profil') }}" class="nav-link-custom {{ request()->routeIs('mitra.profil*') ? 'active' : '' }}">
             <i class="bi bi-person-circle"></i>
             <span>Profil</span>
         </a>
+        @endif
     </div>
 </nav>
 
