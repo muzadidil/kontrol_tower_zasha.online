@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Helpers\NotifHelper;
+use App\Models\OrderTracking;
 
 class PelangganController extends Controller
 {
@@ -250,14 +251,39 @@ class PelangganController extends Controller
             return $this->simpanPesananJastip($request, $id_pelanggan, $mitra);
         }
 
+        $total_pesanan = ($mitra->tarif_per_jam * $request->durasi) + 5000;
+
         $id_pesanan = DB::table('pesanan')->insertGetId([
             'id_pelanggan'    => $id_pelanggan,
             'id_mitra'        => $request->id_mitra,
             'id_kategori'     => $mitra->id_kategori,
             'tanggal_pesanan' => now(),
-            'total_pesanan'   => ($mitra->tarif_per_jam * $request->durasi) + 5000,
+            'total_pesanan'   => $total_pesanan,
             'status_pesanan'  => 'Pending',
         ]);
+
+        // Create order tracking untuk polling mitra
+        try {
+            OrderTracking::create([
+                'mitra_id'      => $request->id_mitra,
+                'order_type'    => 'pesanan',
+                'order_id'      => $id_pesanan,
+                'pelanggan_id'  => $id_pelanggan,
+                'status'        => 'pending',
+                'harga_jual'    => $total_pesanan,
+                'harga_modal'   => $total_pesanan * 0.95, // 5% komisi
+                'komisi_zasha'  => $total_pesanan * 0.05,
+                'escrow_status' => 'held',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to create order tracking for pesanan', [
+                'message'      => $e->getMessage(),
+                'pesanan_id'   => $id_pesanan,
+                'pelanggan_id' => $id_pelanggan,
+                'mitra_id'     => $request->id_mitra,
+            ]);
+            // Don't throw — order creation is already successful
+        }
 
         NotifHelper::kirim(
             $id_pelanggan,
@@ -350,6 +376,20 @@ class PelangganController extends Controller
                     'catatan'         => $request->daftar_belanja,
                     'created_at'      => $now,
                     'updated_at'      => $now,
+                ]);
+
+                // Create order tracking untuk polling mitra
+                // Gunakan estimasi harga barang sebagai harga_jual (akan diupdate nanti)
+                OrderTracking::create([
+                    'mitra_id'      => $mitra->id_mitra,
+                    'order_type'    => 'jastip',
+                    'order_id'      => $orderId,
+                    'pelanggan_id'  => $id_pelanggan,
+                    'status'        => 'pending',
+                    'harga_jual'    => $estimasiBarang > 0 ? $estimasiBarang : 1000, // minimal 1000 kalau 0
+                    'harga_modal'   => $estimasiBarang > 0 ? round($estimasiBarang * 0.95, 0) : 950,
+                    'komisi_zasha'  => $estimasiBarang > 0 ? round($estimasiBarang * 0.05, 0) : 50,
+                    'escrow_status' => 'held',
                 ]);
 
                 return $orderId;
