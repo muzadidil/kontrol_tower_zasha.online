@@ -513,7 +513,14 @@ function showWhatsAppButton() {
 // Status Toggle - only on dashboard
 const toggleEl = document.getElementById('toggleStatus');
 if (toggleEl) {
-    toggleEl.addEventListener('change', async function() {
+    toggleEl.addEventListener('change', async function(e) {
+        // Prevent toggle if user just finished swiping (event propagation issue)
+        if (isSwiping) {
+            this.checked = !this.checked; // Revert checkbox
+            e.stopPropagation();
+            return;
+        }
+
         const isOnline = this.checked;
         const label = document.getElementById('status-label');
         const body = document.body;
@@ -632,6 +639,8 @@ function markNextStepActive(step) {
 }
 
 // ─ Slide-to-Action Logic ─
+let isSwiping = false; // Flag to prevent accidental toggle trigger after swipe
+
 (function initSlideToAction() {
     const thumb = document.getElementById('slider-thumb');
     if (!thumb) return;
@@ -640,6 +649,7 @@ function markNextStepActive(step) {
     const trackWidth = track.offsetWidth;
     const thumbWidth = thumb.offsetWidth;
     const maxSlide = (trackWidth - thumbWidth) / 2 - 8;
+    const SWIPE_THRESHOLD = maxSlide * 0.75; // 75% threshold (increased from 70%)
 
     let startX = 0, currentX = 0, isDragging = false;
 
@@ -648,20 +658,26 @@ function markNextStepActive(step) {
     }
 
     thumb.addEventListener('mousedown', startDrag);
-    thumb.addEventListener('touchstart', startDrag, { passive: true });
+    thumb.addEventListener('touchstart', startDrag);
 
     function startDrag(e) {
         isDragging = true;
+        isSwiping = true;
         startX = getClientX(e);
         thumb.style.cursor = 'grabbing';
         thumb.style.transition = 'none';
+        e.preventDefault();
+        e.stopPropagation();
     }
 
     document.addEventListener('mousemove', onDrag);
-    document.addEventListener('touchmove', onDrag, { passive: true });
+    document.addEventListener('touchmove', onDrag);
 
     function onDrag(e) {
         if (!isDragging) return;
+        e.preventDefault();
+        e.stopPropagation();
+
         const diff = getClientX(e) - startX;
         currentX = Math.max(-maxSlide, Math.min(maxSlide, diff));
         thumb.style.left = `calc(50% + ${currentX}px)`;
@@ -682,16 +698,19 @@ function markNextStepActive(step) {
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchend', endDrag);
 
-    function endDrag() {
+    function endDrag(e) {
         if (!isDragging) return;
         isDragging = false;
+        e.preventDefault();
+        e.stopPropagation();
+
         thumb.style.cursor = 'grab';
         thumb.style.transition = 'all 0.3s ease';
 
-        if (currentX > maxSlide * 0.7) {
+        if (currentX > SWIPE_THRESHOLD) {
             // Geser kanan → TERIMA
             acceptOrder();
-        } else if (currentX < -maxSlide * 0.7) {
+        } else if (currentX < -SWIPE_THRESHOLD) {
             // Geser kiri → TOLAK
             showRejectOptions();
         }
@@ -702,6 +721,11 @@ function markNextStepActive(step) {
         thumb.style.transform = 'translateX(-50%)';
         thumb.style.background = 'white';
         thumb.querySelector('i').style.color = '#64748b';
+
+        // Clear swipe flag after slight delay to prevent toggle trigger
+        setTimeout(() => {
+            isSwiping = false;
+        }, 100);
     }
 })();
 
