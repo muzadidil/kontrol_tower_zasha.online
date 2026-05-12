@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <!-- Stylized ZS monogram (Z on top stacked over S) -->
+  <g transform="translate(250, 230)">
+    <!-- Top Z stroke (blue) -->
+    <path d="M -120 -130 L 100 -130 L 100 -90 L -50 -90 L 80 -50 L 80 -10 L -120 -10 L -120 -50 L 30 -50 L -120 -90 Z"
+          fill="#0a1a4d"/>
+
+    <!-- Middle S curve (gold gradient) -->
+    <path d="M -90 30
+             C -90 -5, -45 -25, 0 -10
+             C 50 8, 90 -5, 90 25
+             C 90 60, 45 75, 0 60
+             C -50 45, -90 60, -90 85
+             L -90 110
+             C -90 85, -40 80, 10 95
+             C 60 110, 90 105, 90 85"
+          fill="none" stroke="#c8a04f" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Bottom Z stroke (blue) mirrored -->
+    <path d="M -120 110 L 100 110 L 100 150 L -50 150 L 80 190 L 80 230 L -120 230 L -120 190 L 30 190 L -120 150 Z"
+          fill="#0a1a4d"/>
+
+    <!-- Decorative tech dots -->
+    <circle cx="125" cy="-110" r="10" fill="#c8a04f"/>
+    <line x1="100" y1="-110" x2="115" y2="-110" stroke="#c8a04f" stroke-width="6"/>
+    <circle cx="-145" cy="210" r="10" fill="#c8a04f"/>
+    <line x1="-120" y1="210" x2="-135" y2="210" stroke="#c8a04f" stroke-width="6"/>
+  </g>
+
+  <!-- Text "ZaSha.Online" -->
+  <text x="250" y="450" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif"
+        font-size="50" font-weight="800" letter-spacing="-0.5">
+    <tspan fill="#0a1a4d">Za</tspan><tspan fill="#c8a04f">Sha</tspan><tspan fill="#0a1a4d">.Online</tspan>
+  </text>
+</svg>
