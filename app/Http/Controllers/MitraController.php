@@ -13,9 +13,32 @@ class MitraController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $mitras     = Mitra::with('role.features')->orderBy('created_at', 'desc')->get();
+        $filterRoleId = $request->query('role_id');
+        $filterQuery  = trim((string) $request->query('q', ''));
+
+        $mitras = Mitra::with('role.features')
+            ->when($filterRoleId !== null && $filterRoleId !== '', function ($q) use ($filterRoleId) {
+                if ($filterRoleId === 'none') {
+                    $q->whereNull('role_id');
+                } else {
+                    $q->where('role_id', $filterRoleId);
+                }
+            })
+            ->when($filterQuery !== '', function ($q) use ($filterQuery) {
+                $q->where(function ($qq) use ($filterQuery) {
+                    $qq->where('nama_panggilan', 'like', "%{$filterQuery}%")
+                       ->orWhere('nama_asli', 'like', "%{$filterQuery}%")
+                       ->orWhere('no_wa', 'like', "%{$filterQuery}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Daftar role untuk dropdown filter (semua role, termasuk draft)
+        $rolesForFilter = \App\Models\Role::orderBy('name')->get();
+
         // Categories sekarang diambil dari roles aktif
         $categories = \App\Models\Role::where('is_active', true)->orderBy('id')->get()->map(function ($role) {
             return (object) [
@@ -67,7 +90,8 @@ class MitraController extends Controller
             'mitras', 'categories', 'units',
             'list_driver', 'list_mitra_verif',
             'cuan_zasha', 'order_hari_ini', 'driver_aktif', 'total_pending', 'all_jastip',
-            'radar_mitras'
+            'radar_mitras',
+            'rolesForFilter', 'filterRoleId', 'filterQuery'
         ));
     }
 

@@ -51,12 +51,50 @@
 {{-- ======== TAB: DAFTAR MITRA ======== --}}
 <div id="tab-mitra">
     <div class="card-zasha card overflow-hidden">
-        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom flex-wrap gap-2">
             <h6 class="fw-bold mb-0" style="color:#1e293b;">Daftar Mitra Terdaftar</h6>
             <a href="{{ route('admin.mitra.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold btn-sm">
                 <i class="fas fa-plus me-1"></i>Tambah Mitra
             </a>
         </div>
+
+        {{-- Filter Bar --}}
+        <form method="GET" action="{{ route('admin.mitra.index') }}" class="px-4 py-3 border-bottom" style="background:#fafbfc;">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <input type="text" name="q" value="{{ $filterQuery ?? '' }}" class="form-control form-control-sm rounded-pill"
+                           placeholder="Cari nama / nomor WA...">
+                </div>
+                <div class="col-md-4">
+                    <select name="role_id" class="form-select form-select-sm rounded-pill">
+                        <option value="">Semua Role</option>
+                        <option value="none" {{ ($filterRoleId ?? '') === 'none' ? 'selected' : '' }}>— Tanpa Role —</option>
+                        @foreach(($rolesForFilter ?? []) as $r)
+                            <option value="{{ $r->id }}" {{ (string)($filterRoleId ?? '') === (string)$r->id ? 'selected' : '' }}>
+                                {{ $r->name }} @if(!$r->is_active) [DRAFT] @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 flex-grow-1">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                    @if(($filterRoleId ?? '') !== '' || ($filterQuery ?? '') !== '')
+                        <a href="{{ route('admin.mitra.index') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            Reset
+                        </a>
+                    @endif
+                </div>
+            </div>
+            @if(($filterRoleId ?? '') !== '' || ($filterQuery ?? '') !== '')
+                <div class="mt-2 small text-muted">
+                    Menampilkan <strong>{{ $mitras->count() }}</strong> mitra
+                    @if($filterQuery)— pencarian: <em>"{{ $filterQuery }}"</em>@endif
+                </div>
+            @endif
+        </form>
+
         <div class="table-responsive">
             <table class="table table-adm mb-0">
                 <thead><tr>
