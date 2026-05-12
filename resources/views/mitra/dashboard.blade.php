@@ -183,57 +183,80 @@
         </div>
     </div>
 
-    {{-- Menu Tiles (2x2 grid, fibonacci radius) --}}
+    @php
+        // Menu tiles dynamic by feature. Tile statis (Pesanan, Saldo, Profil) selalu tampil.
+        // Tile feature-gated hanya muncul bila role mitra punya fitur tsb.
+        $featureTiles = [
+            // [feature_key, route_name, icon, title, subtitle, bg_var, color_var]
+            ['order-jastip',  'mitra.jastip.index',  'bi-motorcycle',      'Jastip',    'Order antar',   'var(--mitra-blue-soft)', 'var(--mitra-blue)'],
+            ['order-wfh',     'mitra.wfh.index',     'bi-laptop',          'WFH',       'Order digital', 'var(--mitra-blue-tint)', 'var(--mitra-blue-mid)'],
+            ['order-tenaga',  'mitra.tenaga.index',  'bi-people-fill',     'Tenaga',    'Order tenaga',  'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
+            ['order-service', 'mitra.service.index', 'bi-tools',           'Service',   'Order teknisi', 'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
+            ['tarif',         'mitra.tarif.index',   'bi-cash-coin',       'Tarif',     'Atur harga',    'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
+        ];
+
+        $activeTiles = collect($featureTiles)->filter(function ($t) use ($mitra) {
+            return $mitra->hasFeature($t[0]) && \Route::has($t[1]);
+        })->values();
+
+        // Tile static yang selalu ada
+        $staticTiles = [
+            ['mitra.pesanan', 'bi-clipboard-check', 'Pesanan', 'Lihat semua',    'var(--mitra-blue-soft)', 'var(--mitra-blue)'],
+            ['mitra.saldo',   'bi-wallet2',         'Saldo',   'Tarik & riwayat','var(--mitra-blue-tint)', 'var(--mitra-blue-mid)'],
+            ['mitra.profil',  'bi-person-circle',   'Profil',  'Data akun',      'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
+        ];
+
+        $totalMenus = count($staticTiles) + $activeTiles->count();
+    @endphp
+
+    {{-- Menu Tiles dynamic by feature --}}
     <div style="margin-bottom: var(--fib-7);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
             <h6 class="label-up mb-0">Fitur</h6>
-            <span class="t-xs" style="color: var(--ink-soft);">{{ count([1,2,3,4]) }} menu</span>
+            <span class="t-xs" style="color: var(--ink-soft);">{{ $totalMenus }} menu</span>
         </div>
         <div class="row g-3">
-            <div class="col-6">
-                <a href="{{ route('mitra.pesanan') }}" class="menu-tile">
-                    <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue);">
-                        <i class="bi bi-clipboard-check"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold t-sm">Pesanan</div>
-                        <div class="t-xxs" style="color: var(--ink-soft);">Lihat semua</div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6">
-                <a href="{{ route('mitra.saldo') }}" class="menu-tile">
-                    <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-mid);">
-                        <i class="bi bi-wallet2"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold t-sm">Saldo</div>
-                        <div class="t-xxs" style="color: var(--ink-soft);">Tarik & riwayat</div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6">
-                <a href="{{ route('mitra.profil') }}" class="menu-tile">
-                    <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue-dark);">
-                        <i class="bi bi-person-circle"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold t-sm">Profil</div>
-                        <div class="t-xxs" style="color: var(--ink-soft);">Data akun</div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6">
-                <div class="menu-tile" style="opacity: 0.55; cursor: not-allowed;">
-                    <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-mid);">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold t-sm">Statistik</div>
-                        <div class="t-xxs" style="color: var(--ink-soft);">Segera hadir</div>
+            {{-- Static tiles --}}
+            @foreach($staticTiles as $tile)
+                <div class="col-6">
+                    <a href="{{ route($tile[0]) }}" class="menu-tile">
+                        <div class="menu-tile-icon" style="background: {{ $tile[4] }}; color: {{ $tile[5] }};">
+                            <i class="bi {{ $tile[1] }}"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold t-sm">{{ $tile[2] }}</div>
+                            <div class="t-xxs" style="color: var(--ink-soft);">{{ $tile[3] }}</div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+
+            {{-- Feature-gated tiles --}}
+            @foreach($activeTiles as $tile)
+                <div class="col-6">
+                    <a href="{{ route($tile[1]) }}" class="menu-tile">
+                        <div class="menu-tile-icon" style="background: {{ $tile[5] }}; color: {{ $tile[6] }};">
+                            <i class="bi {{ $tile[2] }}"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold t-sm">{{ $tile[3] }}</div>
+                            <div class="t-xxs" style="color: var(--ink-soft);">{{ $tile[4] }}</div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+
+            {{-- Empty state bila mitra tanpa fitur sama sekali --}}
+            @if($activeTiles->isEmpty() && !$mitra->role_id)
+                <div class="col-12">
+                    <div class="menu-tile" style="opacity: 0.55; cursor: not-allowed; justify-content: center;">
+                        <i class="bi bi-shield-exclamation me-2" style="color: var(--mitra-blue-mid);"></i>
+                        <div class="t-xs" style="color: var(--ink-soft);">
+                            Belum ada role. Hubungi admin Zasha.
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
