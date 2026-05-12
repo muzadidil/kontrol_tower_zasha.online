@@ -247,9 +247,17 @@ class PelangganController extends Controller
             ->get();
         $komisiPersen = \App\Models\Setting::komisiPersen();
 
+        // Portfolio mitra (featured dulu, lalu urutan/created_at)
+        $portfolios = \App\Models\MitraPortfolio::where('mitra_id', $id)
+            ->orderByDesc('is_featured')
+            ->orderBy('urutan')
+            ->orderByDesc('created_at')
+            ->limit(12)
+            ->get();
+
         return view('pelanggan.detail-mitra', compact(
             'mitra', 'rating_rata', 'total_order', 'ulasans', 'alamats',
-            'tarifs', 'komisiPersen'
+            'tarifs', 'komisiPersen', 'portfolios'
         ));
     }
 

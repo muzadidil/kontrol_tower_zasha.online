@@ -119,6 +119,66 @@
 </div>
 @endif
 
+{{-- Portfolio --}}
+@if(($portfolios ?? collect())->isNotEmpty())
+<div class="section-card">
+    <h6 class="fw-bold small text-muted text-uppercase mb-3">
+        <i class="bi bi-images me-1"></i>Portfolio Karya
+    </h6>
+    <div class="row g-2">
+        @foreach($portfolios as $p)
+            <div class="col-6">
+                <div class="position-relative rounded-3 overflow-hidden"
+                     style="background:#f8fafc;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+                    @if($p->is_featured)
+                        <div style="position:absolute;top:6px;right:6px;z-index:2;
+                                    background:#fbbf24;color:#fff;padding:2px 8px;
+                                    border-radius:999px;font-size:.55rem;font-weight:700;">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    @endif
+
+                    @if($p->isImage())
+                        @if($p->link_url)
+                            <a href="{{ $p->link_url }}" target="_blank">
+                                <img src="{{ asset('storage/' . $p->file_path) }}"
+                                     style="width:100%;height:110px;object-fit:cover;display:block;">
+                            </a>
+                        @else
+                            <a href="{{ asset('storage/' . $p->file_path) }}" target="_blank">
+                                <img src="{{ asset('storage/' . $p->file_path) }}"
+                                     style="width:100%;height:110px;object-fit:cover;display:block;">
+                            </a>
+                        @endif
+                    @elseif($p->file_path)
+                        <a href="{{ asset('storage/' . $p->file_path) }}" target="_blank"
+                           style="display:flex;height:110px;align-items:center;justify-content:center;
+                                  background:linear-gradient(135deg,#eff6ff,#dbeafe);text-decoration:none;">
+                            <i class="bi bi-file-earmark-pdf" style="font-size:2rem;color:#005aa9;"></i>
+                        </a>
+                    @elseif($p->link_url)
+                        <a href="{{ $p->link_url }}" target="_blank"
+                           style="display:flex;height:110px;align-items:center;justify-content:center;
+                                  background:linear-gradient(135deg,#f5f3ff,#ede9fe);text-decoration:none;">
+                            <i class="bi bi-link-45deg" style="font-size:2rem;color:#7c3aed;"></i>
+                        </a>
+                    @endif
+
+                    <div class="p-2">
+                        <div class="fw-semibold text-truncate small" style="color:#1e293b;font-size:.75rem;">
+                            {{ $p->judul }}
+                        </div>
+                        @if($p->kategori)
+                            <small class="text-muted" style="font-size:.6rem;">{{ $p->kategori }}</small>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- Ulasan --}}
 @if($ulasans->isNotEmpty())
 <div class="section-card">

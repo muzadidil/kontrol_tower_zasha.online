@@ -28,6 +28,7 @@ use App\Http\Controllers\Mitra\MitraLaporanController;
 use App\Http\Controllers\Mitra\MitraRatingController;
 use App\Http\Controllers\Mitra\MitraJadwalController;
 use App\Http\Controllers\Mitra\IndenController as MitraIndenController;
+use App\Http\Controllers\Mitra\MitraPortfolioController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -184,6 +185,17 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
             ->middleware('feature:laporan-harian')->name('harian');
         Route::get('/bulanan', [MitraLaporanController::class, 'bulanan'])
             ->middleware('feature:laporan-bulanan')->name('bulanan');
+    });
+
+    // Portfolio (butuh verified + fitur portfolio)
+    Route::prefix('portfolio')->name('portfolio.')->middleware(['verified.mitra', 'feature:portfolio'])->group(function () {
+        Route::get('/', [MitraPortfolioController::class, 'index'])->name('index');
+        Route::get('/create', [MitraPortfolioController::class, 'create'])->name('create');
+        Route::post('/', [MitraPortfolioController::class, 'store'])->name('store');
+        Route::get('/{portfolio}/edit', [MitraPortfolioController::class, 'edit'])->name('edit');
+        Route::put('/{portfolio}', [MitraPortfolioController::class, 'update'])->name('update');
+        Route::post('/{portfolio}/toggle-featured', [MitraPortfolioController::class, 'toggleFeatured'])->name('toggleFeatured');
+        Route::delete('/{portfolio}', [MitraPortfolioController::class, 'destroy'])->name('destroy');
     });
 
     // Jadwal & Hari Libur (butuh verified + fitur jadwal)
