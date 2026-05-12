@@ -28,6 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'profil.lengkap'   => \App\Http\Middleware\CheckPelangganProfil::class,
             'umur'             => \App\Http\Middleware\CheckUmurPelanggan::class,
             'single.device'    => \App\Http\Middleware\CheckSingleDevice::class,
+            // Role-based access control untuk mitra
+            'verified.mitra'   => \App\Http\Middleware\VerifikasiMitra::class,
+            'feature'          => \App\Http\Middleware\FeatureMitra::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
