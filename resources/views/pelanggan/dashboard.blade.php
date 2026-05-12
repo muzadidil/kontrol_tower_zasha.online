@@ -165,7 +165,7 @@
 </div>
 
 {{-- ── PROMO BANNER ────────────────────────────── --}}
-<div style="padding: 0 21px 34px;">
+<div style="padding: 0 21px 34px; margin-top: 21px;">
     <div style="background:linear-gradient(135deg,#002d72,#0047b3,#005dd6);
                 border-radius:21px; padding:21px; position:relative; overflow:hidden;">
         <div style="position:absolute;top:-21px;right:-21px;width:89px;height:89px;

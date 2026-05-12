@@ -116,6 +116,16 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::post('/{tenagaOrder}/dispute', [PelangganTenagaController::class, 'dispute'])->name('dispute');
     });
 
+    // Inden Orders
+    Route::prefix('inden')->name('pelanggan.inden.')->middleware(['profil.lengkap'])->group(function () {
+        Route::post('/order', [\App\Http\Controllers\Pelanggan\IndenController::class, 'store'])->name('store');
+        Route::get('/{indenOrder}', [\App\Http\Controllers\Pelanggan\IndenController::class, 'show'])->name('show');
+        Route::post('/{indenOrder}/bayar-dp', [\App\Http\Controllers\Pelanggan\IndenController::class, 'bayarDp'])->name('bayar-dp');
+        Route::post('/{indenOrder}/bayar-pelunasan', [\App\Http\Controllers\Pelanggan\IndenController::class, 'bayarPelunasan'])->name('bayar-pelunasan');
+        Route::post('/{indenOrder}/konfirmasi', [\App\Http\Controllers\Pelanggan\IndenController::class, 'konfirmasi'])->name('konfirmasi');
+        Route::post('/{indenOrder}/dispute', [\App\Http\Controllers\Pelanggan\IndenController::class, 'dispute'])->name('dispute');
+    });
+
     // PPOB Pelanggan (tanpa profil.lengkap karena PPOB boleh diakses semua)
     Route::prefix('ppob')->name('pelanggan.ppob.')->group(function () {
         Route::get('/', [PelangganPpobNewController::class, 'index'])->name('index');

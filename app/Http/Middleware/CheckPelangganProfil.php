@@ -12,7 +12,7 @@ class CheckPelangganProfil
         $pelanggan = $request->session()->get('pelanggan');
 
         if (! $pelanggan || ! $pelanggan->is_profile_complete) {
-            return redirect()->route('pelanggan.profil.edit')
+            return redirect()->route('pelanggan.profil')
                 ->with('warning', 'Lengkapi profil Anda terlebih dahulu sebelum memesan jasa.');
         }
 

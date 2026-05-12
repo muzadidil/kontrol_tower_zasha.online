@@ -139,49 +139,99 @@
     <div class="modal-dialog modal-dialog-centered px-3">
         <div class="modal-content" style="border-radius: 25px; border: none;">
             <div class="modal-body p-4">
-                <h5 class="fw-bold mb-4 text-center">Form Pemesanan</h5>
-                <form action="{{ route('pelanggan.pesan') }}" method="POST">
+                <h5 class="fw-bold mb-4 text-center">Tipe Pemesanan</h5>
+
+                {{-- Toggle Tipe Order --}}
+                <div class="mb-4">
+                    <div class="btn-group w-100 d-flex" role="group">
+                        <input type="radio" class="btn-check" name="tipe_order" id="orderLangsung" value="langsung" checked>
+                        <label class="btn btn-outline-primary flex-grow-1 rounded-start-3 fw-bold" for="orderLangsung">
+                            <i class="bi bi-lightning-fill me-1"></i>Langsung
+                        </label>
+                        <input type="radio" class="btn-check" name="tipe_order" id="orderInden" value="inden">
+                        <label class="btn btn-outline-primary flex-grow-1 rounded-end-3 fw-bold" for="orderInden">
+                            <i class="bi bi-calendar-event me-1"></i>Inden
+                        </label>
+                    </div>
+                    <small class="text-muted d-block mt-2" id="tipeDesc">Pesan sekarang, kerjakan hari ini</small>
+                </div>
+
+                <form id="formOrder" action="{{ route('pelanggan.pesan') }}" method="POST">
                     @csrf
                     <input type="hidden" name="id_mitra" value="{{ $mitra->id_mitra }}">
 
+                    {{-- Durasi --}}
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Durasi Kerja</label>
                         <div class="input-group">
-                            <input type="number" name="durasi" class="form-control rounded-start-3"
+                            <input type="number" name="durasi" id="inputDurasi" class="form-control rounded-start-3"
                                    min="1" max="24" value="1" required>
-                            <span class="input-group-text rounded-end-3">{{ $mitra->satuan_tarif ?? 'Jam' }}</span>
+                            <span class="input-group-text rounded-end-3" id="satuanInput">{{ $mitra->satuan_tarif ?? 'Jam' }}</span>
                         </div>
                     </div>
 
+                    {{-- Tanggal Pelaksanaan (Hidden, Muncul jika Inden) --}}
+                    <div class="mb-3" id="sectionTanggal" style="display: none;">
+                        <label class="form-label fw-bold small">Tanggal Pelaksanaan</label>
+                        <input type="date" name="tanggal_pelaksanaan" id="inputTanggal" class="form-control rounded-3">
+                        <small class="text-muted d-block mt-1">Minimal besok</small>
+                    </div>
+
+                    {{-- Metode Pembayaran --}}
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Metode Pembayaran</label>
-                        <select name="metode_pembayaran" class="form-select rounded-3" required>
-                            <option value="COD">COD (Bayar di Tempat)</option>
-                            <option value="Transfer">Transfer Bank</option>
-                            <option value="Saldo">Saldo ZASHA</option>
+                        <select name="metode_pembayaran" id="metodeSelect" class="form-select rounded-3" required>
+                            <option value="saldo">Saldo ZASHA</option>
+                            <option value="transfer">Transfer Bank</option>
+                            <option value="cod">COD (Bayar di Tempat)</option>
                         </select>
                     </div>
 
+                    {{-- Keterangan --}}
                     <div class="mb-4">
                         <label class="form-label fw-bold small">Keterangan (Opsional)</label>
                         <textarea name="keterangan_kerja" class="form-control rounded-3" rows="3"
                                   placeholder="Jelaskan pekerjaan yang dibutuhkan..."></textarea>
                     </div>
 
-                    @php
-                        $estimasi = ($mitra->tarif_per_jam ?? 0) * 1;
-                    @endphp
-                    <div class="d-flex justify-content-between small mb-3 text-muted">
-                        <span>Estimasi Biaya</span>
-                        <span class="fw-bold text-primary" id="estimasiHarga">
-                            Rp {{ number_format($mitra->tarif_per_jam ?? 0, 0, ',', '.') }}
-                        </span>
+                    {{-- Rincian Harga --}}
+                    <div style="background: #f8fafc; border-radius: 15px; padding: 15px; margin-bottom: 20px; font-size: 13px;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tarif <span id="labelTarif">/ Jam</span></span>
+                            <span class="fw-bold" id="displayTarif">Rp {{ number_format($mitra->tarif_per_jam ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Durasi</span>
+                            <span class="fw-bold"><span id="displayDurasi">1</span> <span id="satuanDisplay">Jam</span></span>
+                        </div>
+                        <hr style="margin: 10px 0; border-color: #ddd;">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="fw-bold">Total Biaya</span>
+                            <span class="fw-bold text-primary" id="displayTotal" style="font-size: 15px;">
+                                Rp {{ number_format($mitra->tarif_per_jam ?? 0, 0, ',', '.') }}
+                            </span>
+                        </div>
+                        {{-- DP Info (Hidden, Muncul jika Inden) --}}
+                        <div id="dpInfo" style="display: none; background: white; padding: 10px; border-radius: 10px; border-left: 3px solid #f0a500;">
+                            <small class="d-block text-muted mb-1">DP 50% yang harus dibayar</small>
+                            <strong style="color: #f0a500; font-size: 14px;" id="displayDp">
+                                Rp 0
+                            </strong>
+                        </div>
                     </div>
 
+                    {{-- Form Fields Tambahan untuk Inden --}}
+                    <input type="hidden" name="tarif_per_jam" id="hargaJam" value="{{ $mitra->tarif_per_jam ?? 0 }}">
+                    <input type="hidden" name="tarif_per_hari" id="hargaHari" value="{{ $mitra->tarif_per_hari ?? 0 }}">
+                    <input type="hidden" id="alamatPelanggan" name="alamat_pelanggan" value="">
+                    <input type="hidden" id="pelangganLat" name="pelanggan_lat" value="">
+                    <input type="hidden" id="pelangganLng" name="pelanggan_lng" value="">
+
+                    {{-- Buttons --}}
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-light w-100 rounded-pill fw-bold py-3"
                                 data-bs-dismiss="modal">BATAL</button>
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow">
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow" id="btnSubmit">
                             KONFIRMASI
                         </button>
                     </div>
@@ -193,13 +243,91 @@
 
 @push('scripts')
 <script>
-    document.querySelector('input[name="durasi"]')?.addEventListener('input', function() {
-        const tarif = {{ $mitra->tarif_per_jam ?? 0 }};
-        const durasi = parseInt(this.value) || 1;
-        const total = tarif * durasi;
-        document.getElementById('estimasiHarga').textContent =
-            'Rp ' + total.toLocaleString('id-ID');
-    });
+(function() {
+    const radioLangsung = document.getElementById('orderLangsung');
+    const radioInden = document.getElementById('orderInden');
+    const formOrder = document.getElementById('formOrder');
+    const inputDurasi = document.getElementById('inputDurasi');
+    const inputTanggal = document.getElementById('inputTanggal');
+    const sectionTanggal = document.getElementById('sectionTanggal');
+    const dpInfo = document.getElementById('dpInfo');
+    const tipeDesc = document.getElementById('tipeDesc');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const metodeSelect = document.getElementById('metodeSelect');
+
+    const tariffJam = {{ $mitra->tarif_per_jam ?? 0 }};
+    const tariffHari = {{ $mitra->tarif_per_hari ?? 0 }};
+    const mitraId = '{{ $mitra->id_mitra }}';
+    const alamatUtama = '{{ $alamats->firstWhere("is_utama", true)?->alamat ?? "Alamat belum diisi" }}';
+
+    function updatePricing() {
+        const durasi = parseInt(inputDurasi.value) || 1;
+        const tipeOrder = radioInden.checked ? 'inden' : 'langsung';
+
+        let satuan, tarif;
+        if (tipeOrder === 'langsung') {
+            satuan = '{{ $mitra->satuan_tarif ?? "Jam" }}';
+            tarif = tariffJam;
+        } else {
+            satuan = 'Jam'; // Untuk sekarang assume indent selalu per Jam
+            tarif = tariffJam;
+        }
+
+        const total = Math.round(tarif * durasi);
+        const dp = Math.round(total * 0.5);
+
+        document.getElementById('displayTarif').textContent = 'Rp ' + tarif.toLocaleString('id-ID');
+        document.getElementById('displayDurasi').textContent = durasi;
+        document.getElementById('satuanInput').textContent = satuan;
+        document.getElementById('satuanDisplay').textContent = satuan;
+        document.getElementById('labelTarif').textContent = '/ ' + satuan;
+        document.getElementById('displayTotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
+        document.getElementById('displayDp').textContent = 'Rp ' + dp.toLocaleString('id-ID');
+        document.getElementById('hargaJam').value = tariffJam;
+        document.getElementById('hargaHari').value = tariffHari;
+    }
+
+    function updateTipeOrder() {
+        const isInden = radioInden.checked;
+
+        if (isInden) {
+            sectionTanggal.style.display = 'block';
+            dpInfo.style.display = 'block';
+            tipeDesc.textContent = 'Pesan untuk tanggal tertentu di masa depan';
+            btnSubmit.textContent = 'BOOKING & BAYAR DP';
+            formOrder.action = '{{ route("pelanggan.inden.store") }}';
+            metodeSelect.value = 'saldo';
+        } else {
+            sectionTanggal.style.display = 'none';
+            dpInfo.style.display = 'none';
+            tipeDesc.textContent = 'Pesan sekarang, kerjakan hari ini';
+            btnSubmit.textContent = 'KONFIRMASI';
+            formOrder.action = '{{ route("pelanggan.pesan") }}';
+        }
+
+        updatePricing();
+    }
+
+    function setMinDate() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        inputTanggal.min = tomorrow.toISOString().split('T')[0];
+        // Set nilai default ke besok
+        inputTanggal.value = tomorrow.toISOString().split('T')[0];
+    }
+
+    // Set alamat pelanggan
+    document.getElementById('alamatPelanggan').value = alamatUtama;
+
+    // Event listeners
+    radioLangsung.addEventListener('change', updateTipeOrder);
+    radioInden.addEventListener('change', updateTipeOrder);
+    inputDurasi.addEventListener('input', updatePricing);
+
+    // Initialize
+    setMinDate();
+    updateTipeOrder();
+})();
 </script>
 @endpush
 @endsection

@@ -92,6 +92,14 @@ class OrderTrackingService
                     'judul' => 'Order diterima',
                     'pesan' => 'Anda telah menerima order. Status Anda berubah menjadi Sibuk.',
                 ]);
+
+                // Notifikasi ke pelanggan
+                \App\Helpers\NotifHelper::kirim(
+                    $tracking->pelanggan_id,
+                    'Order Diterima ✓',
+                    'Mitra sedang menuju lokasimu!',
+                    'pesanan'
+                );
             });
         } catch (\Exception $e) {
             Log::error('OrderTrackingService::mitraAccept failed', [
@@ -123,6 +131,14 @@ class OrderTrackingService
                     'judul' => 'Order ditolak',
                     'pesan' => 'Anda telah menolak order dengan alasan: ' . $pesan,
                 ]);
+
+                // Notifikasi ke pelanggan
+                \App\Helpers\NotifHelper::kirim(
+                    $tracking->pelanggan_id,
+                    'Order Ditolak ✗',
+                    'Maaf, mitra tidak bisa mengambil ordermu. Alasan: ' . $pesan,
+                    'pesanan'
+                );
             });
         } catch (\Exception $e) {
             Log::error('OrderTrackingService::mitraReject failed', [

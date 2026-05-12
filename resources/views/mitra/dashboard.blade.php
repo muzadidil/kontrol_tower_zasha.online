@@ -305,6 +305,181 @@
 
 @push('scripts')
 <script>
+// ─ Global State ─
+let currentOrderId = null;
+let currentOrderData = null;
+let pollingInterval = null;
+
+// ─ Polling Functions ─
+function startPolling() {
+    if (pollingInterval) return;
+    pollingInterval = setInterval(fetchPendingOrder, 10000); // Poll setiap 10 detik
+    fetchPendingOrder(); // Fetch langsung saat mulai
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
+
+async function fetchPendingOrder() {
+    try {
+        const response = await fetch('{{ route("mitra.api.pending-order") }}');
+        const data = await response.json();
+
+        if (data.order) {
+            showIncomingOrder(data.order);
+        }
+    } catch (err) {
+        console.error('Fetch pending order failed:', err);
+    }
+}
+
+function showIncomingOrder(order) {
+    currentOrderId = order.id;
+    currentOrderData = order;
+
+    document.getElementById('order-nama').textContent = order.pelanggan?.nama || 'Pelanggan';
+    document.getElementById('order-jenis').textContent = order.order_type || 'Order';
+    document.getElementById('order-harga').textContent = 'Rp ' + (order.harga_jual || 0).toLocaleString('id-ID');
+
+    const incomingPopup = document.getElementById('incoming-order');
+    if (incomingPopup) {
+        incomingPopup.style.display = 'flex';
+    }
+}
+
+// ─ Accept/Reject Functions ─
+async function acceptOrder() {
+    if (!currentOrderId) return;
+
+    try {
+        const response = await fetch('{{ route("mitra.order.accept") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ tracking_id: currentOrderId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Sembunyikan incoming popup
+            const incomingPopup = document.getElementById('incoming-order');
+            if (incomingPopup) {
+                incomingPopup.style.display = 'none';
+            }
+
+            // Tampilkan active order section
+            showActiveOrder(currentOrderId);
+            resetProgress();
+
+            // Tampilkan tombol WA pelanggan
+            showWhatsAppButton();
+
+            // Refresh data order aktif
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            alert('Gagal menerima order: ' + data.message);
+        }
+    } catch (err) {
+        console.error('Accept order failed:', err);
+        alert('Gagal menerima order. Coba lagi.');
+    }
+}
+
+function showRejectOptions() {
+    const rejectPanel = document.getElementById('reject-panel');
+    if (rejectPanel) {
+        rejectPanel.style.display = 'block';
+    }
+}
+
+function hideRejectPanel() {
+    const rejectPanel = document.getElementById('reject-panel');
+    if (rejectPanel) {
+        rejectPanel.style.display = 'none';
+    }
+}
+
+async function rejectOrder(alasan) {
+    if (!currentOrderId || !alasan) {
+        alert('Silakan pilih atau masukkan alasan penolakan.');
+        return;
+    }
+
+    try {
+        const response = await fetch('{{ route("mitra.order.reject") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                tracking_id: currentOrderId,
+                pesan: alasan
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Sembunyikan popups
+            const incomingPopup = document.getElementById('incoming-order');
+            const rejectPanel = document.getElementById('reject-panel');
+            if (incomingPopup) incomingPopup.style.display = 'none';
+            if (rejectPanel) rejectPanel.style.display = 'none';
+
+            // Reset form
+            document.getElementById('custom-reject').value = '';
+
+            // Reset state
+            currentOrderId = null;
+            currentOrderData = null;
+
+            alert('Order berhasil ditolak.');
+
+            // Lanjutkan polling
+            setTimeout(fetchPendingOrder, 1000);
+        } else {
+            alert('Gagal menolak order: ' + data.message);
+        }
+    } catch (err) {
+        console.error('Reject order failed:', err);
+        alert('Gagal menolak order. Coba lagi.');
+    }
+}
+
+function showWhatsAppButton() {
+    if (!currentOrderData || !currentOrderData.pelanggan) return;
+
+    const activeOrder = document.getElementById('active-order');
+    if (!activeOrder) return;
+
+    const noWa = currentOrderData.pelanggan.no_wa || '';
+    if (!noWa) return;
+
+    let waButton = document.getElementById('btn-wa-pelanggan');
+    if (!waButton) {
+        const progressSteps = document.getElementById('progress-steps');
+        if (progressSteps) {
+            waButton = document.createElement('a');
+            waButton.id = 'btn-wa-pelanggan';
+            waButton.href = `https://wa.me/${noWa}?text=Halo, saya sedang menuju lokasimu. Sampai dalam beberapa menit.`;
+            waButton.target = '_blank';
+            waButton.style.cssText = 'display: inline-flex; align-items: center; gap: var(--fib-2); background: #25d366; color: white; padding: var(--fib-3); border-radius: var(--r-md); text-decoration: none; font-weight: 700; margin-top: var(--fib-3);';
+            waButton.innerHTML = '<i class="bi bi-whatsapp"></i>Hubungi via WhatsApp';
+            progressSteps.appendChild(waButton);
+        }
+    }
+}
+
 // Status Toggle - only on dashboard
 const toggleEl = document.getElementById('toggleStatus');
 if (toggleEl) {
@@ -349,6 +524,13 @@ if (toggleEl) {
         }
     });
 }
+
+// Init polling jika mitra online
+document.addEventListener('DOMContentLoaded', () => {
+    if ({{ $mitra->status_online === 'online' ? 'true' : 'false' }}) {
+        startPolling();
+    }
+});
 
 // Show Active Order Section - only on dashboard
 function showActiveOrder(trackingId) {
