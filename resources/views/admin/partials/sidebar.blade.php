@@ -14,7 +14,8 @@
         @php
             $isMitraActive = request()->is('admin/mitra*')
                           || request()->is('admin/verification*')
-                          || request()->is('admin/roles*');
+                          || request()->is('admin/roles*')
+                          || request()->is('admin/tarif*');
         @endphp
         <li class="nav-item">
             <a href="#mitraMenu" data-bs-toggle="collapse"
@@ -41,6 +42,12 @@
                         <a href="{{ route('admin.roles.index') }}"
                            class="nav-link py-1 small {{ request()->is('admin/roles*') ? 'active' : '' }}">
                             <i class="fas fa-shield-alt me-2"></i> Role & Akses
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.tarif.index') }}"
+                           class="nav-link py-1 small {{ request()->is('admin/tarif*') ? 'active' : '' }}">
+                            <i class="fas fa-cash-register me-2"></i> Tarif Layanan
                         </a>
                     </li>
                 </ul>

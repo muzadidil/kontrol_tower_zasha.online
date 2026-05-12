@@ -321,6 +321,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('/roles/bulk-action', [\App\Http\Controllers\Admin\RoleController::class, 'bulkAction'])
         ->name('admin.roles.bulkAction');
 
+    // Tarif cross-mitra (read-only banding harga)
+    Route::get('/tarif', [\App\Http\Controllers\Admin\TarifController::class, 'index'])
+        ->name('admin.tarif.index');
+
     // WFH Admin
     Route::prefix('wfh')->name('admin.wfh.')->group(function () {
         Route::get('/', [AdminWfhController::class, 'index'])->name('index');
