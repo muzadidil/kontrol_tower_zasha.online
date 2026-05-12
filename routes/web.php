@@ -189,10 +189,13 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::get('/api/notifikasi', [MitraOrderController::class, 'getNotifikasi'])->name('api.notifikasi');
     Route::get('/api/pending-order', [MitraOrderController::class, 'getPendingOrder'])->name('api.pending-order');
 
-    // Order Management
-    Route::post('/order/accept', [MitraOrderController::class, 'acceptOrder'])->name('order.accept');
-    Route::post('/order/reject', [MitraOrderController::class, 'rejectOrder'])->name('order.reject');
-    Route::post('/order/progress', [MitraOrderController::class, 'updateProgress'])->name('order.progress');
+    // Order Management (butuh verified)
+    Route::post('/order/accept', [MitraOrderController::class, 'acceptOrder'])
+        ->middleware('verified.mitra')->name('order.accept');
+    Route::post('/order/reject', [MitraOrderController::class, 'rejectOrder'])
+        ->middleware('verified.mitra')->name('order.reject');
+    Route::post('/order/progress', [MitraOrderController::class, 'updateProgress'])
+        ->middleware('verified.mitra')->name('order.progress');
 
     Route::get('/pesanan', [MitraDashboardController::class, 'pesanan'])->name('pesanan');
     Route::get('/saldo', [MitraDashboardController::class, 'saldo'])->name('saldo');
@@ -200,8 +203,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
     Route::post('/profil/foto', [MitraDashboardController::class, 'uploadFoto'])->name('profil.foto');
 
-    // WFH Orders (butuh fitur order-wfh)
-    Route::prefix('wfh')->name('wfh.')->middleware('feature:order-wfh')->group(function () {
+    // WFH Orders (butuh verified + fitur order-wfh)
+    Route::prefix('wfh')->name('wfh.')->middleware(['verified.mitra', 'feature:order-wfh'])->group(function () {
         Route::get('/', [MitraWfhController::class, 'index'])->name('index');
         Route::get('/{wfhOrder}', [MitraWfhController::class, 'show'])->name('show');
         Route::post('/{wfhOrder}/terima', [MitraWfhController::class, 'terima'])->name('terima');
@@ -209,8 +212,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{wfhOrder}/kirim-file', [MitraWfhController::class, 'kirimFile'])->name('kirim-file');
     });
 
-    // Jastip Orders (butuh fitur order-jastip)
-    Route::prefix('jastip')->name('jastip.')->middleware('feature:order-jastip')->group(function () {
+    // Jastip Orders (butuh verified + fitur order-jastip)
+    Route::prefix('jastip')->name('jastip.')->middleware(['verified.mitra', 'feature:order-jastip'])->group(function () {
         Route::get('/', [MitraJastipController::class, 'index'])->name('index');
         Route::get('/{jastipOrder}', [MitraJastipController::class, 'show'])->name('show');
         Route::post('/{jastipOrder}/terima', [MitraJastipController::class, 'terima'])->name('terima');
@@ -228,8 +231,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::get('/riwayat', [TopupController::class, 'mitraIndex'])->name('index');
     });
 
-    // Tenaga (butuh fitur order-tenaga)
-    Route::prefix('tenaga')->name('tenaga.')->middleware('feature:order-tenaga')->group(function () {
+    // Tenaga (butuh verified + fitur order-tenaga)
+    Route::prefix('tenaga')->name('tenaga.')->middleware(['verified.mitra', 'feature:order-tenaga'])->group(function () {
         Route::get('/', [MitraTenagaController::class, 'index'])->name('index');
         Route::get('/{tenagaOrder}', [MitraTenagaController::class, 'show'])->name('show');
         Route::post('/{tenagaOrder}/terima', [MitraTenagaController::class, 'terima'])->name('terima');
@@ -238,8 +241,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{tenagaOrder}/selesai-kerja', [MitraTenagaController::class, 'selesaiKerja'])->name('selesai-kerja');
     });
 
-    // Service (butuh fitur order-service)
-    Route::prefix('service')->name('service.')->middleware('feature:order-service')->group(function () {
+    // Service (butuh verified + fitur order-service)
+    Route::prefix('service')->name('service.')->middleware(['verified.mitra', 'feature:order-service'])->group(function () {
         Route::get('/', [MitraServiceController::class, 'index'])->name('index');
         Route::get('/{serviceOrder}', [MitraServiceController::class, 'show'])->name('show');
         Route::post('/{serviceOrder}/terima', [MitraServiceController::class, 'terima'])->name('terima');
