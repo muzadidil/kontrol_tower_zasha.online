@@ -114,8 +114,20 @@ class PelangganController extends Controller
         $sort      = $request->get('sort', 'bintang');
         $is_jastip = false;
 
+        // Mapping id_kategori (legacy) ke kategori_kode (modul baru):
+        // 1=Tukang Bangunan, 2=Teknisi Elektronik=>SVC, 3=Jastip=>JST, 4=Cleaning=>TNG, 5=Rewang=>TNG
+        // Mitra lama pakai id_kategori, mitra baru pakai kategori_kode (enum TNG/WFH/JST/SVC).
+        $kategoriKodeMap = [
+            1 => 'TNG',  // Tukang Bangunan
+            2 => 'SVC',  // Teknisi Elektronik
+            3 => 'JST',  // Jastip
+            4 => 'TNG',  // Cleaning Service
+            5 => 'TNG',  // Rewang
+        ];
+        $kategoriKode = $kategoriKodeMap[$id_kategori] ?? null;
+
         $query = DB::table('mitra as m')
-            ->leftJoin('pesanan_mitra as pm', 'm.id_mitra', '=', 'pm.id_mitra')
+            ->leftJoin('pesanan as p', 'm.id_mitra', '=', 'p.id_mitra')
             ->leftJoin('kategori_pekerjaan as k', 'm.id_kategori', '=', 'k.id_kategori')
             ->select(
                 'm.id_mitra',
@@ -126,10 +138,16 @@ class PelangganController extends Controller
                 DB::raw('COALESCE(m.tarif_per_jam, 0) as tarif_per_jam'),
                 DB::raw('0 as jarak'),
                 DB::raw('COALESCE(k.satuan, "Jam") as satuan_tarif'),
-                DB::raw('COALESCE(AVG(pm.rating), 0) as rating_rata'),
-                DB::raw('COUNT(pm.id_pesanan) as total_order')
+                DB::raw('COALESCE(AVG(p.rating), 0) as rating_rata'),
+                DB::raw('COUNT(p.id_pesanan) as total_order')
             )
-            ->where('m.id_kategori', $id_kategori)
+            // Match by id_kategori ATAU kategori_kode (support kedua skema)
+            ->where(function ($q) use ($id_kategori, $kategoriKode) {
+                $q->where('m.id_kategori', $id_kategori);
+                if ($kategoriKode) {
+                    $q->orWhere('m.kategori_kode', $kategoriKode);
+                }
+            })
             ->groupBy('m.id_mitra', 'm.nama_panggilan', 'm.foto_mitra', 'm.status_mitra', 'm.status_online', 'm.tarif_per_jam', 'k.satuan');
 
         if ($sort == 'orderan') {
@@ -193,20 +211,25 @@ class PelangganController extends Controller
 
         if (!$mitra) abort(404);
 
-        $rating_rata = DB::table('pesanan_mitra')
+        $rating_rata = DB::table('pesanan')
             ->where('id_mitra', $id)
             ->whereNotNull('rating')
             ->where('rating', '>', 0)
             ->avg('rating') ?? 0;
 
-        $total_order = DB::table('pesanan_mitra')->where('id_mitra', $id)->count();
+        $total_order = DB::table('pesanan')->where('id_mitra', $id)->count();
 
-        $ulasans = DB::table('pesanan_mitra as pm')
-            ->join('pelanggan as pl', 'pm.id_pelanggan', '=', 'pl.id_pelanggan')
-            ->select('pm.rating', 'pm.ulasan', 'pl.nama_pelanggan', 'pm.id_pesanan')
-            ->where('pm.id_mitra', $id)
-            ->whereNotNull('pm.ulasan')
-            ->orderBy('pm.id_pesanan', 'desc')
+        $ulasans = DB::table('pesanan as p')
+            ->join('pelanggans as pl', 'p.id_pelanggan', '=', 'pl.id_pelanggan')
+            ->select(
+                'p.rating',
+                'p.ulasan',
+                DB::raw('COALESCE(pl.nama_panggilan, pl.nama_pelanggan, "Pelanggan") as nama_pelanggan'),
+                'p.id_pesanan'
+            )
+            ->where('p.id_mitra', $id)
+            ->whereNotNull('p.ulasan')
+            ->orderBy('p.id_pesanan', 'desc')
             ->limit(5)
             ->get();
 
