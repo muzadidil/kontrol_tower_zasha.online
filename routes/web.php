@@ -25,6 +25,7 @@ use App\Http\Controllers\Mitra\MitraOrderController;
 use App\Http\Controllers\Mitra\MitraVerifikasiController;
 use App\Http\Controllers\Mitra\MitraTarifController;
 use App\Http\Controllers\Mitra\MitraLaporanController;
+use App\Http\Controllers\Mitra\MitraRatingController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -181,6 +182,16 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
             ->middleware('feature:laporan-harian')->name('harian');
         Route::get('/bulanan', [MitraLaporanController::class, 'bulanan'])
             ->middleware('feature:laporan-bulanan')->name('bulanan');
+    });
+
+    // Rating & Ulasan (butuh verified + fitur rating untuk lihat, ulasan untuk balas)
+    Route::prefix('rating')->name('rating.')->middleware(['verified.mitra', 'feature:rating'])->group(function () {
+        Route::get('/', [MitraRatingController::class, 'index'])->name('index');
+        // Balas dan hapus balasan butuh fitur 'ulasan' tambahan
+        Route::post('/{rating}/balas', [MitraRatingController::class, 'balas'])
+            ->middleware('feature:ulasan')->name('balas');
+        Route::delete('/{rating}/balasan', [MitraRatingController::class, 'hapusBalasan'])
+            ->middleware('feature:ulasan')->name('hapusBalasan');
     });
 
     // Tarif Layanan (butuh fitur 'tarif')
