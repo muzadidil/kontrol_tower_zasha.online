@@ -70,7 +70,34 @@
 </div>
 @endif
 
-{{-- Tarif --}}
+{{-- Daftar Layanan & Tarif (dari tarif_mitra) --}}
+@if(($tarifs ?? collect())->isNotEmpty())
+<div class="section-card">
+    <h6 class="fw-bold small text-muted text-uppercase mb-3">
+        <i class="bi bi-list-check me-1"></i>Daftar Layanan & Tarif
+    </h6>
+    @foreach($tarifs as $t)
+        <div class="d-flex justify-content-between align-items-start py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+            <div class="flex-grow-1">
+                <div class="fw-semibold small" style="color:#1e293b;">{{ $t->keterangan }}</div>
+                <small class="text-muted">per {{ $t->satuan }}</small>
+            </div>
+            <div class="text-end">
+                <div class="fw-bold" style="color:#005aa9;">
+                    Rp {{ number_format($t->hargaPelanggan(), 0, ',', '.') }}
+                </div>
+                <small class="text-muted" style="font-size:.65rem;">termasuk komisi</small>
+            </div>
+        </div>
+    @endforeach
+    <div class="alert alert-light border-0 rounded-3 mt-3 mb-0 py-2" style="background:#eff6ff; font-size:.7rem; color:#64748b;">
+        <i class="bi bi-info-circle me-1"></i>
+        Harga sudah termasuk komisi Zasha {{ number_format($komisiPersen ?? 10, 1) }}%.
+        Tidak ada biaya tersembunyi.
+    </div>
+</div>
+@else
+{{-- Tarif legacy (fallback bila tarif_mitra kosong) --}}
 <div class="section-card">
     <h6 class="fw-bold small text-muted text-uppercase mb-3">Rincian Tarif</h6>
     <div class="d-flex justify-content-between small mb-2">
@@ -90,6 +117,7 @@
     </div>
     @endif
 </div>
+@endif
 
 {{-- Ulasan --}}
 @if($ulasans->isNotEmpty())

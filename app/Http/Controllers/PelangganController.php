@@ -240,7 +240,17 @@ class PelangganController extends Controller
             ? DB::table('alamats')->where('id_pelanggan', auth('pelanggan')->id())->orderByDesc('is_utama')->get()
             : collect();
 
-        return view('pelanggan.detail-mitra', compact('mitra', 'rating_rata', 'total_order', 'ulasans', 'alamats'));
+        // Daftar tarif aktif milik mitra ini + komisi Zasha (untuk hitung harga pelanggan).
+        $tarifs = \App\Models\TarifMitra::where('mitra_id', $id)
+            ->where('is_aktif', true)
+            ->orderBy('keterangan')
+            ->get();
+        $komisiPersen = \App\Models\Setting::komisiPersen();
+
+        return view('pelanggan.detail-mitra', compact(
+            'mitra', 'rating_rata', 'total_order', 'ulasans', 'alamats',
+            'tarifs', 'komisiPersen'
+        ));
     }
 
     public function detailJastip($id)
