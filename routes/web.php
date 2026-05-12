@@ -27,6 +27,7 @@ use App\Http\Controllers\Mitra\MitraTarifController;
 use App\Http\Controllers\Mitra\MitraLaporanController;
 use App\Http\Controllers\Mitra\MitraRatingController;
 use App\Http\Controllers\Mitra\MitraJadwalController;
+use App\Http\Controllers\Mitra\IndenController as MitraIndenController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -268,6 +269,16 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{tenagaOrder}/tolak', [MitraTenagaController::class, 'tolak'])->name('tolak');
         Route::post('/{tenagaOrder}/mulai-kerja', [MitraTenagaController::class, 'mulaiKerja'])->name('mulai-kerja');
         Route::post('/{tenagaOrder}/selesai-kerja', [MitraTenagaController::class, 'selesaiKerja'])->name('selesai-kerja');
+    });
+
+    // Inden Orders (butuh verified + fitur order-inden)
+    Route::prefix('inden')->name('inden.')->middleware(['verified.mitra', 'feature:order-inden'])->group(function () {
+        Route::get('/', [MitraIndenController::class, 'index'])->name('index');
+        Route::get('/{indenOrder}', [MitraIndenController::class, 'show'])->name('show');
+        Route::post('/{indenOrder}/approve', [MitraIndenController::class, 'approve'])->name('approve');
+        Route::post('/{indenOrder}/tolak', [MitraIndenController::class, 'tolak'])->name('tolak');
+        Route::post('/{indenOrder}/mulai-kerja', [MitraIndenController::class, 'mulaiKerja'])->name('mulaiKerja');
+        Route::post('/{indenOrder}/selesai-kerja', [MitraIndenController::class, 'selesaiKerja'])->name('selesaiKerja');
     });
 
     // Service (butuh verified + fitur order-service)
