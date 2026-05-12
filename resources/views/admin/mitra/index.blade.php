@@ -61,11 +61,21 @@
             <table class="table table-adm mb-0">
                 <thead><tr>
                     <th class="ps-4">#</th><th>Nama Mitra</th><th>No. WA</th>
+                    <th>Role</th>
                     <th class="text-center">Status</th><th class="text-center">Verifikasi</th>
                     <th class="text-end pe-4">Aksi</th>
                 </tr></thead>
                 <tbody>
                     @forelse($mitras as $m)
+                    @php
+                        $roleObj = $m->role; // belongsTo Role
+                        $statusVerif = $m->status_verifikasi;
+                        $statusVerifLabel = is_object($statusVerif) && method_exists($statusVerif, 'label')
+                            ? $statusVerif->label()
+                            : (is_string($statusVerif) ? ucwords(str_replace('_', ' ', $statusVerif)) : 'Pending');
+                        $isVerified = ($statusVerif instanceof \App\Enums\MitraStatus && $statusVerif->isActive())
+                            || (is_string($statusVerif) && in_array($statusVerif, ['active', 'verified'], true));
+                    @endphp
                     <tr>
                         <td class="ps-4 text-muted">{{ $loop->iteration }}</td>
                         <td>
@@ -73,14 +83,27 @@
                             @if($m->nama_asli)<div class="text-muted" style="font-size:.75rem;">{{ $m->nama_asli }}</div>@endif
                         </td>
                         <td class="text-muted">{{ $m->no_wa ?? '-' }}</td>
+                        <td>
+                            @if($roleObj)
+                                <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:{{ ($roleObj->icon_color ?? '#005aa9') . '15' }};color:{{ $roleObj->icon_color ?? '#005aa9' }};border-radius:999px;font-size:.7rem;font-weight:700;">
+                                    <i class="bi {{ $roleObj->icon ?? 'bi-shield-fill' }}"></i>
+                                    {{ $roleObj->name }}
+                                </span>
+                                <div class="text-muted mt-1" style="font-size:.65rem;">
+                                    <i class="bi bi-key-fill"></i> {{ $roleObj->features->count() }} fitur aktif
+                                </div>
+                            @else
+                                <span class="text-muted small fst-italic">Tanpa role</span>
+                            @endif
+                        </td>
                         <td class="text-center">
                             <span class="badge rounded-pill px-3" style="font-size:.65rem;font-weight:700;background:{{ $m->status_mitra=='aktif'?'#dcfce7':'#fee2e2' }};color:{{ $m->status_mitra=='aktif'?'#16a34a':'#dc2626' }};">
                                 {{ ucfirst($m->status_mitra ?? 'non-aktif') }}
                             </span>
                         </td>
                         <td class="text-center">
-                            <span class="badge rounded-pill px-3" style="font-size:.65rem;font-weight:700;background:{{ $m->status_verifikasi=='Verified'?'#dbeafe':'#fef9c3' }};color:{{ $m->status_verifikasi=='Verified'?'#1d4ed8':'#ca8a04' }};">
-                                {{ $m->status_verifikasi ?? 'Pending' }}
+                            <span class="badge rounded-pill px-3" style="font-size:.65rem;font-weight:700;background:{{ $isVerified?'#dcfce7':'#fef9c3' }};color:{{ $isVerified?'#16a34a':'#ca8a04' }};">
+                                {{ $statusVerifLabel }}
                             </span>
                         </td>
                         <td class="text-end pe-4">
@@ -94,7 +117,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center py-5" style="color:#94a3b8;"><i class="fas fa-users fa-2x mb-2 d-block"></i>Belum ada data mitra</td></tr>
+                    <tr><td colspan="7" class="text-center py-5" style="color:#94a3b8;"><i class="fas fa-users fa-2x mb-2 d-block"></i>Belum ada data mitra</td></tr>
                     @endforelse
                 </tbody>
             </table>

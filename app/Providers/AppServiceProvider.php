@@ -53,6 +53,12 @@ class AppServiceProvider extends ServiceProvider
     public static function mitraIsVerified(): bool
     {
         $mitra = Auth::guard('mitra')->user();
-        return $mitra && ($mitra->status_verifikasi ?? null) === 'verified';
+        if (!$mitra) return false;
+
+        $status = $mitra->status_verifikasi;
+        if ($status instanceof \App\Enums\MitraStatus) {
+            return $status->isActive();
+        }
+        return is_string($status) && in_array($status, ['active', 'verified'], true);
     }
 }

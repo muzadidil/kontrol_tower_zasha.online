@@ -28,6 +28,19 @@
                         <input type="text" name="nomor_wa" class="form-control" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Role Mitra</label>
+                        <select name="role_id" class="form-select">
+                            <option value="">-- Tanpa Role (assign nanti) --</option>
+                            @foreach(\App\Models\Role::where('is_active', true)->orderBy('name')->get() as $role)
+                                <option value="{{ $role->id }}">
+                                    {{ $role->name }} @if($role->description) — {{ $role->description }} @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">Role menentukan fitur yang bisa diakses mitra ini.</small>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Is WFH</label>
                         <select name="is_wfh" class="form-select">
                             <option value="1">Ya</option>

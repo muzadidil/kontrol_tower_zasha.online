@@ -15,7 +15,7 @@ class MitraController extends Controller
      */
     public function index()
     {
-        $mitras     = Mitra::orderBy('created_at', 'desc')->get();
+        $mitras     = Mitra::with('role.features')->orderBy('created_at', 'desc')->get();
         // Categories sekarang diambil dari roles aktif
         $categories = \App\Models\Role::where('is_active', true)->orderBy('id')->get()->map(function ($role) {
             return (object) [
@@ -87,10 +87,11 @@ class MitraController extends Controller
         $request->validate([
             'nama_panggilan' => 'required',
             'no_wa'          => 'required',
+            'role_id'        => 'nullable|exists:roles,id',
         ]);
 
         Mitra::create($request->only([
-            'id_kategori', 'nama_panggilan', 'nama_asli', 'no_wa',
+            'id_kategori', 'role_id', 'nama_panggilan', 'nama_asli', 'no_wa',
             'tarif_per_jam', 'tarif_per_hari', 'biaya_service_standar',
             'status_mitra', 'deskripsi_singkat', 'alamat',
         ]));

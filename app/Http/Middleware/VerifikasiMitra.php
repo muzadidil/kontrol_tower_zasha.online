@@ -24,8 +24,17 @@ class VerifikasiMitra
             return redirect()->route('mitra.login');
         }
 
-        if (($mitra->status_verifikasi ?? null) !== 'verified') {
-            // Kalau request expect JSON (API), kasih response 403.
+        // Status mitra dari MitraStatus enum — yang "aktif" adalah 'active'.
+        // Kalau cast ke enum gagal (data legacy), fall back ke string compare.
+        $status = $mitra->status_verifikasi;
+        $isActive = false;
+        if ($status instanceof \App\Enums\MitraStatus) {
+            $isActive = $status->isActive();
+        } elseif (is_string($status)) {
+            $isActive = in_array($status, ['active', 'verified'], true);
+        }
+
+        if (!$isActive) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
