@@ -102,8 +102,7 @@
             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
                 <li class="px-3 py-2 border-bottom"><strong class="small">Aksi Cepat</strong></li>
                 <li><a class="dropdown-item small" href="{{ route('admin.finance.deposit') }}"><i class="fas fa-plus-circle text-success me-2"></i>Deposit Manual</a></li>
-                <li><a class="dropdown-item small" href="{{ route('admin.kategori.index') }}"><i class="fas fa-tags text-warning me-2"></i>Kelola Master Layanan</a></li>
-                <li><a class="dropdown-item small" href="{{ route('admin.game-topup.index') }}"><i class="fas fa-gamepad text-info me-2"></i>Game Top-Up</a></li>
+                <li><a class="dropdown-item small" href="{{ route('admin.roles.index') }}"><i class="fas fa-shield-alt text-warning me-2"></i>Kelola Role & Akses</a></li>
                 <li><a class="dropdown-item small" href="{{ route('admin.monitor') }}"><i class="fas fa-desktop text-secondary me-2"></i>Session Monitor</a></li>
             </ul>
         </li>

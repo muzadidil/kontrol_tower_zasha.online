@@ -17,7 +17,21 @@ class PelangganController extends Controller
         $user = auth('pelanggan')->user();
         if (!$user) return redirect()->route('login');
 
-        $categories   = DB::table('kategori_pekerjaan')->orderBy('nama_kategori')->get();
+        // Categories diambil dari roles yang aktif (mengganti tabel kategori_pekerjaan legacy).
+        // Map field agar kompatibel dengan view yg masih pakai $kat->id_kategori, nama_kategori, svg_kategori.
+        $categories = \App\Models\Role::where('is_active', true)
+            ->orderBy('id')
+            ->get()
+            ->map(function ($role) {
+                return (object) [
+                    'id_kategori'  => $role->id,
+                    'nama_kategori' => str_replace('Mitra ', '', $role->name), // "Mitra TNG" -> "TNG"
+                    'svg_kategori' => '<i class="bi ' . ($role->icon ?: 'bi-shield-fill') . '" style="font-size:1.5rem; color:' . ($role->icon_color ?: '#005aa9') . ';"></i>',
+                    'satuan'       => 'Jam',
+                    'warna_tema'   => 'primary',
+                ];
+            });
+
         $unread_notif = NotifHelper::unreadCount($user->id_pelanggan);
 
         return view('pelanggan.dashboard', compact('user', 'categories', 'unread_notif'));
@@ -108,27 +122,22 @@ class PelangganController extends Controller
 
     public function katalog(Request $request, $id_kategori)
     {
-        $kategori = DB::table('kategori_pekerjaan')->where('id_kategori', $id_kategori)->first();
-        if (!$kategori) abort(404);
+        // $id_kategori sekarang = role_id (karena dashboard pelanggan pass role->id sebagai id_kategori)
+        $role = \App\Models\Role::where('id', $id_kategori)->where('is_active', true)->first();
+        if (!$role) abort(404);
+
+        // Pseudo-object kategori untuk kompatibilitas view
+        $kategori = (object) [
+            'id_kategori'   => $role->id,
+            'nama_kategori' => str_replace('Mitra ', '', $role->name),
+        ];
 
         $sort      = $request->get('sort', 'bintang');
-        $is_jastip = false;
+        $is_jastip = $role->name === 'Mitra JST';
 
-        // Mapping id_kategori (legacy) ke kategori_kode (modul baru):
-        // 1=Tukang Bangunan, 2=Teknisi Elektronik=>SVC, 3=Jastip=>JST, 4=Cleaning=>TNG, 5=Rewang=>TNG
-        // Mitra lama pakai id_kategori, mitra baru pakai kategori_kode (enum TNG/WFH/JST/SVC).
-        $kategoriKodeMap = [
-            1 => 'TNG',  // Tukang Bangunan
-            2 => 'SVC',  // Teknisi Elektronik
-            3 => 'JST',  // Jastip
-            4 => 'TNG',  // Cleaning Service
-            5 => 'TNG',  // Rewang
-        ];
-        $kategoriKode = $kategoriKodeMap[$id_kategori] ?? null;
-
+        // Filter mitra by role_id
         $query = DB::table('mitra as m')
             ->leftJoin('pesanan as p', 'm.id_mitra', '=', 'p.id_mitra')
-            ->leftJoin('kategori_pekerjaan as k', 'm.id_kategori', '=', 'k.id_kategori')
             ->select(
                 'm.id_mitra',
                 'm.nama_panggilan as nama_mitra',
@@ -137,18 +146,12 @@ class PelangganController extends Controller
                 'm.status_online',
                 DB::raw('COALESCE(m.tarif_per_jam, 0) as tarif_per_jam'),
                 DB::raw('0 as jarak'),
-                DB::raw('COALESCE(k.satuan, "Jam") as satuan_tarif'),
+                DB::raw('"Jam" as satuan_tarif'),
                 DB::raw('COALESCE(AVG(p.rating), 0) as rating_rata'),
                 DB::raw('COUNT(p.id_pesanan) as total_order')
             )
-            // Match by id_kategori ATAU kategori_kode (support kedua skema)
-            ->where(function ($q) use ($id_kategori, $kategoriKode) {
-                $q->where('m.id_kategori', $id_kategori);
-                if ($kategoriKode) {
-                    $q->orWhere('m.kategori_kode', $kategoriKode);
-                }
-            })
-            ->groupBy('m.id_mitra', 'm.nama_panggilan', 'm.foto_mitra', 'm.status_mitra', 'm.status_online', 'm.tarif_per_jam', 'k.satuan');
+            ->where('m.role_id', $role->id)
+            ->groupBy('m.id_mitra', 'm.nama_panggilan', 'm.foto_mitra', 'm.status_mitra', 'm.status_online', 'm.tarif_per_jam');
 
         if ($sort == 'orderan') {
             $query->orderByDesc('total_order');
@@ -204,8 +207,8 @@ class PelangganController extends Controller
     public function detailMitra($id)
     {
         $mitra = DB::table('mitra as m')
-            ->leftJoin('kategori_pekerjaan as k', 'm.id_kategori', '=', 'k.id_kategori')
-            ->select('m.*', 'k.nama_kategori', DB::raw('COALESCE(k.satuan, "Jam") as satuan_tarif'))
+            ->leftJoin('roles as r', 'm.role_id', '=', 'r.id')
+            ->select('m.*', 'r.name as nama_kategori', DB::raw('"Jam" as satuan_tarif'))
             ->where('m.id_mitra', $id)
             ->first();
 

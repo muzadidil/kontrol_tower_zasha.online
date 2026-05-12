@@ -26,7 +26,7 @@ class RiwayatController extends Controller
         // Query Jasa (tabel pesanan) + JOIN order_trackings untuk link tracking page
         $query_jasa = DB::table('pesanan as p')
             ->leftJoin('mitra as m', 'p.id_mitra', '=', 'm.id_mitra')
-            ->leftJoin('kategori_pekerjaan as k', 'm.id_kategori', '=', 'k.id_kategori')
+            ->leftJoin('roles as r', 'm.role_id', '=', 'r.id')
             ->leftJoin('order_trackings as ot', function ($join) {
                 $join->on('ot.order_id', '=', 'p.id_pesanan')
                      ->where('ot.order_type', '=', 'pesanan');
@@ -35,7 +35,7 @@ class RiwayatController extends Controller
                 'p.*',
                 'm.nama_panggilan as nama_mitra',
                 'm.foto_mitra',
-                'k.nama_kategori',
+                'r.name as nama_kategori',
                 'ot.id as tracking_id',
                 'ot.status as tracking_status'
             )

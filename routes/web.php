@@ -14,11 +14,9 @@ use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\AdminJastipController;
 use App\Http\Controllers\AdminMonitorController;
-use App\Http\Controllers\KategoriPekerjaanController;
 use App\Http\Controllers\AdminOrderMonitoringController;
 use App\Http\Controllers\AdminArsipPesananController;
 use App\Http\Controllers\AdminVerificationController;
-use App\Http\Controllers\AdminMasterKategoriController;
 use App\Http\Controllers\AdminTopupController;
 use App\Http\Controllers\Auth\MitraLoginController;
 use App\Http\Controllers\Auth\AdminLoginController;
@@ -38,11 +36,7 @@ use App\Http\Controllers\Admin\TenagaController as AdminTenagaController;
 use App\Http\Controllers\Pelanggan\ServiceController as PelangganServiceController;
 use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
-use App\Http\Controllers\Pelanggan\PpobController as PelangganPpobNewController;
 use App\Http\Controllers\Admin\PpobController as AdminPpobController;
-use App\Http\Controllers\Admin\GameTopupController as AdminGameTopupController;
-use App\Http\Controllers\Pelanggan\GameTopupController as PelangganGameTopupController;
-use App\Http\Controllers\Pelanggan\PelangganPpobController;
 use App\Http\Controllers\TopupController;
 use App\Http\Controllers\PushNotificationController;
 
@@ -126,20 +120,6 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::post('/{indenOrder}/dispute', [\App\Http\Controllers\Pelanggan\IndenController::class, 'dispute'])->name('dispute');
     });
 
-    // PPOB Pelanggan (tanpa profil.lengkap karena PPOB boleh diakses semua)
-    Route::prefix('ppob')->name('pelanggan.ppob.')->group(function () {
-        Route::get('/', [PelangganPpobNewController::class, 'index'])->name('index');
-        Route::get('/beli', [PelangganPpobNewController::class, 'form'])->name('form');
-        Route::post('/transaksi', [PelangganPpobNewController::class, 'transaksi'])->name('transaksi');
-        Route::post('/checkout', [PelangganPpobController::class, 'checkout'])->name('checkout');
-        Route::get('/produk/{kategori:kode}', [PelangganPpobController::class, 'produk'])->name('produk');
-        // Harus di atas /{trx} agar constraint where() bisa match lebih dulu
-        Route::get('/{tipe}', [PelangganPpobController::class, 'kategori'])
-            ->name('kategori')
-            ->where('tipe', 'pulsa|token|game|ewallet');
-        Route::get('/{trx}', [PelangganPpobNewController::class, 'show'])->name('show');
-    });
-
     // Topup pelanggan (Tokopay)
     Route::prefix('topup-saldo')->name('pelanggan.topup.')->group(function () {
         Route::get('/', [TopupController::class, 'pelangganForm'])->name('form');
@@ -147,12 +127,7 @@ Route::middleware('auth:pelanggan')->group(function () {
         Route::get('/riwayat', [TopupController::class, 'pelangganIndex'])->name('index');
     });
 
-    // Game Top-Up Pelanggan
-    Route::prefix('game')->name('pelanggan.game-topup.')->group(function () {
-        Route::get('/', [PelangganGameTopupController::class, 'landing'])->name('landing');
-        Route::post('/checkout', [PelangganGameTopupController::class, 'checkout'])->name('checkout');
-        Route::get('/{kategori:kode}', [PelangganGameTopupController::class, 'show'])->name('show');
-    });
+    // PPOB & Game Top-Up: REMOVED — fitur dihapus saat cleanup tabel kategoris/layanans
 
     // Service Orders
     Route::prefix('service')->name('pelanggan.service.')->middleware(['profil.lengkap'])->group(function () {
@@ -282,14 +257,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/orders/arsip', [AdminArsipPesananController::class, 'index'])->name('admin.orders.arsip');
     Route::post('/orders/arsip/update', [AdminArsipPesananController::class, 'updateStatus'])->name('admin.orders.arsip.update');
 
-    // Verifikasi & Master Data
+    // Verifikasi
     Route::get('/verification', [AdminVerificationController::class, 'index'])->name('admin.verification.index');
     Route::post('/verification/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
-    Route::get('/master-kategori', fn() => redirect()->route('admin.mitra.index'))->name('admin.master.kategori');
-    Route::post('/master-kategori/store', [AdminMasterKategoriController::class, 'store'])->name('admin.master.kategori.store');
-    Route::delete('/master-kategori/{id}', [AdminMasterKategoriController::class, 'destroy'])->name('admin.master.kategori.destroy');
-    Route::post('/master-kategori/unit', [AdminMasterKategoriController::class, 'storeUnit'])->name('admin.master.kategori.unit.store');
-    Route::delete('/master-kategori/unit/{id}', [AdminMasterKategoriController::class, 'destroyUnit'])->name('admin.master.kategori.unit.destroy');
+    // Master Kategori (LEGACY - REMOVED): digantikan oleh Roles
 
     // Finance Management
     Route::get('/dashboard/finance', [FinanceController::class, 'index'])->name('admin.finance.dashboard');
@@ -307,9 +278,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
     // Others
     Route::get('/jastip', [AdminJastipController::class, 'index'])->name('admin.jastip');
-    Route::get('/kategori', [KategoriPekerjaanController::class, 'index'])->name('admin.kategori.index');
-    Route::post('/kategori', [KategoriPekerjaanController::class, 'store'])->name('admin.kategori.store');
-    Route::delete('/kategori/{id}', [KategoriPekerjaanController::class, 'destroy'])->name('admin.kategori.destroy');
+    // /kategori (LEGACY - REMOVED): digantikan oleh Roles
     Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
 
     // Role & Feature Management
@@ -364,14 +333,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::get('/{trx}', [AdminPpobController::class, 'show'])->name('show');
     });
 
-    // Game Top-Up Admin
-    Route::prefix('game-topup')->name('admin.game-topup.')->group(function () {
-        Route::get('/', [AdminGameTopupController::class, 'index'])->name('index');
-        Route::get('/import', [AdminGameTopupController::class, 'importForm'])->name('import');
-        Route::post('/import', [AdminGameTopupController::class, 'importProduk'])->name('import.store');
-        Route::post('/sync', [AdminGameTopupController::class, 'syncHarga'])->name('sync');
-        Route::delete('/kategori/{kategori}', [AdminGameTopupController::class, 'destroyKategori'])->name('kategori.destroy');
-    });
+    // Game Top-Up Admin: REMOVED — fitur dihapus saat cleanup tabel kategoris/layanans
     Route::post('/monitor/{id}/force-logout', [AdminMonitorController::class, 'forceLogout'])->name('admin.monitor.force_logout');
 
     Route::prefix('mitra')->name('admin.mitra.')->group(function () {

@@ -19,10 +19,11 @@ class MitraDashboardController extends Controller
     public function dashboard()
     {
         $mitra        = $this->mitra();
-        $totalPesanan = DB::table('pesanan_mitra')->where('id_mitra', $mitra->id_mitra)->count();
-        $pesananAktif = DB::table('pesanan_mitra')
-                          ->where('id_mitra', $mitra->id_mitra)
-                          ->whereNotIn('status_pesanan', ['Selesai', 'Batal', 'Dibatalkan'])
+        // Pakai order_trackings sebagai single source of truth
+        $totalPesanan = DB::table('order_trackings')->where('mitra_id', $mitra->id_mitra)->count();
+        $pesananAktif = DB::table('order_trackings')
+                          ->where('mitra_id', $mitra->id_mitra)
+                          ->whereNotIn('status', ['selesai', 'ditolak_mitra', 'dibatalkan'])
                           ->count();
 
         // Ambil order aktif (accepted/menuju/dikerjakan/selesai_mitra/belum_selesai)

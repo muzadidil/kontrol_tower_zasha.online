@@ -39,10 +39,10 @@
 </div>
 @endif
 
-{{-- Tab Bar --}}
+{{-- Tab Bar (tab Kategori dihilangkan: digantikan halaman Role & Akses) --}}
 <div class="tab-bar mb-4">
     <button class="tab-pill active" onclick="switchTab('mitra',this)"><i class="fas fa-users me-1"></i>Daftar Mitra <span class="ms-1" style="opacity:.7;font-size:.65rem;">{{ $mitras->count() }}</span></button>
-    <button class="tab-pill" onclick="switchTab('kategori',this)"><i class="fas fa-tags me-1"></i>Kategori <span class="ms-1" style="opacity:.7;font-size:.65rem;">{{ $categories->count() }}</span></button>
+    <a href="{{ route('admin.roles.index') }}" class="tab-pill" style="text-decoration:none;"><i class="fas fa-shield-alt me-1"></i>Role & Akses</a>
     <button class="tab-pill" onclick="switchTab('verifikasi',this)"><i class="fas fa-shield-alt me-1"></i>Verifikasi <span class="ms-1" style="opacity:.7;font-size:.65rem;">{{ $list_driver->count() + $list_mitra_verif->count() }}</span></button>
     <button class="tab-pill" onclick="switchTab('radar',this)"><i class="fas fa-broadcast-tower me-1"></i>Radar</button>
     <button class="tab-pill" onclick="switchTab('jastip',this)"><i class="fas fa-motorcycle me-1"></i>Jastip</button>
@@ -102,73 +102,6 @@
     </div>
 </div>
 
-{{-- ======== TAB: KATEGORI ======== --}}
-<div id="tab-kategori" style="display:none;">
-    <div class="row g-4">
-        <div class="col-lg-5">
-            <div class="card-zasha card p-4" style="position:sticky;top:1rem;">
-                <h6 class="fw-bold mb-3" id="form-kat-title" style="color:#1e293b;"><i class="fas fa-plus me-2" style="color:#005aa9;"></i>Tambah Kategori</h6>
-                <form action="{{ route('admin.master.kategori.store') }}" method="POST" id="main-form">
-                    @csrf
-                    <input type="hidden" name="id_edit" id="id_edit">
-                    <div class="mb-3">
-                        <label class="form-label-up">Nama Layanan</label>
-                        <input type="text" name="nama_kategori" id="nama_kategori" class="form-control" placeholder="Contoh: Tukang AC..." required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label-up d-flex justify-content-between">
-                            Satuan Tarif
-                            <a href="#" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#modalSatuan">+ Kelola Satuan</a>
-                        </label>
-                        <select name="satuan" id="satuan" class="form-select" required>
-                            @foreach($units as $s)<option value="{{ $s->nama_satuan }}">{{ $s->nama_satuan }}</option>@endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label-up">Ikon (Bootstrap Icon / SVG)</label>
-                        <input type="text" name="svg_kategori" id="svg_kategori" class="form-control" placeholder='<i class="bi bi-bag"></i>' required>
-                    </div>
-                    <div class="mb-4 p-3 rounded-3 border" style="background:#f8fafc;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="form-label-up mb-0">Tarif Dinamis</span>
-                            <button type="button" class="btn btn-sm btn-primary rounded-circle" onclick="addRow()" style="width:24px;height:24px;padding:0;font-size:.65rem;"><i class="fas fa-plus"></i></button>
-                        </div>
-                        <div id="builder-container"></div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary fw-bold flex-grow-1 rounded-pill" style="font-size:.875rem;"><i class="fas fa-save me-1"></i>Simpan</button>
-                        <button type="button" onclick="resetForm()" class="btn rounded-pill px-4 fw-bold" style="background:#f1f5f9;color:#64748b;">Reset</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="col-lg-7">
-            <h6 class="fw-bold mb-3 small text-muted text-uppercase">Kategori Tersedia ({{ $categories->count() }})</h6>
-            @forelse($categories as $row)
-            <div class="kat-item d-flex align-items-center gap-3">
-                <div class="kat-icon-box">{!! $row->svg_kategori !!}</div>
-                <div class="flex-grow-1">
-                    <div class="fw-bold" style="color:#1e293b;">{{ $row->nama_kategori }}</div>
-                    <span class="badge rounded-pill px-2 mt-1" style="background:#eff6ff;color:#005aa9;font-size:.65rem;">Per {{ $row->satuan }}</span>
-                    <div class="mt-1">
-                        @php $sk = json_decode($row->skema_tarif ?? '[]', true); @endphp
-                        @foreach($sk ?? [] as $s)<span class="badge-field">{{ $s['label'] }}</span>@endforeach
-                    </div>
-                </div>
-                <div class="d-flex gap-1">
-                    <button onclick='editKategori(@json($row))' class="btn-tbl" style="background:#eff6ff;color:#005aa9;"><i class="fas fa-pencil-alt"></i></button>
-                    <form action="{{ route('admin.master.kategori.destroy', $row->id_kategori) }}" method="POST" onsubmit="return confirm('Hapus?')">
-                        @csrf @method('DELETE')
-                        <button class="btn-tbl" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-trash"></i></button>
-                    </form>
-                </div>
-            </div>
-            @empty
-            <div class="text-center py-5" style="color:#94a3b8;"><i class="fas fa-tags fa-2x mb-2 d-block"></i>Belum ada kategori</div>
-            @endforelse
-        </div>
-    </div>
-</div>
 
 {{-- ======== TAB: VERIFIKASI ======== --}}
 <div id="tab-verifikasi" style="display:none;">
@@ -326,32 +259,6 @@
     </div>
 </div>
 
-{{-- Modal Satuan --}}
-<div class="modal fade" id="modalSatuan" tabindex="-1">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius:16px;">
-            <div class="modal-body p-4">
-                <h6 class="fw-bold mb-3">Master Satuan</h6>
-                <form action="{{ route('admin.master.kategori.unit.store') }}" method="POST" class="mb-3">
-                    @csrf
-                    <div class="input-group">
-                        <input type="text" name="nama_satuan" class="form-control rounded-start-pill" placeholder="Jam, Trip, Unit..." required>
-                        <button class="btn btn-primary rounded-end-pill px-3" type="submit"><i class="fas fa-plus"></i></button>
-                    </div>
-                </form>
-                @foreach($units as $s)
-                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                    <span class="small fw-bold">{{ $s->nama_satuan }}</span>
-                    <form action="{{ route('admin.master.kategori.unit.destroy', $s->id_satuan) }}" method="POST">
-                        @csrf @method('DELETE')
-                        <button class="border-0 bg-transparent text-danger"><i class="fas fa-times-circle"></i></button>
-                    </form>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
 const TABS = ['mitra','kategori','verifikasi','radar','jastip'];
@@ -381,23 +288,6 @@ function addRow(label = '', value = '') {
     document.getElementById('builder-container').appendChild(div);
 }
 
-function editKategori(data) {
-    document.getElementById('form-kat-title').innerHTML = '<i class="fas fa-pencil-alt me-2" style="color:#d97706;"></i>Edit Kategori';
-    document.getElementById('id_edit').value       = data.id_kategori;
-    document.getElementById('nama_kategori').value = data.nama_kategori;
-    document.getElementById('satuan').value        = data.satuan;
-    document.getElementById('svg_kategori').value  = data.svg_kategori;
-    document.getElementById('builder-container').innerHTML = '';
-    try { JSON.parse(data.skema_tarif || '[]').forEach(s => addRow(s.label, s.default)); } catch(e) {}
-    switchTab('kategori', document.querySelectorAll('.tab-pill')[1]);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function resetForm() {
-    document.getElementById('form-kat-title').innerHTML = '<i class="fas fa-plus me-2" style="color:#005aa9;"></i>Tambah Kategori';
-    document.getElementById('id_edit').value = '';
-    document.getElementById('main-form').reset();
-    document.getElementById('builder-container').innerHTML = '';
-}
+// editKategori & resetForm REMOVED: tab kategori sudah dihilangkan, digantikan halaman /admin/roles
 </script>
 @endsection

@@ -16,8 +16,14 @@ class MitraController extends Controller
     public function index()
     {
         $mitras     = Mitra::orderBy('created_at', 'desc')->get();
-        $categories = DB::table('kategori_pekerjaan')->orderBy('id_kategori', 'desc')->get();
-        $units      = DB::table('master_satuan')->orderBy('nama_satuan')->get();
+        // Categories sekarang diambil dari roles aktif
+        $categories = \App\Models\Role::where('is_active', true)->orderBy('id')->get()->map(function ($role) {
+            return (object) [
+                'id_kategori'   => $role->id,
+                'nama_kategori' => $role->name,
+            ];
+        });
+        $units      = collect(); // master_satuan REMOVED, digantikan oleh sistem role
 
         // Verifikasi — driver = mitra dengan kategori_kode='JST'
         $list_driver = DB::table('mitra')

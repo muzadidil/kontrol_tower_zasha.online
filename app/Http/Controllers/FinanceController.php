@@ -12,11 +12,12 @@ class FinanceController extends Controller
 {
     public function index(Request $request)
     {
-        $totalOmzet = DB::table('pesanan_mitra')
-            ->where('status_pesanan', 'Selesai')
-            ->sum('total_pesanan');
+        // Pakai order_trackings sebagai single source of truth untuk semua jenis order
+        $totalOmzet = DB::table('order_trackings')
+            ->where('status', 'selesai')
+            ->sum('harga_jual');
 
-        $totalCuanZasha = DB::table('jastip_orders')
+        $totalCuanZasha = DB::table('order_trackings')
             ->where('status', 'selesai')
             ->sum('komisi_zasha');
 
@@ -26,9 +27,10 @@ class FinanceController extends Controller
             $totalProfitPpob = 0;
         }
 
-        $totalDanaEscrow = DB::table('pesanan_mitra')
-            ->whereNotIn('status_pesanan', ['Selesai', 'Batal', 'Dibatalkan'])
-            ->sum('total_pesanan');
+        // Escrow held = order yg belum selesai/dibatalkan
+        $totalDanaEscrow = DB::table('order_trackings')
+            ->where('escrow_status', 'held')
+            ->sum('harga_jual');
 
         $totalSaldoMengendap = Mitra::sum('saldo') + Pelanggan::sum('saldo');
 
