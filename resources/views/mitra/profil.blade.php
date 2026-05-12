@@ -75,12 +75,7 @@
 
     {{-- Info Akun --}}
     <div class="card-custom" style="padding: var(--fib-4);">
-        <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
-            <h6 class="label-up mb-0">Informasi Akun</h6>
-            <a href="#" class="t-xs fw-bold" style="color: var(--mitra-blue); text-decoration: none;">
-                <i class="bi bi-pencil-square"></i> Edit
-            </a>
-        </div>
+        <h6 class="label-up mb-0" style="margin-bottom: var(--fib-3);">Informasi Akun</h6>
 
         <div class="stack-3">
             <div class="d-flex justify-content-between align-items-center" style="padding-bottom: var(--fib-3); border-bottom: 1px solid var(--line);">
@@ -93,12 +88,18 @@
 
             <div class="d-flex justify-content-between align-items-center" style="padding-bottom: var(--fib-3); border-bottom: 1px solid var(--line);">
                 <div>
-                    <div class="t-xxs label-up">Kategori</div>
+                    <div class="t-xxs label-up">Role</div>
                     <div class="t-sm fw-semibold mt-1">
-                        {{ $mitra->kategori_kode?->label() ?? $mitra->id_kategori ?? 'Belum dipilih' }}
+                        @if($mitra->role)
+                            <span style="color: {{ $mitra->role->icon_color ?? 'var(--mitra-blue)' }};">
+                                <i class="bi {{ $mitra->role->icon ?? 'bi-shield-fill' }} me-1"></i>{{ $mitra->role->name }}
+                            </span>
+                        @else
+                            <span style="color: var(--ink-soft);">Belum di-assign</span>
+                        @endif
                     </div>
                 </div>
-                <i class="bi bi-tag-fill" style="color: var(--mitra-blue-mid); font-size: var(--t-md);"></i>
+                <i class="bi bi-shield-fill" style="color: var(--mitra-blue-mid); font-size: var(--t-md);"></i>
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
@@ -117,61 +118,90 @@
         </div>
     </div>
 
-    {{-- Tarif Layanan --}}
-    <div class="card-custom" style="padding: var(--fib-4);">
-        <h6 class="label-up mb-0" style="margin-bottom: var(--fib-3);">Tarif Layanan</h6>
-        <div class="row g-3">
-            <div class="col-6">
-                <div style="padding: var(--fib-3); background: linear-gradient(135deg, var(--mitra-blue-tint), #fff); border-radius: var(--r-md);">
-                    <div class="t-xxs label-up" style="margin-bottom: var(--fib-1);">Per Jam</div>
-                    <div class="fw-bold t-sm" style="color: var(--mitra-blue);">
-                        Rp {{ number_format($mitra->tarif_per_jam ?? 0, 0, ',', '.') }}
-                    </div>
-                </div>
-            </div>
-            <div class="col-6">
-                <div style="padding: var(--fib-3); background: linear-gradient(135deg, var(--mitra-blue-soft), #fff); border-radius: var(--r-md);">
-                    <div class="t-xxs label-up" style="margin-bottom: var(--fib-1);">Per Hari</div>
-                    <div class="fw-bold t-sm" style="color: var(--mitra-blue);">
-                        Rp {{ number_format($mitra->tarif_per_hari ?? 0, 0, ',', '.') }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Action Cards --}}
+    {{-- Action Cards (dynamic by feature) --}}
     <div class="stack-3">
-        <a href="#" class="menu-tile">
+
+        {{-- Tarif Layanan --}}
+        @if($mitra->hasFeature('tarif'))
+        <a href="{{ route('mitra.tarif.index') }}" class="menu-tile">
             <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue);">
+                <i class="bi bi-cash-coin"></i>
+            </div>
+            <div style="flex: 1;">
+                <div class="fw-bold t-sm">Tarif Layanan</div>
+                <div class="t-xxs" style="color: var(--ink-soft);">Atur harga jasa Anda</div>
+            </div>
+            <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
+        </a>
+        @endif
+
+        {{-- Dokumen Verifikasi --}}
+        <a href="{{ route('mitra.verifikasi.status') }}" class="menu-tile">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-mid);">
                 <i class="bi bi-shield-check"></i>
             </div>
             <div style="flex: 1;">
                 <div class="fw-bold t-sm">Dokumen Verifikasi</div>
-                <div class="t-xxs" style="color: var(--ink-soft);">Upload KTP, Foto, dll</div>
+                <div class="t-xxs" style="color: var(--ink-soft);">Upload KTP, Foto, SIM, dll</div>
             </div>
             <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
         </a>
-        <a href="#" class="menu-tile">
-            <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-mid);">
+
+        {{-- Portfolio (kalau punya feature) --}}
+        @if($mitra->hasFeature('portfolio'))
+        <a href="{{ route('mitra.portfolio.index') }}" class="menu-tile">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue);">
+                <i class="bi bi-images"></i>
+            </div>
+            <div style="flex: 1;">
+                <div class="fw-bold t-sm">Portfolio Karya</div>
+                <div class="t-xxs" style="color: var(--ink-soft);">Showcase pekerjaan</div>
+            </div>
+            <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
+        </a>
+        @endif
+
+        {{-- Jadwal (kalau punya feature) --}}
+        @if($mitra->hasFeature('jadwal'))
+        <a href="{{ route('mitra.jadwal.index') }}" class="menu-tile">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue-dark);">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+            <div style="flex: 1;">
+                <div class="fw-bold t-sm">Jam Kerja & Libur</div>
+                <div class="t-xxs" style="color: var(--ink-soft);">Atur availability Anda</div>
+            </div>
+            <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
+        </a>
+        @endif
+
+        {{-- Tarik Saldo (kalau punya feature withdraw) --}}
+        @if($mitra->hasFeature('withdraw'))
+        <a href="{{ route('mitra.withdrawal') }}" class="menu-tile">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue-dark);">
                 <i class="bi bi-bank"></i>
             </div>
             <div style="flex: 1;">
-                <div class="fw-bold t-sm">Rekening Bank</div>
-                <div class="t-xxs" style="color: var(--ink-soft);">Untuk pencairan saldo</div>
+                <div class="fw-bold t-sm">Tarik Saldo & Rekening</div>
+                <div class="t-xxs" style="color: var(--ink-soft);">Pencairan ke rekening bank</div>
             </div>
             <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
         </a>
-        <a href="#" class="menu-tile">
-            <div class="menu-tile-icon" style="background: var(--mitra-blue-soft); color: var(--mitra-blue-dark);">
-                <i class="bi bi-question-circle"></i>
+        @endif
+
+        {{-- Rating & Ulasan (kalau punya feature) --}}
+        @if($mitra->hasFeature('rating'))
+        <a href="{{ route('mitra.rating.index') }}" class="menu-tile">
+            <div class="menu-tile-icon" style="background: var(--mitra-blue-tint); color: var(--mitra-blue);">
+                <i class="bi bi-star-fill"></i>
             </div>
             <div style="flex: 1;">
-                <div class="fw-bold t-sm">Bantuan & FAQ</div>
-                <div class="t-xxs" style="color: var(--ink-soft);">Panduan & support</div>
+                <div class="fw-bold t-sm">Rating & Ulasan</div>
+                <div class="t-xxs" style="color: var(--ink-soft);">Lihat penilaian pelanggan</div>
             </div>
             <i class="bi bi-chevron-right" style="color: var(--ink-soft);"></i>
         </a>
+        @endif
     </div>
 
     {{-- Logout --}}
