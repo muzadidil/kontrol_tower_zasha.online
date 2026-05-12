@@ -10,20 +10,41 @@
 
         {{-- ── MITRA ────────────────────────────────────────── --}}
         <li class="sidebar-divider">Mitra</li>
-        <li>
-            <a href="{{ route('admin.mitra.index') }}" class="nav-link {{ request()->is('admin/mitra*') ? 'active' : '' }}">
-                <i class="fas fa-users me-2"></i> Manajemen Mitra
+
+        @php
+            $isMitraActive = request()->is('admin/mitra*')
+                          || request()->is('admin/verification*')
+                          || request()->is('admin/roles*');
+        @endphp
+        <li class="nav-item">
+            <a href="#mitraMenu" data-bs-toggle="collapse"
+               class="nav-link d-flex justify-content-between align-items-center {{ $isMitraActive ? 'active' : '' }}"
+               aria-expanded="{{ $isMitraActive ? 'true' : 'false' }}">
+                <span><i class="fas fa-users me-2"></i> Mitra & Akses</span>
+                <i class="fas fa-chevron-down small"></i>
             </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.verification.index') }}" class="nav-link {{ request()->is('admin/verification*') ? 'active' : '' }}">
-                <i class="fas fa-user-check me-2"></i> Verifikasi Dokumen
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->is('admin/roles*') ? 'active' : '' }}">
-                <i class="fas fa-shield-alt me-2"></i> Role & Akses
-            </a>
+            <div class="collapse {{ $isMitraActive ? 'show' : '' }}" id="mitraMenu">
+                <ul class="nav flex-column ms-3 mt-1">
+                    <li>
+                        <a href="{{ route('admin.mitra.index') }}"
+                           class="nav-link py-1 small {{ request()->is('admin/mitra*') && !request()->is('admin/mitra/dashboard*') ? 'active' : '' }}">
+                            <i class="fas fa-users me-2"></i> Manajemen Mitra
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.verification.index') }}"
+                           class="nav-link py-1 small {{ request()->is('admin/verification*') ? 'active' : '' }}">
+                            <i class="fas fa-user-check me-2"></i> Verifikasi Dokumen
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.roles.index') }}"
+                           class="nav-link py-1 small {{ request()->is('admin/roles*') ? 'active' : '' }}">
+                            <i class="fas fa-shield-alt me-2"></i> Role & Akses
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
         {{-- ── PESANAN (gabungan: Live Monitor + Modul + Arsip) ── --}}
