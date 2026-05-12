@@ -291,8 +291,7 @@
         <input type="text" id="custom-reject" placeholder="Tulis alasan lain..."
                style="flex: 1; border: 1.5px solid var(--line); border-radius: var(--r-md); padding: var(--fib-3);
                       font-size: var(--t-xs); font-family: 'Plus Jakarta Sans';">
-        <button onclick="rejectOrder(document.getElementById('custom-reject').value)"
-                class="btn-reject-send">Kirim</button>
+        <button id="btn-kirim-alasan" class="btn-reject-send">Kirim</button>
     </div>
 
     <button onclick="hideRejectPanel()" style="width: 100%; margin-top: var(--fib-3); padding: var(--fib-3);
@@ -303,8 +302,42 @@
     </button>
 </div>
 
+{{-- Toast Notification --}}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastNotif" class="toast align-items-center border-0 shadow-lg"
+         role="alert" data-bs-autohide="true" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="toastMessage">
+                Pesan notifikasi
+            </div>
+            <button type="button" class="btn-close me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
+// ─ Toast Notification Helper ─
+function showToast(message, type = 'success') {
+    const toastEl = document.getElementById('toastNotif');
+    const toastMsg = document.getElementById('toastMessage');
+
+    // Reset class
+    toastEl.className = 'toast align-items-center border-0 shadow-lg';
+
+    const typeMap = {
+        'success': ['bg-success', 'text-white'],
+        'error':   ['bg-danger',  'text-white'],
+        'warning': ['bg-warning', 'text-dark'],
+        'info':    ['bg-primary', 'text-white'],
+    };
+    (typeMap[type] || typeMap['info']).forEach(cls => toastEl.classList.add(cls));
+
+    toastMsg.textContent = message;
+    new bootstrap.Toast(toastEl).show();
+}
+
 // ─ Polling Functions ─
 function startPolling() {
     if (pollingInterval) return;
@@ -381,11 +414,11 @@ async function acceptOrder() {
                 location.reload();
             }, 1000);
         } else {
-            alert('Gagal menerima order: ' + data.message);
+            showToast('Gagal menerima order: ' + (data.message || 'Silakan coba lagi'), 'error');
         }
     } catch (err) {
         console.error('Accept order failed:', err);
-        alert('Gagal menerima order. Coba lagi.');
+        showToast('Gagal menerima order, coba lagi', 'error');
     }
 }
 
@@ -404,8 +437,10 @@ function hideRejectPanel() {
 }
 
 async function rejectOrder(alasan) {
-    if (!currentOrderId || !alasan) {
-        alert('Silakan pilih atau masukkan alasan penolakan.');
+    const trimmedAlasan = alasan ? alasan.trim() : '';
+
+    if (!currentOrderId || !trimmedAlasan) {
+        showToast('Silakan pilih atau masukkan alasan penolakan', 'warning');
         return;
     }
 
@@ -418,7 +453,7 @@ async function rejectOrder(alasan) {
             },
             body: JSON.stringify({
                 tracking_id: currentOrderId,
-                pesan: alasan
+                pesan: trimmedAlasan
             })
         });
 
@@ -438,16 +473,16 @@ async function rejectOrder(alasan) {
             currentOrderId = null;
             currentOrderData = null;
 
-            alert('Order berhasil ditolak.');
+            showToast('Order berhasil ditolak', 'info');
 
             // Lanjutkan polling
             setTimeout(fetchPendingOrder, 1000);
         } else {
-            alert('Gagal menolak order: ' + data.message);
+            showToast('Gagal menolak order: ' + (data.message || 'Silakan coba lagi'), 'error');
         }
     } catch (err) {
         console.error('Reject order failed:', err);
-        alert('Gagal menolak order. Coba lagi.');
+        showToast('Terjadi kesalahan, silakan coba lagi', 'error');
     }
 }
 
@@ -510,12 +545,12 @@ if (toggleEl) {
                 }
             } else {
                 this.checked = !isOnline;
-                alert('Gagal mengubah status: ' + data.message);
+                showToast('Gagal mengubah status: ' + (data.message || 'Silakan coba lagi'), 'error');
             }
         } catch (err) {
             this.checked = !isOnline;
             console.error('Toggle failed:', err);
-            alert('Gagal mengubah status. Coba lagi.');
+            showToast('Gagal mengubah status, coba lagi', 'error');
         }
     });
 }
@@ -568,11 +603,11 @@ async function updateProgress(status) {
             markStepCompleted(status);
             markNextStepActive(status);
         } else {
-            alert(data.message);
+            showToast(data.message || 'Gagal update status', 'error');
         }
     } catch (e) {
         console.error('Update progress failed:', e);
-        alert('Gagal update status');
+        showToast('Gagal update status, coba lagi', 'error');
     }
 }
 
@@ -669,6 +704,21 @@ function markNextStepActive(step) {
         thumb.querySelector('i').style.color = '#64748b';
     }
 })();
+
+// Event listener untuk tombol Kirim alasan custom
+document.addEventListener('DOMContentLoaded', function() {
+    const btnKirim = document.getElementById('btn-kirim-alasan');
+    if (btnKirim) {
+        btnKirim.addEventListener('click', function() {
+            const alasan = document.getElementById('custom-reject').value.trim();
+            if (!alasan) {
+                showToast('Tulis alasan penolakan terlebih dahulu', 'warning');
+                return;
+            }
+            rejectOrder(alasan);
+        });
+    }
+});
 </script>
 @endpush
 
