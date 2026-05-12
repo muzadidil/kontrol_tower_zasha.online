@@ -27,7 +27,7 @@ class RoleSeeder extends Seeder
                 'icon' => 'bi-truck',
                 'icon_color' => '#10b981',
                 'features' => [
-                    'order-jastip',
+                    'order-jastip', 'order-inden',
                     'maps',
                     'saldo', 'profil', 'pesanan-list',
                 ],
@@ -49,7 +49,7 @@ class RoleSeeder extends Seeder
                 'icon' => 'bi-wrench-adjustable',
                 'icon_color' => '#0ea5e9',
                 'features' => [
-                    'order-service',
+                    'order-service', 'order-inden',
                     'sparepart', 'maps',
                     'saldo', 'profil', 'pesanan-list',
                 ],
