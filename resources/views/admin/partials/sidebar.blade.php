@@ -25,6 +25,11 @@
                 <i class="fas fa-tags me-2"></i> Master Layanan
             </a>
         </li>
+        <li>
+            <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->is('admin/roles*') ? 'active' : '' }}">
+                <i class="fas fa-shield-alt me-2"></i> Role & Akses
+            </a>
+        </li>
 
         {{-- ── PESANAN (gabungan: Live Monitor + Modul + Arsip) ── --}}
         <li class="sidebar-divider">Pesanan</li>

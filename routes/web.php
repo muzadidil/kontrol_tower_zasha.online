@@ -312,6 +312,21 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::delete('/kategori/{id}', [KategoriPekerjaanController::class, 'destroy'])->name('admin.kategori.destroy');
     Route::get('/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
 
+    // Role & Feature Management
+    Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)
+        ->except(['show'])
+        ->names([
+            'index'   => 'admin.roles.index',
+            'create'  => 'admin.roles.create',
+            'store'   => 'admin.roles.store',
+            'edit'    => 'admin.roles.edit',
+            'update'  => 'admin.roles.update',
+            'destroy' => 'admin.roles.destroy',
+        ]);
+    // Assign role ke mitra
+    Route::post('/mitra/{mitra}/role', [\App\Http\Controllers\Admin\RoleController::class, 'assignToMitra'])
+        ->name('admin.mitra.assignRole');
+
     // WFH Admin
     Route::prefix('wfh')->name('admin.wfh.')->group(function () {
         Route::get('/', [AdminWfhController::class, 'index'])->name('index');

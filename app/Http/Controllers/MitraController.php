@@ -97,7 +97,8 @@ class MitraController extends Controller
     public function show(string $id)
     {
         $mitra = Mitra::findOrFail($id);
-        return view('admin.mitra.edit', compact('mitra'));
+        $roles = \App\Models\Role::orderBy('name')->get();
+        return view('admin.mitra.edit', compact('mitra', 'roles'));
     }
 
     /**
@@ -106,7 +107,8 @@ class MitraController extends Controller
     public function edit(string $id)
     {
         $mitra = Mitra::findOrFail($id);
-        return view('admin.mitra.edit', compact('mitra'));
+        $roles = \App\Models\Role::orderBy('name')->get();
+        return view('admin.mitra.edit', compact('mitra', 'roles'));
     }
 
     /**
