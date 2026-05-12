@@ -139,4 +139,67 @@
     </div>
 </div>
 
+{{-- ── QUICK ACCESS / SHORTCUT KE FITUR PENGATURAN ──────────────────────── --}}
+<div class="row g-3 mt-4">
+    <div class="col-12">
+        <div class="section-title">Pengaturan Cepat</div>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="{{ route('admin.roles.index') }}" class="text-decoration-none">
+            <div class="stat-card h-100 d-flex flex-column" style="cursor:pointer; transition:all 0.2s;"
+                 onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 16px rgba(0,90,169,0.15)';"
+                 onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                <div class="stat-icon" style="background:#dbeafe; color:#1e40af;">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-label">Role & Akses Mitra</div>
+                <div class="stat-value" style="font-size:1rem;">{{ \App\Models\Role::count() }} role</div>
+                <div class="stat-sub">Atur fitur per role</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="{{ route('admin.mitra.index') }}" class="text-decoration-none">
+            <div class="stat-card h-100 d-flex flex-column" style="cursor:pointer; transition:all 0.2s;"
+                 onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 16px rgba(124,58,237,0.15)';"
+                 onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                <div class="stat-icon" style="background:#ede9fe; color:#7c3aed;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-label">Manajemen Mitra</div>
+                <div class="stat-value" style="font-size:1rem;">{{ \App\Models\Mitra::count() }} mitra</div>
+                <div class="stat-sub">Atur role per mitra</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="{{ route('admin.kategori.index') }}" class="text-decoration-none">
+            <div class="stat-card h-100 d-flex flex-column" style="cursor:pointer; transition:all 0.2s;"
+                 onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 16px rgba(245,158,11,0.15)';"
+                 onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                <div class="stat-icon" style="background:#fef3c7; color:#92400e;">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="stat-label">Master Layanan</div>
+                <div class="stat-value" style="font-size:1rem;">{{ \DB::table('kategori_pekerjaan')->count() }} kategori</div>
+                <div class="stat-sub">Kelola sub-layanan</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="{{ route('admin.settings', ['tab' => 'api']) }}" class="text-decoration-none">
+            <div class="stat-card h-100 d-flex flex-column" style="cursor:pointer; transition:all 0.2s;"
+                 onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 16px rgba(16,185,129,0.15)';"
+                 onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                <div class="stat-icon" style="background:#d1fae5; color:#065f46;">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="stat-label">Pengaturan Sistem</div>
+                <div class="stat-value" style="font-size:1rem;">API & Webhook</div>
+                <div class="stat-sub">Digiflazz, Tokopay, dll</div>
+            </div>
+        </a>
+    </div>
+</div>
+
 @endsection
