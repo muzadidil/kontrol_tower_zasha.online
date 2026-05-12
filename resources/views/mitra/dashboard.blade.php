@@ -1,7 +1,7 @@
 @extends('layouts.mitra')
 
 @section('content')
-<div class="page-pad stack-4">
+<div class="page-pad stack-3">
 
     {{-- Header (fib-3 gap) --}}
     <div class="d-flex justify-content-between align-items-center" style="padding-top: var(--fib-2);">
@@ -124,7 +124,7 @@
     </div>
 
     {{-- Active Order Progress (muncul saat order diterima) --}}
-    <div id="active-order" style="display: none; margin-bottom: var(--fib-7);">
+    <div id="active-order" style="display: none;">
         <div class="card-custom" style="padding: var(--fib-3);">
             <div style="font-size: var(--t-xxs); font-weight: 800; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: var(--fib-3);">Order Aktif</div>
 
@@ -225,7 +225,7 @@
     @endphp
 
     {{-- Menu Tiles fully dynamic by feature --}}
-    <div style="margin-bottom: var(--fib-7);">
+    <div>
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--fib-3);">
             <h6 class="label-up mb-0">Fitur</h6>
             <span class="t-xs" style="color: var(--ink-soft);">{{ $totalMenus }} menu</span>
