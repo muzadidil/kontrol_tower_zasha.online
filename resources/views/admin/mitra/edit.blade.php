@@ -61,6 +61,84 @@
             </div>
         </div>
 
+        {{-- Tarif Mitra Card --}}
+        <div class="card mb-4 border-success">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-cash-coin me-2"></i> Tarif & Komisi Mitra
+                </div>
+                <span class="badge bg-light text-success fw-bold">
+                    Komisi Zasha: {{ number_format($komisiPersen ?? 10, 1) }}%
+                </span>
+            </div>
+            <div class="card-body p-0">
+                @if($mitra->tarifs->isEmpty())
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        <div class="fst-italic">Mitra belum punya daftar tarif.</div>
+                        <small>Tarif akan muncul setelah mitra menambahkannya dari dashboard.</small>
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Keterangan</th>
+                                    <th class="text-end">Tarif Mitra</th>
+                                    <th class="text-end">Keuntungan Admin</th>
+                                    <th class="text-end pe-3">Harga Pelanggan</th>
+                                    <th class="text-center" style="width:80px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($mitra->tarifs as $t)
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="fw-semibold">{{ $t->keterangan }}</div>
+                                            <small class="text-muted">per {{ $t->satuan ?? 'unit' }}</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="fw-semibold">Rp {{ number_format($t->nominal, 0, ',', '.') }}</span>
+                                        </td>
+                                        <td class="text-end text-warning">
+                                            +Rp {{ number_format($t->keuntunganAdmin(), 0, ',', '.') }}
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <span class="fw-bold text-success">
+                                                Rp {{ number_format($t->hargaPelanggan(), 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if($t->is_aktif)
+                                                <span class="badge bg-success">Aktif</span>
+                                            @else
+                                                <span class="badge bg-secondary">Non-aktif</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td class="ps-3 fw-bold">Total Aktif: {{ $mitra->tarifs->where('is_aktif', true)->count() }} tarif</td>
+                                    <td class="text-end fw-bold">
+                                        Rp {{ number_format($mitra->tarifs->where('is_aktif', true)->sum('nominal'), 0, ',', '.') }}
+                                    </td>
+                                    <td class="text-end fw-bold text-warning">
+                                        +Rp {{ number_format($mitra->tarifs->where('is_aktif', true)->sum(fn($t) => $t->keuntunganAdmin()), 0, ',', '.') }}
+                                    </td>
+                                    <td class="text-end pe-3 fw-bold text-success">
+                                        Rp {{ number_format($mitra->tarifs->where('is_aktif', true)->sum(fn($t) => $t->hargaPelanggan()), 0, ',', '.') }}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-body">
                 <form action="{{ route('admin.mitra.update', $mitra->id_mitra) }}" method="POST">

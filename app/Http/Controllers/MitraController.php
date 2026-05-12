@@ -103,9 +103,10 @@ class MitraController extends Controller
      */
     public function show(string $id)
     {
-        $mitra = Mitra::findOrFail($id);
+        $mitra = Mitra::with(['role.features', 'tarifs'])->findOrFail($id);
         $roles = \App\Models\Role::orderBy('name')->get();
-        return view('admin.mitra.edit', compact('mitra', 'roles'));
+        $komisiPersen = \App\Models\Setting::komisiPersen();
+        return view('admin.mitra.edit', compact('mitra', 'roles', 'komisiPersen'));
     }
 
     /**
@@ -113,9 +114,10 @@ class MitraController extends Controller
      */
     public function edit(string $id)
     {
-        $mitra = Mitra::findOrFail($id);
+        $mitra = Mitra::with(['role.features', 'tarifs'])->findOrFail($id);
         $roles = \App\Models\Role::orderBy('name')->get();
-        return view('admin.mitra.edit', compact('mitra', 'roles'));
+        $komisiPersen = \App\Models\Setting::komisiPersen();
+        return view('admin.mitra.edit', compact('mitra', 'roles', 'komisiPersen'));
     }
 
     /**
