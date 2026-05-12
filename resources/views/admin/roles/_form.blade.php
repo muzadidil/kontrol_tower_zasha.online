@@ -184,6 +184,64 @@
     </div>
 @endforeach
 
+{{-- ── SYARAT VERIFIKASI (dokumen yang wajib diupload mitra) ── --}}
+<div class="mt-4 mb-2">
+    <label class="form-label fw-bold mb-1">Syarat Verifikasi Role Ini</label>
+    <div class="text-muted small">
+        Dokumen yang harus diupload mitra sebelum bisa aktif. Klik chip untuk aktifkan,
+        toggle "Wajib" untuk menentukan mandatory atau opsional.
+    </div>
+</div>
+
+@php
+    $allVerifikasi = $allVerifikasi ?? \App\Models\Role::ALL_VERIFIKASI;
+    $activeVerifikasi = $activeVerifikasi ?? [];
+@endphp
+
+<div class="feature-chips-wrap">
+    @foreach($allVerifikasi as $key => $label)
+        @php
+            $isActive = array_key_exists($key, $activeVerifikasi);
+            $isWajib  = $isActive ? (bool) $activeVerifikasi[$key] : true; // default wajib=true
+        @endphp
+        <div class="d-flex align-items-center gap-2 p-2 border rounded" style="border-color:#e5e7eb !important; min-width:240px;">
+            <label class="d-flex align-items-center gap-2 flex-grow-1 mb-0" style="cursor:pointer;">
+                <input type="checkbox"
+                       name="verifikasi[{{ $key }}][aktif]"
+                       value="1"
+                       class="form-check-input m-0 verif-checkbox"
+                       data-target="wajib-{{ $key }}"
+                       {{ $isActive ? 'checked' : '' }}>
+                <span class="small fw-semibold">{{ $label }}</span>
+            </label>
+            <div class="form-check form-switch m-0" style="padding-left:30px;">
+                <input type="checkbox"
+                       id="wajib-{{ $key }}"
+                       name="verifikasi[{{ $key }}][wajib]"
+                       value="1"
+                       class="form-check-input"
+                       {{ $isWajib ? 'checked' : '' }}>
+                <label class="form-check-label small text-muted" style="font-size:0.7rem;">Wajib</label>
+            </div>
+        </div>
+    @endforeach
+</div>
+
+<script>
+    // Auto-uncheck "wajib" jika item tidak aktif
+    document.querySelectorAll('.verif-checkbox').forEach(cb => {
+        const updateWajibState = () => {
+            const target = document.getElementById(cb.dataset.target);
+            if (target) {
+                target.disabled = !cb.checked;
+                if (!cb.checked) target.checked = false;
+            }
+        };
+        cb.addEventListener('change', updateWajibState);
+        updateWajibState();
+    });
+</script>
+
 <div class="d-flex gap-2 mt-4">
     <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" style="background:var(--zasha-blue);border-color:var(--zasha-blue);">
         <i class="bi bi-check-lg me-1"></i> Simpan

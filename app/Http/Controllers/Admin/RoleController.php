@@ -17,7 +17,9 @@ class RoleController extends Controller
     public function create()
     {
         $allFeatures = Role::ALL_FEATURES;
-        return view('admin.roles.create', compact('allFeatures'));
+        $allVerifikasi = Role::ALL_VERIFIKASI;
+        $activeVerifikasi = []; // belum ada
+        return view('admin.roles.create', compact('allFeatures', 'allVerifikasi', 'activeVerifikasi'));
     }
 
     public function store(Request $request)
@@ -29,6 +31,7 @@ class RoleController extends Controller
             'icon_color'  => 'nullable|string|max:20',
             'features'    => 'array',
             'features.*'  => 'string',
+            'verifikasi'  => 'array',
         ]);
 
         $role = Role::create([
@@ -40,16 +43,38 @@ class RoleController extends Controller
             'is_active'   => false, // role baru = draft, harus dirilis dulu
         ]);
         $role->syncFeatures($request->features ?? []);
+        $role->syncVerifikasi($this->parseVerifikasiInput($request->verifikasi ?? []));
 
         return redirect()->route('admin.roles.index')
             ->with('success', "Role '{$role->name}' berhasil dibuat sebagai DRAFT. Klik 'Rilis & Aktifkan' untuk mengaktifkan.");
+    }
+
+    /**
+     * Parse input verifikasi[$key][aktif|wajib] dari form ke format:
+     *   ['ktp' => true, 'sim' => false]  -> key = verifikasi_key, value = wajib flag
+     * Hanya item yang [aktif] di-include.
+     */
+    private function parseVerifikasiInput(array $verifikasiInput): array
+    {
+        $result = [];
+        foreach ($verifikasiInput as $key => $val) {
+            if (!empty($val['aktif'])) {
+                $result[$key] = !empty($val['wajib']);
+            }
+        }
+        return $result;
     }
 
     public function edit(Role $role)
     {
         $allFeatures = Role::ALL_FEATURES;
         $activeFeatures = $role->features->pluck('feature_key')->toArray();
-        return view('admin.roles.edit', compact('role', 'allFeatures', 'activeFeatures'));
+
+        $allVerifikasi = Role::ALL_VERIFIKASI;
+        // Map: ['ktp' => true, 'sim' => false] -> verifikasi_key dengan wajib flag
+        $activeVerifikasi = $role->verifikasiKeys->pluck('wajib', 'verifikasi_key')->toArray();
+
+        return view('admin.roles.edit', compact('role', 'allFeatures', 'activeFeatures', 'allVerifikasi', 'activeVerifikasi'));
     }
 
     public function update(Request $request, Role $role)
@@ -61,6 +86,7 @@ class RoleController extends Controller
             'icon_color'  => 'nullable|string|max:20',
             'features'    => 'array',
             'features.*'  => 'string',
+            'verifikasi'  => 'array',
         ]);
 
         $role->update([
@@ -70,6 +96,7 @@ class RoleController extends Controller
             'icon_color'  => $request->icon_color ?: Role::DEFAULT_ICON_COLOR,
         ]);
         $role->syncFeatures($request->features ?? []);
+        $role->syncVerifikasi($this->parseVerifikasiInput($request->verifikasi ?? []));
 
         return redirect()->route('admin.roles.index')
             ->with('success', "Role '{$role->name}' berhasil diperbarui.");

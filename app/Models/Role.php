@@ -91,6 +91,30 @@ class Role extends Model
         return $this->hasMany(RoleFeature::class);
     }
 
+    public function verifikasiKeys(): HasMany
+    {
+        return $this->hasMany(RoleVerifikasi::class);
+    }
+
+    public function hasVerifikasi(string $key): bool
+    {
+        return $this->verifikasiKeys()->where('verifikasi_key', $key)->exists();
+    }
+
+    /** Sync daftar verifikasi (replace semua), format: ['ktp' => true, 'sim' => false] (wajib flag). */
+    public function syncVerifikasi(array $verifikasiData): void
+    {
+        $this->verifikasiKeys()->delete();
+        foreach ($verifikasiData as $key => $wajib) {
+            if (array_key_exists($key, self::ALL_VERIFIKASI)) {
+                $this->verifikasiKeys()->create([
+                    'verifikasi_key' => $key,
+                    'wajib' => (bool) $wajib,
+                ]);
+            }
+        }
+    }
+
     public function hasFeature(string $key): bool
     {
         return $this->features()->where('feature_key', $key)->exists();
