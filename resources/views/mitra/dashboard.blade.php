@@ -294,6 +294,22 @@
         <div style="text-align: center; margin-top: var(--fib-2); font-size: var(--t-xxs); color: rgba(255,255,255,0.5);">
             Geser ke kiri untuk tolak, ke kanan untuk terima
         </div>
+
+        {{-- TOMBOL FALLBACK kalau swipe tidak berfungsi --}}
+        <div style="display: flex; gap: var(--fib-2); margin-top: var(--fib-3);">
+            <button type="button" onclick="showRejectOptions()"
+                    style="flex: 1; background: rgba(239, 68, 68, 0.15); color: #fca5a5;
+                           border: 1.5px solid #ef4444; border-radius: var(--r-pill);
+                           padding: var(--fib-2); font-size: var(--t-xs); font-weight: 800; cursor: pointer;">
+                <i class="bi bi-x-circle me-1"></i> Tolak
+            </button>
+            <button type="button" onclick="acceptOrder()"
+                    style="flex: 1; background: rgba(16, 185, 129, 0.15); color: #6ee7b7;
+                           border: 1.5px solid #10b981; border-radius: var(--r-pill);
+                           padding: var(--fib-2); font-size: var(--t-xs); font-weight: 800; cursor: pointer;">
+                <i class="bi bi-check-circle me-1"></i> Terima
+            </button>
+        </div>
     </div>
 </div>
 
@@ -879,38 +895,42 @@ function markNextStepActive(step) {
     }
 }
 
-// ─ Slide-to-Action Logic (3-zone snap: 0% / 50% / 100%) ─
-let isSwiping = false; // Flag to prevent accidental toggle trigger after swipe
+// ─ Slide-to-Action Logic (REWRITE: simple & robust) ─
+let isSwiping = false; // Flag untuk cegah toggle terpicu setelah swipe
 
 (function initSlideToAction() {
     const thumb = document.getElementById('slider-thumb');
-    if (!thumb) return;
-
-    const track = thumb.parentElement;
-    const trackWidth = track.offsetWidth;
-    const thumbWidth = thumb.offsetWidth;
-    // Jarak penuh ke kiri/kanan = setengah lebar track dikurangi setengah lebar thumb
-    const maxSlide = (trackWidth - thumbWidth) / 2 - 8;
-    // Snap zone: 50% dari maxSlide → posisi pertengahan ke kiri/kanan
-    // Kalau geser >= snap point → snap ke ujung
-    const SNAP_POINT = maxSlide * 0.5;
-
-    let startX = 0, currentX = 0;
-    let isDragging = false, dragStartTime = 0;
-
-    function getClientX(e) {
-        return e.touches ? e.touches[0].clientX : e.clientX;
+    if (!thumb) {
+        console.warn('[Slider] thumb element not found, swipe disabled');
+        return;
     }
 
-    function safePreventDefault(e) {
-        if (e && e.cancelable) e.preventDefault();
+    // State: cara update saat ukuran berubah
+    let trackWidth = 0, thumbWidth = 0, maxSlide = 0, SNAP_POINT = 0;
+    function recalcDimensions() {
+        const track = thumb.parentElement;
+        trackWidth = track.offsetWidth;
+        thumbWidth = thumb.offsetWidth;
+        maxSlide = (trackWidth - thumbWidth) / 2 - 8;
+        SNAP_POINT = maxSlide * 0.5;
+    }
+    recalcDimensions();
+
+    let startX = 0, currentX = 0;
+    let isDragging = false;
+
+    function getClientX(e) {
+        if (e.touches && e.touches.length > 0) return e.touches[0].clientX;
+        if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientX;
+        return e.clientX;
     }
 
     function setThumbPosition(x) {
+        // Pakai transform agar bisa overlap left:50% + translateX(-50%)
         thumb.style.left = `calc(50% + ${x}px)`;
     }
 
-    function setThumbVisual(x) {
+    function paintVisual(x) {
         const icon = thumb.querySelector('i');
         if (x > SNAP_POINT * 0.5) {
             thumb.style.background = '#10b981';
@@ -924,118 +944,94 @@ let isSwiping = false; // Flag to prevent accidental toggle trigger after swipe
         }
     }
 
-    function resetThumb(animated = true) {
-        thumb.style.transition = animated ? 'all 0.25s ease' : 'none';
+    function resetThumb() {
+        thumb.style.transition = 'all 0.25s ease';
         setThumbPosition(0);
         thumb.style.background = 'white';
         const icon = thumb.querySelector('i');
         if (icon) icon.style.color = '#64748b';
-    }
-
-    function cancelDrag() {
-        if (!isDragging) return;
-        isDragging = false;
-        thumb.style.cursor = 'grab';
         currentX = 0;
-        resetThumb(true);
-        setTimeout(() => { isSwiping = false; }, 100);
     }
-
-    thumb.addEventListener('mousedown', startDrag);
-    thumb.addEventListener('touchstart', startDrag, { passive: false });
 
     function startDrag(e) {
+        recalcDimensions(); // recalc setiap drag (handle resize)
         isDragging = true;
         isSwiping = true;
         startX = getClientX(e);
         currentX = 0;
-        dragStartTime = Date.now();
         thumb.style.cursor = 'grabbing';
         thumb.style.transition = 'none';
-        safePreventDefault(e);
-        e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        console.log('[Slider] startDrag at startX=' + startX);
     }
-
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('touchmove', onDrag, { passive: false });
 
     function onDrag(e) {
         if (!isDragging) return;
-        safePreventDefault(e);
-        e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
 
         const diff = getClientX(e) - startX;
         currentX = Math.max(-maxSlide, Math.min(maxSlide, diff));
         setThumbPosition(currentX);
-        setThumbVisual(currentX);
+        paintVisual(currentX);
     }
-
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-    document.addEventListener('touchcancel', cancelDrag);
-
-    // Cancel drag hanya saat cursor BENAR-BENAR keluar window (bukan saat
-    // pindah antar element). Listener ke document.mouseleave terlalu sensitif
-    // — bisa fire saat swipe kiri sebelum endDrag → reject panel batal muncul.
-    document.addEventListener('mouseleave', function(e) {
-        // Hanya cancel jika cursor keluar lewat window edge (relatedTarget null)
-        if (e.relatedTarget === null && e.target === document.documentElement) {
-            cancelDrag();
-        }
-    });
 
     function endDrag(e) {
         if (!isDragging) return;
         isDragging = false;
-        safePreventDefault(e);
-        e.stopPropagation();
+        if (e && e.cancelable) e.preventDefault();
 
         thumb.style.cursor = 'grab';
         thumb.style.transition = 'all 0.25s ease';
 
         const finalX = currentX;
-        const dragDuration = Date.now() - dragStartTime;
-
-        console.log(`Swipe end: finalX=${finalX}px, maxSlide=${maxSlide}px, snapPoint=±${SNAP_POINT}px, duration=${dragDuration}ms`);
-
-        // ── 3-Zone Snap Logic ──
-        // Zone KIRI (currentX <= -SNAP_POINT) → snap ke -maxSlide (100% kiri) → TOLAK
-        // Zone TENGAH (-SNAP_POINT < currentX < SNAP_POINT) → balik ke 0 → TIDAK ADA AKSI
-        // Zone KANAN (currentX >= SNAP_POINT) → snap ke +maxSlide (100% kanan) → TERIMA
+        console.log('[Slider] endDrag finalX=' + finalX + ', SNAP_POINT=' + SNAP_POINT + ', maxSlide=' + maxSlide);
 
         if (finalX >= SNAP_POINT) {
-            // Snap ke kanan penuh
             setThumbPosition(maxSlide);
             thumb.style.background = '#10b981';
-            const icon = thumb.querySelector('i');
-            if (icon) icon.style.color = 'white';
-            console.log('SNAP RIGHT → Accept Order');
-            // Delay sebentar agar user lihat snap animation
-            setTimeout(() => acceptOrder(), 150);
+            console.log('[Slider] >>> SNAP RIGHT → acceptOrder()');
+            setTimeout(function() {
+                resetThumb();
+                acceptOrder();
+            }, 150);
         } else if (finalX <= -SNAP_POINT) {
-            // Snap ke kiri penuh
             setThumbPosition(-maxSlide);
             thumb.style.background = '#ef4444';
-            const icon = thumb.querySelector('i');
-            if (icon) icon.style.color = 'white';
-            console.log('SNAP LEFT → Show Reject Options');
-            setTimeout(() => showRejectOptions(), 150);
+            console.log('[Slider] >>> SNAP LEFT → showRejectOptions()');
+            setTimeout(function() {
+                resetThumb();
+                showRejectOptions();
+            }, 150);
         } else {
-            // Snap kembali ke tengah
-            console.log('SNAP CENTER (no action)');
-            currentX = 0;
-            resetThumb(true);
+            console.log('[Slider] >>> SNAP CENTER (no action)');
+            resetThumb();
         }
 
-        // Clear swipe flag setelah animation selesai
-        setTimeout(() => { isSwiping = false; }, 300);
+        setTimeout(function() { isSwiping = false; }, 300);
     }
 
-    // Reset thumb saat popup ditutup
+    // BIND: thumb start, document move, document end
+    // Tidak ada lagi cancelDrag atau mouseleave — terlalu agresif
+    thumb.addEventListener('mousedown', startDrag);
+    thumb.addEventListener('touchstart', startDrag, { passive: false });
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    // Expose untuk external reset
     window.resetSliderThumb = function() {
         currentX = 0;
-        resetThumb(false);
+        thumb.style.transition = 'none';
+        setThumbPosition(0);
+        thumb.style.background = 'white';
+        const icon = thumb.querySelector('i');
+        if (icon) icon.style.color = '#64748b';
     };
+
+    console.log('[Slider] initialized: maxSlide=' + maxSlide + ', SNAP_POINT=' + SNAP_POINT);
 })();
 
 // Event listener untuk tombol Kirim alasan custom
