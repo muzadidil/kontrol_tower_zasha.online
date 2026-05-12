@@ -664,6 +664,7 @@ let isSwiping = false; // Flag to prevent accidental toggle trigger after swipe
         isDragging = true;
         isSwiping = true;
         startX = getClientX(e);
+        currentX = 0;  // Reset currentX when drag starts
         thumb.style.cursor = 'grabbing';
         thumb.style.transition = 'none';
         e.preventDefault();
@@ -707,12 +708,18 @@ let isSwiping = false; // Flag to prevent accidental toggle trigger after swipe
         thumb.style.cursor = 'grab';
         thumb.style.transition = 'all 0.3s ease';
 
+        console.log(`Swipe distance: ${currentX}px, threshold: ${SWIPE_THRESHOLD}px`);
+
         if (currentX > SWIPE_THRESHOLD) {
-            // Geser kanan → TERIMA
+            // Geser ke KANAN (positive currentX) → TERIMA order
+            console.log('Swipe RIGHT (positive) → Accept Order');
             acceptOrder();
         } else if (currentX < -SWIPE_THRESHOLD) {
-            // Geser kiri → TOLAK
+            // Geser ke KIRI (negative currentX) → TOLAK order
+            console.log('Swipe LEFT (negative) → Reject Order');
             showRejectOptions();
+        } else {
+            console.log('Swipe not far enough to trigger action');
         }
 
         // Reset posisi
