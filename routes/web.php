@@ -32,6 +32,7 @@ use App\Http\Controllers\Mitra\MitraPortfolioController;
 use App\Http\Controllers\Mitra\MitraSparepartController;
 use App\Http\Controllers\Mitra\MitraFotoBuktiController;
 use App\Http\Controllers\Mitra\MitraDokumenController;
+use App\Http\Controllers\Mitra\MitraMapsController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -189,6 +190,11 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::get('/bulanan', [MitraLaporanController::class, 'bulanan'])
             ->middleware('feature:laporan-bulanan')->name('bulanan');
     });
+
+    // Maps - list lokasi order aktif (butuh verified + fitur maps)
+    Route::get('/maps', [MitraMapsController::class, 'index'])
+        ->middleware(['verified.mitra', 'feature:maps'])
+        ->name('maps');
 
     // Foto Bukti per order (butuh verified + fitur kamera)
     Route::prefix('foto-bukti')->name('foto-bukti.')->middleware(['verified.mitra', 'feature:kamera'])->group(function () {

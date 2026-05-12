@@ -204,6 +204,7 @@
             ['jadwal',          'mitra.jadwal.index',    'bi-calendar-week',   'Jadwal',    'Jam & libur',     'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
             ['portfolio',       'mitra.portfolio.index', 'bi-images',          'Portfolio', 'Karya saya',      'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
             ['sparepart',       'mitra.sparepart.index', 'bi-box-seam',        'Sparepart', 'Inventory stok',  'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
+            ['maps',            'mitra.maps',            'bi-geo-alt-fill',    'Maps',      'Lokasi order',    'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
         ];
 
         $activeTiles = collect($featureTiles)->filter(function ($t) use ($mitra) {
