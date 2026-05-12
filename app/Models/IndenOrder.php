@@ -29,7 +29,7 @@ class IndenOrder extends Model
         'pelunasan_paid_at'       => 'datetime',
         'selesai_at'              => 'datetime',
         'auto_konfirmasi_at'      => 'datetime',
-    };
+    ];
 
     public function pelanggan(): BelongsTo
     {
