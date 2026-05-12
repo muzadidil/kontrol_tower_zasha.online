@@ -326,6 +326,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Assign role ke mitra
     Route::post('/mitra/{mitra}/role', [\App\Http\Controllers\Admin\RoleController::class, 'assignToMitra'])
         ->name('admin.mitra.assignRole');
+    // Toggle aktif/draft role
+    Route::post('/roles/{role}/toggle-active', [\App\Http\Controllers\Admin\RoleController::class, 'toggleActive'])
+        ->name('admin.roles.toggleActive');
 
     // WFH Admin
     Route::prefix('wfh')->name('admin.wfh.')->group(function () {

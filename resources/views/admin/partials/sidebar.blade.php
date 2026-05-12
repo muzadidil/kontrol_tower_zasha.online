@@ -21,11 +21,6 @@
             </a>
         </li>
         <li>
-            <a href="{{ route('admin.kategori.index') }}" class="nav-link {{ request()->is('admin/kategori*') || request()->is('admin/master-kategori*') ? 'active' : '' }}">
-                <i class="fas fa-tags me-2"></i> Master Layanan
-            </a>
-        </li>
-        <li>
             <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->is('admin/roles*') ? 'active' : '' }}">
                 <i class="fas fa-shield-alt me-2"></i> Role & Akses
             </a>

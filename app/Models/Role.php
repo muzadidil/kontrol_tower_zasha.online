@@ -7,11 +7,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends Model
 {
-    protected $fillable = ['name', 'description', 'is_default'];
+    protected $fillable = ['name', 'description', 'icon', 'icon_color', 'is_default', 'is_active'];
 
     protected $casts = [
         'is_default' => 'boolean',
+        'is_active'  => 'boolean',
     ];
+
+    /** Daftar icon Bootstrap Icons yang sering dipakai untuk role mitra. */
+    public const SUGGESTED_ICONS = [
+        'bi-tools'           => 'Tools (TNG)',
+        'bi-truck'           => 'Truck (JST)',
+        'bi-laptop'          => 'Laptop (WFH)',
+        'bi-wrench-adjustable'=> 'Wrench (SVC)',
+        'bi-person-badge'    => 'Badge',
+        'bi-shield-check'    => 'Shield',
+        'bi-star-fill'       => 'Star',
+        'bi-lightning-fill'  => 'Lightning',
+        'bi-house-fill'      => 'House',
+        'bi-bag-fill'        => 'Bag',
+        'bi-gear-fill'       => 'Gear',
+        'bi-globe'           => 'Globe',
+    ];
+
+    public const DEFAULT_ICON = 'bi-shield-fill';
+    public const DEFAULT_ICON_COLOR = '#005aa9';
 
     /**
      * Master daftar semua fitur yang bisa diatur per role.

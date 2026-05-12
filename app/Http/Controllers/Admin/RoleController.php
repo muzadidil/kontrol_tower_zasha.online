@@ -25,6 +25,8 @@ class RoleController extends Controller
         $request->validate([
             'name'        => 'required|string|max:100|unique:roles,name',
             'description' => 'nullable|string|max:255',
+            'icon'        => 'nullable|string|max:100',
+            'icon_color'  => 'nullable|string|max:20',
             'features'    => 'array',
             'features.*'  => 'string',
         ]);
@@ -32,12 +34,15 @@ class RoleController extends Controller
         $role = Role::create([
             'name'        => $request->name,
             'description' => $request->description,
+            'icon'        => $request->icon ?: Role::DEFAULT_ICON,
+            'icon_color'  => $request->icon_color ?: Role::DEFAULT_ICON_COLOR,
             'is_default'  => false,
+            'is_active'   => false, // role baru = draft, harus dirilis dulu
         ]);
         $role->syncFeatures($request->features ?? []);
 
         return redirect()->route('admin.roles.index')
-            ->with('success', "Role '{$role->name}' berhasil dibuat.");
+            ->with('success', "Role '{$role->name}' berhasil dibuat sebagai DRAFT. Klik 'Rilis & Aktifkan' untuk mengaktifkan.");
     }
 
     public function edit(Role $role)
@@ -52,6 +57,8 @@ class RoleController extends Controller
         $request->validate([
             'name'        => 'required|string|max:100|unique:roles,name,' . $role->id,
             'description' => 'nullable|string|max:255',
+            'icon'        => 'nullable|string|max:100',
+            'icon_color'  => 'nullable|string|max:20',
             'features'    => 'array',
             'features.*'  => 'string',
         ]);
@@ -59,11 +66,21 @@ class RoleController extends Controller
         $role->update([
             'name'        => $request->name,
             'description' => $request->description,
+            'icon'        => $request->icon ?: Role::DEFAULT_ICON,
+            'icon_color'  => $request->icon_color ?: Role::DEFAULT_ICON_COLOR,
         ]);
         $role->syncFeatures($request->features ?? []);
 
         return redirect()->route('admin.roles.index')
             ->with('success', "Role '{$role->name}' berhasil diperbarui.");
+    }
+
+    /** Toggle status aktif/draft role. */
+    public function toggleActive(Role $role)
+    {
+        $role->update(['is_active' => !$role->is_active]);
+        $status = $role->is_active ? 'AKTIF dan siap dipakai' : 'di-set sebagai DRAFT';
+        return back()->with('success', "Role '{$role->name}' kini {$status}.");
     }
 
     public function destroy(Role $role)

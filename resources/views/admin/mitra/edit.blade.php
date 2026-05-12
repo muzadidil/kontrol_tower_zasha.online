@@ -25,11 +25,14 @@
                             <select name="role_id" class="form-select rounded-3">
                                 <option value="">-- Tanpa Role (tidak bisa akses fitur apapun) --</option>
                                 @foreach(($roles ?? []) as $role)
-                                    <option value="{{ $role->id }}" {{ $mitra->role_id == $role->id ? 'selected' : '' }}>
-                                        {{ $role->name }} @if($role->description) — {{ $role->description }} @endif
-                                    </option>
+                                    @if($role->is_active || $mitra->role_id == $role->id)
+                                        <option value="{{ $role->id }}" {{ $mitra->role_id == $role->id ? 'selected' : '' }}>
+                                            {{ $role->name }} @if(!$role->is_active) [DRAFT] @endif @if($role->description) — {{ $role->description }} @endif
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
+                            <div class="form-text">Hanya role yang sudah dirilis (aktif) yang bisa di-assign.</div>
                         </div>
                         <div class="col-md-3">
                             <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold w-100">

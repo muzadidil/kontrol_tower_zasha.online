@@ -173,16 +173,16 @@
         </a>
     </div>
     <div class="col-md-3 col-6">
-        <a href="{{ route('admin.kategori.index') }}" class="text-decoration-none">
+        <a href="{{ route('admin.verification.index') }}" class="text-decoration-none">
             <div class="stat-card h-100 d-flex flex-column" style="cursor:pointer; transition:all 0.2s;"
                  onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 16px rgba(245,158,11,0.15)';"
                  onmouseout="this.style.transform=''; this.style.boxShadow='';">
                 <div class="stat-icon" style="background:#fef3c7; color:#92400e;">
-                    <i class="fas fa-tags"></i>
+                    <i class="fas fa-user-check"></i>
                 </div>
-                <div class="stat-label">Master Layanan</div>
-                <div class="stat-value" style="font-size:1rem;">{{ \DB::table('kategori_pekerjaan')->count() }} kategori</div>
-                <div class="stat-sub">Kelola sub-layanan</div>
+                <div class="stat-label">Verifikasi Mitra</div>
+                <div class="stat-value" style="font-size:1rem;">Pending review</div>
+                <div class="stat-sub">Approve dokumen mitra</div>
             </div>
         </a>
     </div>
