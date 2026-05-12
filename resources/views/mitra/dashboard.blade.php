@@ -973,8 +973,16 @@ let isSwiping = false; // Flag to prevent accidental toggle trigger after swipe
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchend', endDrag);
     document.addEventListener('touchcancel', cancelDrag);
-    document.addEventListener('mouseleave', cancelDrag);
-    window.addEventListener('blur', cancelDrag);
+
+    // Cancel drag hanya saat cursor BENAR-BENAR keluar window (bukan saat
+    // pindah antar element). Listener ke document.mouseleave terlalu sensitif
+    // — bisa fire saat swipe kiri sebelum endDrag → reject panel batal muncul.
+    document.addEventListener('mouseleave', function(e) {
+        // Hanya cancel jika cursor keluar lewat window edge (relatedTarget null)
+        if (e.relatedTarget === null && e.target === document.documentElement) {
+            cancelDrag();
+        }
+    });
 
     function endDrag(e) {
         if (!isDragging) return;
