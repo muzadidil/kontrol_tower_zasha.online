@@ -6,9 +6,19 @@
     {{-- Header (fib-3 gap) --}}
     <div class="d-flex justify-content-between align-items-center" style="padding-top: var(--fib-2);">
         <div class="d-flex align-items-center gap-3">
-            <div class="avatar-34" style="background: linear-gradient(135deg,var(--mitra-blue),var(--mitra-blue-dark));display:flex;align-items:center;justify-content:center;box-shadow:0 var(--fib-1) var(--fib-3) rgba(0,90,169,0.25);">
-                <i class="bi bi-person-fill text-white" style="font-size:var(--t-md);"></i>
-            </div>
+            <a href="{{ route('mitra.profil') }}" class="avatar-34"
+               style="background: linear-gradient(135deg,var(--mitra-blue),var(--mitra-blue-dark));
+                      display:flex;align-items:center;justify-content:center;
+                      box-shadow:0 var(--fib-1) var(--fib-3) rgba(0,90,169,0.25);
+                      overflow:hidden; text-decoration:none; flex-shrink:0;">
+                @if($mitra->foto_mitra)
+                    <img src="{{ asset('storage/' . $mitra->foto_mitra) }}"
+                         alt="{{ $mitra->nama_panggilan }}"
+                         style="width:100%; height:100%; object-fit:cover;">
+                @else
+                    <i class="bi bi-person-fill text-white" style="font-size:var(--t-md);"></i>
+                @endif
+            </a>
             <div>
                 <div class="t-xs label-up" style="color:var(--ink-soft);margin-bottom:2px;">Halo,</div>
                 <h6 class="fw-bold mb-0 allow-select t-lg" style="line-height:1;">{{ explode(' ', trim($mitra->nama_panggilan ?? $mitra->nama_asli ?? 'Mitra'))[0] }}</h6>
@@ -249,47 +259,15 @@
         </div>
     </div>
 
-    {{-- Branding Footer (golden ratio spacing — isi ruang kosong di bawah menu) --}}
-    <div style="margin-top: var(--fib-7); padding: var(--fib-5) var(--fib-3) var(--fib-4);
-                text-align: center; position: relative;">
-
-        {{-- Decorative divider with fibonacci proportions --}}
-        <div style="display: flex; align-items: center; justify-content: center;
-                    gap: var(--fib-3); margin-bottom: var(--fib-5);">
+    {{-- Footer spacer (isi ruang kosong di bawah menu, golden ratio) --}}
+    <div style="margin-top: var(--fib-7); padding: var(--fib-4) var(--fib-3); text-align: center;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: var(--fib-3); margin-bottom: var(--fib-3);">
             <div style="width: var(--fib-5); height: 1px; background: var(--line);"></div>
-            <div style="width: var(--fib-2); height: var(--fib-2); border-radius: 50%;
-                        background: var(--mitra-gold); opacity: 0.6;"></div>
+            <div style="width: var(--fib-2); height: var(--fib-2); border-radius: 50%; background: var(--mitra-gold); opacity: 0.6;"></div>
             <div style="width: var(--fib-5); height: 1px; background: var(--line);"></div>
         </div>
-
-        {{-- Logo — aspect square fibonacci size --}}
-        <div style="margin: 0 auto var(--fib-3); width: var(--fib-8); height: var(--fib-8);
-                    display: flex; align-items: center; justify-content: center;">
-            <img src="{{ asset(file_exists(public_path('img/logo-zasha.png')) ? 'img/logo-zasha.png' : 'img/logo-zasha.svg') }}"
-                 alt="ZaSha.Online"
-                 style="width: 100%; height: 100%; object-fit: contain; opacity: 0.95;
-                        filter: drop-shadow(0 var(--fib-1) var(--fib-3) rgba(10, 92, 169, 0.15));">
-        </div>
-
-        {{-- Tagline --}}
-        <div style="font-size: var(--t-xs); color: var(--ink-soft); font-weight: 600;
-                    letter-spacing: 0.05em; margin-bottom: var(--fib-2);">
-            Platform Layanan Terpercaya
-        </div>
-
-        {{-- Version / Year --}}
-        <div style="font-size: var(--t-xxs); color: var(--ink-soft); opacity: 0.7;
-                    letter-spacing: 0.08em; text-transform: uppercase;">
+        <div style="font-size: var(--t-xxs); color: var(--ink-soft); letter-spacing: 0.08em; text-transform: uppercase;">
             v1.0 · &copy; {{ date('Y') }} ZaSha.Online
-        </div>
-
-        {{-- Decorative tech dots (matching logo accent) --}}
-        <div style="display: flex; align-items: center; justify-content: center;
-                    gap: var(--fib-2); margin-top: var(--fib-4);">
-            <div style="width: var(--fib-1); height: var(--fib-1); border-radius: 50%; background: var(--mitra-blue-mid);"></div>
-            <div style="width: var(--fib-7); height: 1px; background: linear-gradient(90deg,
-                        var(--mitra-blue-mid) 0%, var(--mitra-gold) 50%, var(--mitra-blue-mid) 100%); opacity: 0.4;"></div>
-            <div style="width: var(--fib-1); height: var(--fib-1); border-radius: 50%; background: var(--mitra-gold);"></div>
         </div>
     </div>
 
