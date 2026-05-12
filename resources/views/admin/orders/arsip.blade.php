@@ -3,6 +3,31 @@
 @section('content')
 @include('admin.partials._zasha-style')
 
+<style>
+    .btn-status-action {
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        transition: all 0.15s;
+        opacity: 0.8;
+    }
+    .btn-status-action:hover { opacity: 1; transform: translateY(-1px); }
+    .btn-status-action.success { background: #10b981; color: white; }
+    .btn-status-action.warning { background: #f59e0b; color: white; }
+    .btn-status-action.danger  { background: #ef4444; color: white; }
+    .btn-status-action.gray    { background: var(--zasha-gray-500); color: white; }
+    .btn-status-action:disabled {
+        opacity: 0.35; cursor: not-allowed; transform: none;
+    }
+</style>
+
 <div class="zasha-page-header">
     <div class="zasha-page-title">
         <h4><i class="bi bi-archive-fill"></i> Arsip Pesanan</h4>
@@ -65,19 +90,29 @@
             </div>
             <div class="zasha-row-amount">
                 <div class="zasha-row-amount-main">Rp {{ number_format($display_harga, 0, ',', '.') }}</div>
-                <form action="{{ route('admin.orders.arsip.update') }}" method="POST" class="d-flex gap-1 justify-content-end mt-1">
-                    @csrf
-                    <input type="hidden" name="id_pesanan" value="{{ $row->id_pesanan }}">
-                    <select name="status_baru" class="form-select form-select-sm" style="font-size:0.7rem; padding:3px 8px; max-width:120px;">
-                        <option value="Selesai" {{ !$is_batal ? 'selected' : '' }}>Selesai</option>
-                        <option value="Batal" {{ $is_batal ? 'selected' : '' }}>Batal</option>
-                        <option value="Lunas">Lunas</option>
-                        <option value="Pending">Pending</option>
-                    </select>
-                    <button type="submit" class="btn btn-sm" style="background:var(--zasha-gray-500); color:white; padding:3px 10px; border-radius:6px;" title="Koreksi status">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </form>
+                <div class="zasha-row-amount-sub">Koreksi status →</div>
+            </div>
+            {{-- Tombol koreksi status (sebaris, kompak) --}}
+            <div class="d-flex gap-1 flex-shrink-0">
+                @foreach([
+                    ['Selesai', 'success', 'bi-check-lg'],
+                    ['Batal',   'danger',  'bi-x-lg'],
+                    ['Lunas',   'warning', 'bi-cash'],
+                    ['Pending', 'gray',    'bi-hourglass'],
+                ] as $action)
+                    @php [$label, $color, $icon] = $action; @endphp
+                    <form action="{{ route('admin.orders.arsip.update') }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="id_pesanan" value="{{ $row->id_pesanan }}">
+                        <input type="hidden" name="status_baru" value="{{ $label }}">
+                        <button type="submit" class="btn-status-action {{ $color }}"
+                                {{ $row->status_pesanan === $label ? 'disabled' : '' }}
+                                onclick="return confirm('Ubah status #{{ $row->id_pesanan }} ke {{ $label }}?')"
+                                title="Koreksi ke: {{ $label }}">
+                            <i class="bi {{ $icon }}"></i> {{ $label }}
+                        </button>
+                    </form>
+                @endforeach
             </div>
         </div>
     @empty

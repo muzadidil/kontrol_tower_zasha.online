@@ -42,4 +42,20 @@ class PpobController extends Controller
     {
         return view('admin.ppob.show', compact('trx'));
     }
+
+    /**
+     * Update status PPOB secara manual oleh admin
+     * (gagal -> sukses untuk reconciliation, pending -> gagal untuk force timeout, dll).
+     */
+    public function updateStatus(Request $request, PpobTransaction $trx)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,sukses,gagal',
+        ]);
+
+        $oldStatus = $trx->status;
+        $trx->update(['status' => $request->status]);
+
+        return back()->with('notif', "Status #{$trx->id} diubah dari {$oldStatus} ke {$request->status}.");
+    }
 }

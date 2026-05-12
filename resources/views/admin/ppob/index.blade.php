@@ -2,137 +2,221 @@
 @section('title', 'Monitoring PPOB')
 
 @section('content')
-<div class="container-fluid py-4">
-    <h4 class="fw-bold mb-4"><i class="fas fa-mobile-alt text-warning me-2"></i>Monitoring PPOB (Pulsa, Paket, Token)</h4>
+@include('admin.partials._zasha-style')
 
-    {{-- Statistik --}}
-    <div class="row g-3 mb-4">
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="text-muted small">Total Transaksi</div>
-                    <div class="fw-bold fs-4">{{ number_format($stats['total_trx'], 0, ',', '.') }}</div>
-                </div>
-            </div>
+<style>
+    .btn-status-action {
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        transition: all 0.15s;
+        opacity: 0.8;
+    }
+    .btn-status-action:hover { opacity: 1; transform: translateY(-1px); }
+    .btn-status-action.success { background: #10b981; color: white; }
+    .btn-status-action.warning { background: #f59e0b; color: white; }
+    .btn-status-action.danger  { background: #ef4444; color: white; }
+    .btn-status-action.success:disabled,
+    .btn-status-action.warning:disabled,
+    .btn-status-action.danger:disabled {
+        opacity: 0.35; cursor: not-allowed; transform: none;
+    }
+    .ppob-stat-card {
+        background: white;
+        border: 1px solid var(--zasha-gray-200);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .ppob-stat-label {
+        font-size: 0.7rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.4px;
+        color: var(--zasha-gray-400);
+        margin-bottom: 4px;
+    }
+    .ppob-stat-value {
+        font-size: 1.1rem; font-weight: 800;
+        color: var(--zasha-gray-900);
+    }
+</style>
+
+<div class="zasha-page-header">
+    <div class="zasha-page-title">
+        <h4><i class="bi bi-mobile-vibrate"></i> Monitoring PPOB</h4>
+        <div class="zasha-page-subtitle">Pulsa, Paket Data, Token Listrik — transaksi via Digiflazz.</div>
+    </div>
+    <a href="{{ route('admin.ppob.index') }}" class="btn btn-light rounded-pill px-3 border small fw-bold">
+        <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+    </a>
+</div>
+
+@if(session('notif'))
+    <div class="alert alert-success rounded-3 small">
+        <i class="bi bi-check-circle-fill me-1"></i> {{ session('notif') }}
+    </div>
+@endif
+
+{{-- ── STATS ROW ────────────────────────────────────── --}}
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="ppob-stat-card">
+            <div class="ppob-stat-label">Total Transaksi</div>
+            <div class="ppob-stat-value">{{ number_format($stats['total_trx'], 0, ',', '.') }}</div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="text-muted small">Total Omzet</div>
-                    <div class="fw-bold fs-5 text-info">Rp {{ number_format($stats['total_omzet'], 0, ',', '.') }}</div>
-                </div>
-            </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="ppob-stat-card">
+            <div class="ppob-stat-label">Total Omzet</div>
+            <div class="ppob-stat-value" style="color:var(--zasha-blue);">Rp {{ number_format($stats['total_omzet'], 0, ',', '.') }}</div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="text-muted small">Profit Zasha (Margin)</div>
-                    <div class="fw-bold fs-5 text-success">Rp {{ number_format($stats['total_margin'], 0, ',', '.') }}</div>
-                </div>
-            </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="ppob-stat-card">
+            <div class="ppob-stat-label">Profit Zasha</div>
+            <div class="ppob-stat-value" style="color:var(--zasha-success);">Rp {{ number_format($stats['total_margin'], 0, ',', '.') }}</div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-success">Sukses: {{ $stats['sukses'] }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-warning">Pending: {{ $stats['pending'] }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-danger">Gagal: {{ $stats['gagal'] }}</span>
-                    </div>
-                </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="ppob-stat-card">
+            <div class="ppob-stat-label">Status</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                <span class="zasha-status-badge success">Sukses {{ $stats['sukses'] }}</span>
+                <span class="zasha-status-badge pending">Pending {{ $stats['pending'] }}</span>
+                <span class="zasha-status-badge danger">Gagal {{ $stats['gagal'] }}</span>
             </div>
         </div>
     </div>
+</div>
 
-    {{-- Filter --}}
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body p-3">
-            <form method="GET" class="row g-2">
-                <div class="col-md-3">
-                    <input type="text" name="search" class="form-control" placeholder="Ref ID / Nomor / Produk..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2">
-                    <select name="status" class="form-select">
-                        <option value="">Semua Status</option>
-                        <option value="pending" {{ request('status')==='pending'?'selected':'' }}>Pending</option>
-                        <option value="sukses" {{ request('status')==='sukses'?'selected':'' }}>Sukses</option>
-                        <option value="gagal" {{ request('status')==='gagal'?'selected':'' }}>Gagal</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="jenis" class="form-select">
-                        <option value="">Semua Jenis</option>
-                        <option value="pulsa" {{ request('jenis')==='pulsa'?'selected':'' }}>Pulsa</option>
-                        <option value="paket_data" {{ request('jenis')==='paket_data'?'selected':'' }}>Paket Data</option>
-                        <option value="token_listrik" {{ request('jenis')==='token_listrik'?'selected':'' }}>Token Listrik</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="user_type" class="form-select">
-                        <option value="">Semua Pembeli</option>
-                        <option value="pelanggan" {{ request('user_type')==='pelanggan'?'selected':'' }}>Pelanggan</option>
-                        <option value="mitra" {{ request('user_type')==='mitra'?'selected':'' }}>Mitra</option>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-warning">Filter</button>
-                    <a href="{{ route('admin.ppob.index') }}" class="btn btn-outline-secondary">Reset</a>
-                </div>
-            </form>
+<div class="zasha-card">
+    {{-- Filter Bar --}}
+    <form method="GET" class="zasha-filter-bar">
+        <div class="position-relative flex-grow-1" style="min-width:180px;">
+            <i class="bi bi-search position-absolute" style="left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:0.8rem;"></i>
+            <input type="text" name="search" class="form-control ps-5" placeholder="Ref ID / Nomor / Produk..." value="{{ request('search') }}">
         </div>
+        <select name="status" class="form-select" style="max-width:130px;">
+            <option value="">Semua Status</option>
+            <option value="pending" {{ request('status')==='pending'?'selected':'' }}>Pending</option>
+            <option value="sukses" {{ request('status')==='sukses'?'selected':'' }}>Sukses</option>
+            <option value="gagal" {{ request('status')==='gagal'?'selected':'' }}>Gagal</option>
+        </select>
+        <select name="jenis" class="form-select" style="max-width:140px;">
+            <option value="">Semua Jenis</option>
+            <option value="pulsa" {{ request('jenis')==='pulsa'?'selected':'' }}>Pulsa</option>
+            <option value="paket_data" {{ request('jenis')==='paket_data'?'selected':'' }}>Paket Data</option>
+            <option value="token_listrik" {{ request('jenis')==='token_listrik'?'selected':'' }}>Token Listrik</option>
+        </select>
+        <select name="user_type" class="form-select" style="max-width:140px;">
+            <option value="">Semua Pembeli</option>
+            <option value="pelanggan" {{ request('user_type')==='pelanggan'?'selected':'' }}>Pelanggan</option>
+            <option value="mitra" {{ request('user_type')==='mitra'?'selected':'' }}>Mitra</option>
+        </select>
+        <button class="btn btn-primary" style="background:var(--zasha-blue); border-color:var(--zasha-blue);">
+            <i class="bi bi-funnel-fill me-1"></i> Filter
+        </button>
+        <a href="{{ route('admin.ppob.index') }}" class="btn btn-light">Reset</a>
+    </form>
+
+    <div class="zasha-list-header">
+        <h6><i class="bi bi-list-ul"></i> Daftar Transaksi PPOB</h6>
+        <span class="badge-count">{{ $trxs->total() }}</span>
     </div>
 
-    {{-- Tabel --}}
-    <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Ref ID</th>
-                        <th>Pembeli</th>
-                        <th>Produk</th>
-                        <th>Tujuan</th>
-                        <th class="text-end">Harga Jual</th>
-                        <th class="text-end">Margin</th>
-                        <th class="text-center">Status</th>
-                        <th>Waktu</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($trxs as $trx)
-                    @php
-                        $bm = ['pending'=>'warning','sukses'=>'success','gagal'=>'danger'];
-                        $jenisIcon = ['pulsa'=>'phone','paket_data'=>'wifi','token_listrik'=>'bolt'];
-                    @endphp
-                    <tr>
-                        <td><code class="small">{{ $trx->digiflazz_ref }}</code></td>
-                        <td class="small">
-                            <span class="badge bg-{{ $trx->user_type === 'mitra' ? 'info' : 'secondary' }}">{{ ucfirst($trx->user_type) }}</span>
-                            #{{ $trx->user_id }}
-                        </td>
-                        <td class="small">
-                            <i class="fas fa-{{ $jenisIcon[$trx->jenis_produk] ?? 'box' }} text-warning me-1"></i>
-                            {{ $trx->nama_produk }}
-                        </td>
-                        <td class="small font-monospace">{{ $trx->nomor_tujuan }}</td>
-                        <td class="text-end small">Rp {{ number_format($trx->harga_jual, 0, ',', '.') }}</td>
-                        <td class="text-end small fw-semibold text-success">Rp {{ number_format($trx->margin_zasha, 0, ',', '.') }}</td>
-                        <td class="text-center"><span class="badge bg-{{ $bm[$trx->status] ?? 'secondary' }}">{{ ucfirst($trx->status) }}</span></td>
-                        <td class="small text-muted">{{ $trx->created_at->format('d M H:i') }}</td>
-                        <td><a href="{{ route('admin.ppob.show', $trx->id) }}" class="btn btn-outline-warning btn-sm">Detail</a></td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="9" class="text-center text-muted py-4">Belum ada transaksi PPOB.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+    @forelse($trxs as $trx)
+        @php
+            $statusMap = [
+                'pending' => ['pending', 'bi-hourglass-split', 'warning'],
+                'sukses'  => ['success', 'bi-check-circle-fill', 'success'],
+                'gagal'   => ['danger',  'bi-x-circle-fill', 'danger'],
+            ];
+            [$badgeClass, $iconBi, $iconColor] = $statusMap[$trx->status] ?? ['gray', 'bi-question-circle', 'gray'];
+
+            $jenisIcon = match($trx->jenis_produk) {
+                'pulsa' => 'bi-phone',
+                'paket_data' => 'bi-wifi',
+                'token_listrik' => 'bi-lightning-charge-fill',
+                default => 'bi-box',
+            };
+        @endphp
+        <div class="zasha-row">
+            <div class="zasha-row-icon {{ $iconColor }}">
+                <i class="bi {{ $jenisIcon }}"></i>
+            </div>
+            <div class="zasha-row-body">
+                <div class="zasha-row-title">
+                    <span class="text-muted small fw-normal">{{ $trx->digiflazz_ref ?? '#'.$trx->id }}</span>
+                    · {{ $trx->nama_produk }}
+                </div>
+                <div class="zasha-row-meta">
+                    <span class="zasha-status-badge {{ $badgeClass }}">
+                        <i class="bi {{ $iconBi }}"></i> {{ ucfirst($trx->status) }}
+                    </span>
+                    <span><i class="bi bi-person-circle"></i> {{ ucfirst($trx->user_type) }} #{{ $trx->user_id }}</span>
+                    <span class="font-monospace"><i class="bi bi-telephone"></i> {{ $trx->nomor_tujuan }}</span>
+                    <span><i class="bi bi-clock"></i> {{ $trx->created_at->format('d M, H:i') }}</span>
+                </div>
+            </div>
+            <div class="zasha-row-amount">
+                <div class="zasha-row-amount-main">Rp {{ number_format($trx->harga_jual, 0, ',', '.') }}</div>
+                <div class="zasha-row-amount-sub">+Rp {{ number_format($trx->margin_zasha, 0, ',', '.') }} margin</div>
+            </div>
+            {{-- Tombol aksi: Sukses / Pending / Gagal (sebaris, kompak) --}}
+            <div class="d-flex gap-1 flex-shrink-0">
+                <form action="{{ route('admin.ppob.updateStatus', $trx->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="status" value="sukses">
+                    <button type="submit" class="btn-status-action success"
+                            {{ $trx->status === 'sukses' ? 'disabled' : '' }}
+                            onclick="return confirm('Ubah status #{{ $trx->id }} ke SUKSES?')"
+                            title="Set status: Sukses">
+                        <i class="bi bi-check-lg"></i> Sukses
+                    </button>
+                </form>
+                <form action="{{ route('admin.ppob.updateStatus', $trx->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="status" value="pending">
+                    <button type="submit" class="btn-status-action warning"
+                            {{ $trx->status === 'pending' ? 'disabled' : '' }}
+                            onclick="return confirm('Ubah status #{{ $trx->id }} ke PENDING?')"
+                            title="Set status: Pending">
+                        <i class="bi bi-hourglass"></i> Pending
+                    </button>
+                </form>
+                <form action="{{ route('admin.ppob.updateStatus', $trx->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="status" value="gagal">
+                    <button type="submit" class="btn-status-action danger"
+                            {{ $trx->status === 'gagal' ? 'disabled' : '' }}
+                            onclick="return confirm('Ubah status #{{ $trx->id }} ke GAGAL?')"
+                            title="Set status: Gagal">
+                        <i class="bi bi-x-lg"></i> Gagal
+                    </button>
+                </form>
+                <a href="{{ route('admin.ppob.show', $trx->id) }}" class="btn-status-action"
+                   style="background:var(--zasha-gray-100); color:var(--zasha-gray-700);"
+                   title="Detail">
+                    <i class="bi bi-eye"></i>
+                </a>
+            </div>
         </div>
-        <div class="card-footer bg-white">{{ $trxs->withQueryString()->links() }}</div>
-    </div>
+    @empty
+        <div class="zasha-empty">
+            <i class="bi bi-mobile-vibrate"></i>
+            <div class="zasha-empty-title">Belum ada transaksi PPOB</div>
+            <div class="zasha-empty-sub">Transaksi pulsa, paket data, token listrik akan muncul di sini.</div>
+        </div>
+    @endforelse
+
+    @if(method_exists($trxs, 'links'))
+        <div class="p-3 border-top">{{ $trxs->withQueryString()->links() }}</div>
+    @endif
 </div>
 @endsection

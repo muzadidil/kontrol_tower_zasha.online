@@ -331,6 +331,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::prefix('ppob')->name('admin.ppob.')->group(function () {
         Route::get('/', [AdminPpobController::class, 'index'])->name('index');
         Route::get('/{trx}', [AdminPpobController::class, 'show'])->name('show');
+        Route::post('/{trx}/update-status', [AdminPpobController::class, 'updateStatus'])->name('updateStatus');
     });
 
     // Game Top-Up Admin: REMOVED — fitur dihapus saat cleanup tabel kategoris/layanans
