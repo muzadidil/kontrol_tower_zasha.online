@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\WfhOrderStatus;
 use App\Models\{EscrowLedger, MitraLayanan, WfhOrder};
 use Illuminate\Support\Facades\DB;
+use App\Services\OrderTrackingService;
 
 class WfhService
 {
@@ -54,6 +55,17 @@ class WfhService
                 'keterangan'   => 'Dana ditahan saat order dibuat',
                 'triggered_by' => 'customer',
             ]);
+
+            // Create order tracking untuk polling mitra
+            $orderTrackingService = new OrderTrackingService();
+            $orderTrackingService->createTracking(
+                'wfh',
+                $order->id,
+                $layanan->mitra_id,
+                $pelangganId,
+                $totalPrice,
+                $pendapatan
+            );
 
             return $order;
         });

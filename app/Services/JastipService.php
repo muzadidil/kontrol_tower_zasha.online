@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\JastipOrderStatus;
 use App\Models\{JastipOrder, JastipOrderItem, JastipStop, Mitra};
 use Illuminate\Support\Facades\DB;
+use App\Services\OrderTrackingService;
 
 class JastipService
 {
@@ -92,6 +93,19 @@ class JastipService
                         'catatan'         => $itemData['catatan'] ?? null,
                     ]);
                 }
+            }
+
+            // Create order tracking untuk polling mitra
+            if ($mitraId) {
+                $orderTrackingService = new OrderTrackingService();
+                $orderTrackingService->createTracking(
+                    'jastip',
+                    $order->id,
+                    $mitraId,
+                    $pelangganId,
+                    $ongkosJasa,
+                    $pendapatanMitra
+                );
             }
 
             return $order->fresh(['stops', 'items']);

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\TenagaOrderStatus;
 use App\Models\{Mitra, MitraLayanan, TenagaOrder};
 use Illuminate\Support\Facades\DB;
+use App\Services\OrderTrackingService;
 
 class TenagaService
 {
@@ -39,7 +40,7 @@ class TenagaService
                 }
             }
 
-            return TenagaOrder::create([
+            $order = TenagaOrder::create([
                 'order_code'           => TenagaOrder::generateCode(),
                 'pelanggan_id'         => $pelangganId,
                 'mitra_id'             => $layanan->mitra_id,
@@ -63,6 +64,19 @@ class TenagaService
                 'mitra_notified_at'    => now(),
                 'auto_reject_at'       => now()->addMinutes(15),
             ]);
+
+            // Create order tracking untuk polling mitra
+            $orderTrackingService = new OrderTrackingService();
+            $orderTrackingService->createTracking(
+                'tenaga',
+                $order->id,
+                $layanan->mitra_id,
+                $pelangganId,
+                $totalBiaya,
+                $pendapatan
+            );
+
+            return $order;
         });
     }
 

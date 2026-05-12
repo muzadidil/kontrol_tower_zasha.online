@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ServiceOrderStatus;
 use App\Models\{Mitra, MitraLayanan, ServiceOrder, ServiceOrderItem};
 use Illuminate\Support\Facades\DB;
+use App\Services\OrderTrackingService;
 
 class ServiceJasaService
 {
@@ -20,7 +21,7 @@ class ServiceJasaService
 
             $mitra = Mitra::where('id_mitra', $layanan->mitra_id)->first();
 
-            return ServiceOrder::create([
+            $order = ServiceOrder::create([
                 'order_code'            => ServiceOrder::generateCode(),
                 'pelanggan_id'          => $pelangganId,
                 'mitra_id'              => $layanan->mitra_id,
@@ -40,6 +41,19 @@ class ServiceJasaService
                 'mitra_notified_at'     => now(),
                 'auto_reject_at'        => now()->addMinutes(15),
             ]);
+
+            // Create order tracking untuk polling mitra
+            $orderTrackingService = new OrderTrackingService();
+            $orderTrackingService->createTracking(
+                'service',
+                $order->id,
+                $layanan->mitra_id,
+                $pelangganId,
+                $estimasiAwal,
+                $estimasiAwal
+            );
+
+            return $order;
         });
     }
 
