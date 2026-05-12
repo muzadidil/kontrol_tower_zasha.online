@@ -39,15 +39,60 @@ class MitraDashboardController extends Controller
         return view('mitra.dashboard', compact('mitra', 'totalPesanan', 'pesananAktif', 'activeTracking'));
     }
 
-    public function pesanan()
+    public function pesanan(Request $request)
     {
-        $mitra   = $this->mitra();
-        $pesanan = DB::table('pesanan_mitra')
-                     ->where('id_mitra', $mitra->id_mitra)
-                     ->orderByDesc('created_at')
-                     ->get();
+        $mitra  = $this->mitra();
+        $filter = $request->get('filter', 'semua');
 
-        return view('mitra.pesanan', compact('mitra', 'pesanan'));
+        // Query order_trackings + JOIN pesanan + pelanggan
+        // Berlaku untuk semua jenis order (pesanan/jastip/tenaga/service/wfh)
+        $query = DB::table('order_trackings as ot')
+            ->leftJoin('pelanggans as pl', 'ot.pelanggan_id', '=', 'pl.id_pelanggan')
+            ->select(
+                'ot.id as tracking_id',
+                'ot.order_type',
+                'ot.order_id',
+                'ot.status',
+                'ot.harga_jual',
+                'ot.harga_modal',
+                'ot.komisi_zasha',
+                'ot.escrow_status',
+                'ot.pesan_tolak',
+                'ot.created_at',
+                'ot.updated_at',
+                'pl.nama_panggilan as pelanggan_nama',
+                'pl.nama_pelanggan as pelanggan_nama_full',
+                'pl.no_wa as pelanggan_wa'
+            )
+            ->where('ot.mitra_id', $mitra->id_mitra)
+            ->orderByDesc('ot.id');
+
+        // Filter berdasarkan kategori status
+        if ($filter === 'aktif') {
+            $query->whereIn('ot.status', ['pending','accepted','menuju_lokasi','di_lokasi','dikerjakan']);
+        } elseif ($filter === 'perbaikan') {
+            $query->whereIn('ot.status', ['selesai_mitra','belum_selesai']);
+        } elseif ($filter === 'selesai') {
+            $query->where('ot.status', 'selesai');
+        } elseif ($filter === 'dibatalkan') {
+            $query->whereIn('ot.status', ['ditolak_mitra','dibatalkan']);
+        }
+
+        $pesanan = $query->get();
+
+        // Hitung counter per kategori untuk badge di tab
+        $counters = DB::table('order_trackings')
+            ->where('mitra_id', $mitra->id_mitra)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status IN ('pending','accepted','menuju_lokasi','di_lokasi','dikerjakan') THEN 1 ELSE 0 END) as aktif,
+                SUM(CASE WHEN status IN ('selesai_mitra','belum_selesai') THEN 1 ELSE 0 END) as perbaikan,
+                SUM(CASE WHEN status = 'selesai' THEN 1 ELSE 0 END) as selesai,
+                SUM(CASE WHEN status IN ('ditolak_mitra','dibatalkan') THEN 1 ELSE 0 END) as dibatalkan
+            ")
+            ->first();
+
+        return view('mitra.pesanan', compact('mitra', 'pesanan', 'filter', 'counters'));
     }
 
     public function saldo()
