@@ -26,6 +26,7 @@ use App\Http\Controllers\Mitra\MitraVerifikasiController;
 use App\Http\Controllers\Mitra\MitraTarifController;
 use App\Http\Controllers\Mitra\MitraLaporanController;
 use App\Http\Controllers\Mitra\MitraRatingController;
+use App\Http\Controllers\Mitra\MitraJadwalController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -182,6 +183,14 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
             ->middleware('feature:laporan-harian')->name('harian');
         Route::get('/bulanan', [MitraLaporanController::class, 'bulanan'])
             ->middleware('feature:laporan-bulanan')->name('bulanan');
+    });
+
+    // Jadwal & Hari Libur (butuh verified + fitur jadwal)
+    Route::prefix('jadwal')->name('jadwal.')->middleware(['verified.mitra', 'feature:jadwal'])->group(function () {
+        Route::get('/', [MitraJadwalController::class, 'index'])->name('index');
+        Route::post('/harian', [MitraJadwalController::class, 'updateHarian'])->name('updateHarian');
+        Route::post('/libur', [MitraJadwalController::class, 'storeLibur'])->name('storeLibur');
+        Route::delete('/libur/{libur}', [MitraJadwalController::class, 'destroyLibur'])->name('destroyLibur');
     });
 
     // Rating & Ulasan (butuh verified + fitur rating untuk lihat, ulasan untuk balas)
