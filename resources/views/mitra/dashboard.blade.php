@@ -323,22 +323,6 @@
         <div style="text-align: center; margin-top: var(--fib-2); font-size: var(--t-xxs); color: rgba(255,255,255,0.5);">
             Geser ke kiri untuk tolak, ke kanan untuk terima
         </div>
-
-        {{-- TOMBOL FALLBACK kalau swipe tidak berfungsi --}}
-        <div style="display: flex; gap: var(--fib-2); margin-top: var(--fib-3);">
-            <button type="button" onclick="showRejectOptions()"
-                    style="flex: 1; background: rgba(239, 68, 68, 0.15); color: #fca5a5;
-                           border: 1.5px solid #ef4444; border-radius: var(--r-pill);
-                           padding: var(--fib-2); font-size: var(--t-xs); font-weight: 800; cursor: pointer;">
-                <i class="bi bi-x-circle me-1"></i> Tolak
-            </button>
-            <button type="button" onclick="acceptOrder()"
-                    style="flex: 1; background: rgba(16, 185, 129, 0.15); color: #6ee7b7;
-                           border: 1.5px solid #10b981; border-radius: var(--r-pill);
-                           padding: var(--fib-2); font-size: var(--t-xs); font-weight: 800; cursor: pointer;">
-                <i class="bi bi-check-circle me-1"></i> Terima
-            </button>
-        </div>
     </div>
 </div>
 
