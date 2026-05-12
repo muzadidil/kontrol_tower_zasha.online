@@ -1,133 +1,91 @@
 @extends('layouts.admin')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('assets/css/topup.css') }}">
-<script src="{{ asset('assets/js/topup.js') }}" defer></script>
+@include('admin.partials._zasha-style')
 
-<div id="topup-wrapper" class="animate-in">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold m-0"><i class="bi bi-cash-coin text-primary me-2"></i>Konfirmasi Top-Up</h4>
-            <small class="text-muted">Validasi bukti transfer mitra & pelanggan sebelum menambah saldo.</small>
-        </div>
-        <a href="{{ route('admin.finance.topup.index') }}" class="btn btn-white shadow-sm rounded-pill px-3 border bg-white btn-sm">
-            <i class="bi bi-arrow-clockwise"></i> Refresh
-        </a>
+<div class="zasha-page-header">
+    <div class="zasha-page-title">
+        <h4><i class="bi bi-cash-coin"></i> Konfirmasi Top-Up</h4>
+        <div class="zasha-page-subtitle">Validasi bukti transfer mitra & pelanggan sebelum menambah saldo.</div>
+    </div>
+    <a href="{{ route('admin.finance.topup.index') }}" class="btn btn-light rounded-pill px-3 border small fw-bold">
+        <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+    </a>
+</div>
+
+@if(session('notif'))
+    <div class="alert alert-success rounded-3 small">
+        <i class="bi bi-check-circle-fill me-1"></i> {{ session('notif') }}
+    </div>
+@endif
+
+<div class="alert alert-warning rounded-3 small mb-3" style="background:#fffbeb; border-color:#fde68a; color:#92400e;">
+    <i class="bi bi-info-circle-fill me-1"></i>
+    <strong>Penting!</strong> Pastikan dana sudah masuk ke mutasi rekening sebelum menekan <b>TERIMA</b>. Cocokkan <b>nominal transfer unik</b> dengan mutasi bank.
+</div>
+
+<div class="zasha-card">
+    <div class="zasha-list-header">
+        <h6><i class="bi bi-hourglass-split"></i> Antrian Top-Up</h6>
+        <span class="badge-count">{{ $topups->count() }}</span>
     </div>
 
-    @if(session('notif'))
-        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 animate-in">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ session('notif') }}
-        </div>
-    @endif
-
-    <div class="alert alert-topup-info border-0 shadow-sm rounded-4 mb-4">
-        <div class="d-flex align-items-center">
-            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
-            <div>
-                <strong>Penting!</strong> Pastikan dana sudah benar-benar masuk ke mutasi rekening ZASHA sebelum menekan tombol <b>TERIMA</b>.
-                Cocokkan <b>nominal transfer unik</b> dengan mutasi bank.
+    @forelse($topups as $row)
+        @php
+            $isMitra = $row->tipe_user == 'mitra';
+            $totalTransfer = $row->total_transfer ?? $row->nominal;
+        @endphp
+        <div class="zasha-row">
+            <div class="zasha-row-icon {{ $isMitra ? 'success' : '' }}">
+                <i class="bi {{ $isMitra ? 'bi-person-badge' : 'bi-person-circle' }}"></i>
+            </div>
+            <div class="zasha-row-body">
+                <div class="zasha-row-title">
+                    {{ $row->nama_user }}
+                    <span class="zasha-status-badge {{ $isMitra ? 'success' : 'process' }} ms-1" style="font-size:0.6rem;">
+                        {{ $isMitra ? 'Mitra' : 'Pelanggan' }}
+                    </span>
+                </div>
+                <div class="zasha-row-meta">
+                    @if($row->no_wa)
+                        <span><i class="bi bi-whatsapp text-success"></i> {{ $row->no_wa }}</span>
+                    @endif
+                    @if($row->total_transfer && $row->kode_unik)
+                        <span>Rp {{ number_format($row->nominal, 0, ',', '.') }} + Kode <strong style="color:#e65100;">{{ $row->kode_unik }}</strong></span>
+                    @endif
+                    @if(!empty($row->bank_tujuan))
+                        <span><i class="bi bi-bank"></i> {{ $row->bank_tujuan }}</span>
+                    @endif
+                    <span><i class="bi bi-clock"></i> {{ date('d M, H:i', strtotime($row->waktu)) }} WIB</span>
+                </div>
+            </div>
+            <div class="zasha-row-amount">
+                <div class="zasha-row-amount-main">Rp {{ number_format($totalTransfer, 0, ',', '.') }}</div>
+                <div class="zasha-row-amount-sub">Total Transfer</div>
+            </div>
+            <div class="d-flex flex-column gap-1 flex-shrink-0" style="min-width:80px;">
+                @php
+                    $routeKey = $isMitra ? 'admin.finance.topup.mitra' : 'admin.finance.topup.pelanggan';
+                    $confirmMsg = "Konfirmasi Saldo Rp " . number_format($row->nominal, 0, ',', '.') . " untuk " . strtoupper($isMitra ? 'mitra' : 'pelanggan') . " " . $row->nama_user . "?\\n\\nCocokkan transfer Rp " . number_format($totalTransfer, 0, ',', '.') . " di mutasi bank.";
+                @endphp
+                <a href="{{ route($routeKey, ['id' => $row->id, 'aksi' => 'setuju']) }}"
+                   onclick="return confirm('{{ $confirmMsg }}')"
+                   class="btn btn-success btn-sm rounded-pill fw-bold" style="padding:5px 14px; font-size:0.7rem;">
+                    <i class="bi bi-check-lg"></i> TERIMA
+                </a>
+                <a href="{{ route($routeKey, ['id' => $row->id, 'aksi' => 'tolak']) }}"
+                   onclick="return confirm('Yakin ingin TOLAK top-up ini?')"
+                   class="btn btn-outline-danger btn-sm rounded-pill fw-bold" style="padding:5px 14px; font-size:0.7rem;">
+                    TOLAK
+                </a>
             </div>
         </div>
-    </div>
-
-    <div class="card card-zasha overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-zasha table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-4">Tipe</th>
-                        <th>Pengirim</th>
-                        <th>Nominal Transfer</th>
-                        <th>Waktu Pengajuan</th>
-                        <th class="text-center pe-4">Tindakan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($topups as $row)
-                        <tr>
-                            <td class="ps-4">
-                                @if($row->tipe_user == 'mitra')
-                                    <span class="badge rounded-pill bg-success" style="font-size:0.7rem;">
-                                        <i class="bi bi-person-badge me-1"></i>Mitra
-                                    </span>
-                                @else
-                                    <span class="badge rounded-pill bg-primary" style="font-size:0.7rem;">
-                                        <i class="bi bi-person me-1"></i>Pelanggan
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ $row->nama_user }}</div>
-                                @if($row->no_wa)
-                                    <div class="text-muted small"><i class="bi bi-whatsapp me-1 text-success"></i>{{ $row->no_wa }}</div>
-                                @endif
-                            </td>
-                            <td>
-                                @if($row->total_transfer && $row->kode_unik)
-                                    <div class="nominal-topup fw-bold" style="font-size:1.05rem; color:#005aa9;">
-                                        Rp {{ number_format($row->total_transfer, 0, ',', '.') }}
-                                    </div>
-                                    <small class="text-muted" style="font-size: 10px;">
-                                        Nominal: Rp {{ number_format($row->nominal, 0, ',', '.') }}
-                                        + Kode Unik: <strong style="color:#e65100;">{{ $row->kode_unik }}</strong>
-                                    </small><br>
-                                    <small class="text-muted" style="font-size: 10px;">
-                                        <i class="bi bi-bank me-1"></i>Via {{ $row->bank_tujuan ?? 'Transfer Bank' }}
-                                    </small>
-                                @else
-                                    <div class="nominal-topup">
-                                        Rp {{ number_format($row->nominal, 0, ',', '.') }}
-                                    </div>
-                                    <small class="text-muted" style="font-size: 10px;">Metode: Transfer Bank</small>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="fw-semibold text-secondary small">{{ date('H:i', strtotime($row->waktu)) }} WIB</div>
-                                <div class="text-muted" style="font-size: 10px;">{{ date('d M Y', strtotime($row->waktu)) }}</div>
-                            </td>
-                            <td class="text-center pe-4">
-                                <div class="d-flex justify-content-center gap-2">
-                                    @if($row->tipe_user == 'mitra')
-                                        <a href="{{ route('admin.finance.topup.mitra', ['id' => $row->id, 'aksi' => 'setuju']) }}" 
-                                           onclick="return confirm('Konfirmasi Saldo Rp {{ number_format($row->nominal, 0, ',', '.') }} untuk MITRA {{ $row->nama_user }}?\n\nCocokkan transfer Rp {{ number_format($row->total_transfer ?? $row->nominal, 0, ',', '.') }} di mutasi bank.')"
-                                           class="btn btn-success btn-sm rounded-pill px-3 fw-bold shadow-sm">
-                                            <i class="bi bi-check-lg me-1"></i> TERIMA
-                                        </a>
-                                        <a href="{{ route('admin.finance.topup.mitra', ['id' => $row->id, 'aksi' => 'tolak']) }}" 
-                                           onclick="return confirm('Yakin ingin TOLAK top-up mitra ini?')"
-                                           class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
-                                            TOLAK
-                                        </a>
-                                    @else
-                                        <a href="{{ route('admin.finance.topup.pelanggan', ['id' => $row->id, 'aksi' => 'setuju']) }}" 
-                                           onclick="return confirm('Konfirmasi Saldo Rp {{ number_format($row->nominal, 0, ',', '.') }} untuk PELANGGAN {{ $row->nama_user }}?\n\nCocokkan transfer Rp {{ number_format($row->total_transfer ?? $row->nominal, 0, ',', '.') }} di mutasi bank.')"
-                                           class="btn btn-success btn-sm rounded-pill px-3 fw-bold shadow-sm">
-                                            <i class="bi bi-check-lg me-1"></i> TERIMA
-                                        </a>
-                                        <a href="{{ route('admin.finance.topup.pelanggan', ['id' => $row->id, 'aksi' => 'tolak']) }}" 
-                                           onclick="return confirm('Yakin ingin TOLAK top-up pelanggan ini?')"
-                                           class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
-                                            TOLAK
-                                        </a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <div class="py-4 opacity-50">
-                                    <i class="bi bi-check2-all display-1 d-block mb-3"></i>
-                                    <h6 class="fw-bold">Bersih! Tidak ada antrian top-up.</h6>
-                                    <small>Semua permintaan sudah diproses.</small>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+    @empty
+        <div class="zasha-empty">
+            <i class="bi bi-check2-all"></i>
+            <div class="zasha-empty-title">Bersih! Tidak ada antrian top-up.</div>
+            <div class="zasha-empty-sub">Semua permintaan sudah diproses.</div>
         </div>
-    </div>
+    @endforelse
 </div>
 @endsection

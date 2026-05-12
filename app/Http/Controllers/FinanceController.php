@@ -39,7 +39,15 @@ class FinanceController extends Controller
 
     public function deposit()
     {
-        return view('admin.finance.deposit');
+        // Stats summary untuk full-width view
+        $totalPelanggan = \App\Models\Pelanggan::count();
+        $totalMitra     = Mitra::count();
+        $totalSaldoPelanggan = \App\Models\Pelanggan::sum('saldo');
+        $totalSaldoMitra     = Mitra::sum('saldo');
+
+        return view('admin.finance.deposit', compact(
+            'totalPelanggan', 'totalMitra', 'totalSaldoPelanggan', 'totalSaldoMitra'
+        ));
     }
 
     public function storeDeposit(Request $request)

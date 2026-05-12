@@ -2,63 +2,80 @@
 @section('title', 'Monitoring Jastip')
 
 @section('content')
-<div class="container-fluid py-4">
-    <h4 class="fw-bold mb-4">Monitoring Order Jastip</h4>
+@include('admin.partials._zasha-style')
 
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body p-3">
-            <form method="GET" class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Cari kode order..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select">
-                        <option value="">Semua Status</option>
-                        @foreach(['menunggu_mitra','menuju_pickup','belanja','menuju_pengantaran','diantar','menunggu_konfirmasi','dispute','selesai','ditolak'] as $s)
-                        <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>{{ ucwords(str_replace('_', ' ', $s)) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-warning">Filter</button>
-                </div>
-            </form>
+<div class="zasha-page-header">
+    <div class="zasha-page-title">
+        <h4><i class="bi bi-truck"></i> Order Jastip / Kurir</h4>
+        <div class="zasha-page-subtitle">Monitoring pesanan modul jastip & antar barang.</div>
+    </div>
+</div>
+
+<div class="zasha-card">
+    <form method="GET" class="zasha-filter-bar">
+        <div class="position-relative flex-grow-1" style="min-width:200px;">
+            <i class="bi bi-search position-absolute" style="left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:0.8rem;"></i>
+            <input type="text" name="search" class="form-control ps-5" placeholder="Cari kode order..." value="{{ request('search') }}">
         </div>
+        <select name="status" class="form-select" style="max-width:200px;">
+            <option value="">Semua Status</option>
+            @foreach(['menunggu_mitra','menuju_pickup','belanja','menuju_pengantaran','diantar','menunggu_konfirmasi','dispute','selesai','ditolak'] as $s)
+                <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>{{ ucwords(str_replace('_', ' ', $s)) }}</option>
+            @endforeach
+        </select>
+        <button class="btn btn-primary" style="background:var(--zasha-blue); border-color:var(--zasha-blue);">
+            <i class="bi bi-funnel-fill me-1"></i> Filter
+        </button>
+        <a href="{{ route('admin.jastip.index') }}" class="btn btn-light">Reset</a>
+    </form>
+
+    <div class="zasha-list-header">
+        <h6><i class="bi bi-list-ul"></i> Daftar Order</h6>
+        <span class="badge-count">{{ $orders->total() ?? $orders->count() }}</span>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Kode Order</th>
-                        <th>Pelanggan</th>
-                        <th>Mitra</th>
-                        <th>Stops / Jarak</th>
-                        <th>Total COD</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($orders as $order)
-                    @php $bm = ['menunggu_mitra'=>'warning','ditolak'=>'danger','menuju_pickup'=>'info','belanja'=>'info','menuju_pengantaran'=>'primary','diantar'=>'primary','menunggu_konfirmasi'=>'primary','selesai'=>'success','dispute'=>'danger']; @endphp
-                    <tr>
-                        <td><span class="fw-bold text-warning">{{ $order->order_code }}</span></td>
-                        <td class="small">{{ $order->pelanggan->nama_pelanggan ?? '-' }}</td>
-                        <td class="small">{{ $order->mitra->nama_asli ?? $order->mitra->nama_panggilan ?? '-' }}</td>
-                        <td class="small">{{ $order->total_stops }} stops · {{ $order->total_jarak_km }} km</td>
-                        <td class="small fw-semibold">Rp {{ number_format($order->grandTotalCod(), 0, ',', '.') }}</td>
-                        <td><span class="badge bg-{{ $bm[$order->status->value] ?? 'secondary' }}">{{ ucwords(str_replace('_', ' ', $order->status->value)) }}</span></td>
-                        <td><a href="{{ route('admin.jastip.show', $order->id) }}" class="btn btn-outline-warning btn-sm">Detail</a></td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="7" class="text-center text-muted py-4">Tidak ada order.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+    @forelse($orders as $order)
+        @php
+            $statusClass = match($order->status->value) {
+                'menunggu_mitra' => 'pending',
+                'menuju_pickup', 'belanja' => 'process',
+                'menuju_pengantaran', 'diantar', 'menunggu_konfirmasi' => 'purple',
+                'selesai' => 'success',
+                'dispute', 'ditolak' => 'danger',
+                default => 'gray',
+            };
+        @endphp
+        <a href="{{ route('admin.jastip.show', $order->id) }}" class="zasha-row">
+            <div class="zasha-row-icon success">
+                <i class="bi bi-truck"></i>
+            </div>
+            <div class="zasha-row-body">
+                <div class="zasha-row-title">
+                    <span class="text-muted small fw-normal">{{ $order->order_code }}</span>
+                    · {{ $order->pelanggan->nama_pelanggan ?? '-' }}
+                </div>
+                <div class="zasha-row-meta">
+                    <span class="zasha-status-badge {{ $statusClass }}">{{ ucwords(str_replace('_', ' ', $order->status->value)) }}</span>
+                    <span><i class="bi bi-person-badge"></i> {{ $order->mitra->nama_asli ?? $order->mitra->nama_panggilan ?? '-' }}</span>
+                    <span><i class="bi bi-geo-alt"></i> {{ $order->total_stops }} stops · {{ $order->total_jarak_km }} km</span>
+                    <span><i class="bi bi-clock"></i> {{ $order->created_at->format('d M Y') }}</span>
+                </div>
+            </div>
+            <div class="zasha-row-amount">
+                <div class="zasha-row-amount-main">Rp {{ number_format($order->grandTotalCod(), 0, ',', '.') }}</div>
+                <div class="zasha-row-amount-sub">Detail <i class="bi bi-chevron-right"></i></div>
+            </div>
+        </a>
+    @empty
+        <div class="zasha-empty">
+            <i class="bi bi-truck"></i>
+            <div class="zasha-empty-title">Belum ada order Jastip</div>
+            <div class="zasha-empty-sub">Pesanan jastip & kurir akan muncul di sini.</div>
         </div>
-        <div class="card-footer bg-white">{{ $orders->withQueryString()->links() }}</div>
-    </div>
+    @endforelse
+
+    @if(method_exists($orders, 'links'))
+        <div class="p-3 border-top">{{ $orders->withQueryString()->links() }}</div>
+    @endif
 </div>
 @endsection

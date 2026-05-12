@@ -1,151 +1,113 @@
 @extends('layouts.admin')
 
 @section('content')
-<style>
-    .badge-pill-zasha {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 999px;
-        font-size: 11px;
-        font-weight: 700;
-        color: white;
-    }
-    .badge-pill-order {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-    .text-purple { color: #9333ea !important; }
-    .bg-purple { background-color: #9333ea !important; }
-    .card-zasha { border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); background: white; }
-    .table-zasha th { background: #f9fafb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 700; padding: 12px 8px; }
-    .table-zasha td { padding: 14px 8px; font-size: 13px; vertical-align: middle; }
-    .select-quick-action { max-width: 110px; font-size: 11px; }
-</style>
+@include('admin.partials._zasha-style')
 
-<div id="order-monitoring-wrapper">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold m-0"><i class="bi bi-receipt-cutoff text-primary me-2"></i>Pesanan Aktif</h4>
-            <small class="text-muted">Hanya tampilkan pesanan yang sedang berjalan. Untuk pesanan Selesai/Batal, lihat <a href="{{ route('admin.orders.arsip') }}">Arsip Pesanan</a>.</small>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('admin.orders.arsip') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="bi bi-archive me-1"></i> Arsip
-            </a>
-            <a href="{{ route('admin.orders.index') }}" class="btn btn-white shadow-sm rounded-pill px-3 border bg-white">
-                <i class="bi bi-arrow-clockwise"></i>
-            </a>
+<div class="zasha-page-header">
+    <div class="zasha-page-title">
+        <h4><i class="bi bi-receipt-cutoff"></i> Pesanan Aktif</h4>
+        <div class="zasha-page-subtitle">
+            Pesanan yang sedang berjalan. Untuk pesanan Selesai/Batal lihat
+            <a href="{{ route('admin.orders.arsip') }}" class="text-decoration-none fw-bold">Arsip Pesanan</a>.
         </div>
     </div>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.orders.arsip') }}" class="btn btn-light rounded-pill px-3 small fw-bold border">
+            <i class="bi bi-archive me-1"></i> Arsip
+        </a>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-light rounded-pill px-3 border" title="Refresh">
+            <i class="bi bi-arrow-clockwise"></i>
+        </a>
+    </div>
+</div>
 
-    <div class="card card-zasha p-3 mb-4">
-        <form action="{{ route('admin.orders.index') }}" method="GET" class="row g-2">
-            <div class="col-md-5">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 rounded-end-pill" placeholder="Cari ID, Pelanggan, atau Mitra..." value="{{ $search }}">
+@if(session('pesan'))
+    <div class="alert alert-info rounded-3 small">{{ session('pesan') }}</div>
+@endif
+
+<div class="zasha-card">
+    {{-- Filter Bar --}}
+    <form action="{{ route('admin.orders.index') }}" method="GET" class="zasha-filter-bar">
+        <div class="position-relative flex-grow-1" style="min-width:200px;">
+            <i class="bi bi-search position-absolute" style="left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:0.8rem;"></i>
+            <input type="text" name="search" class="form-control ps-5" placeholder="Cari ID, pelanggan, atau mitra..." value="{{ $search }}">
+        </div>
+        <select name="status" class="form-select" style="max-width:170px;">
+            <option value="">Semua Status</option>
+            @foreach(['Pending', 'Proses', 'Lunas', 'Menunggu Konfirmasi'] as $st)
+                <option value="{{ $st }}" {{ $filter_status == $st ? 'selected' : '' }}>{{ $st }}</option>
+            @endforeach
+        </select>
+        <button type="submit" class="btn btn-primary" style="background:var(--zasha-blue);border-color:var(--zasha-blue);">
+            <i class="bi bi-funnel-fill me-1"></i> Filter
+        </button>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-light">Reset</a>
+    </form>
+
+    {{-- List Header --}}
+    <div class="zasha-list-header">
+        <h6><i class="bi bi-list-ul"></i> Daftar Pesanan</h6>
+        <span class="badge-count">{{ count($orders) }}</span>
+    </div>
+
+    @forelse($orders as $row)
+        @php
+            $st = $row->status;
+            $tipe = $row->tipe_order;
+            $statusClass = match(strtolower($st)) {
+                'pending', 'menunggu_mitra' => 'pending',
+                'proses', 'belanja', 'menuju_pengantaran', 'diantar', 'dikerjakan' => 'process',
+                'lunas', 'selesai' => 'success',
+                'menunggu konfirmasi', 'menunggu_konfirmasi' => 'purple',
+                default => 'gray',
+            };
+            $iconClass = $tipe == 'JASA' ? '' : 'purple';
+            $iconBi = $tipe == 'JASA' ? 'bi-briefcase-fill' : 'bi-bag-fill';
+        @endphp
+        <div class="zasha-row">
+            <div class="zasha-row-icon {{ $iconClass }}">
+                <i class="bi {{ $iconBi }}"></i>
+            </div>
+            <div class="zasha-row-body">
+                <div class="zasha-row-title">
+                    <span class="text-muted small fw-normal">#{{ $row->id }}</span> · {{ $row->nama_pelanggan }}
+                </div>
+                <div class="zasha-row-meta">
+                    <span class="zasha-status-badge {{ $statusClass }}">{{ $st }}</span>
+                    <span><i class="bi bi-tag-fill"></i> {{ $tipe }}</span>
+                    <span><i class="bi bi-person-badge"></i> {{ $row->nama_pekerja }}</span>
+                    <span><i class="bi bi-credit-card"></i> {{ $row->metode }}</span>
+                    <span class="d-none d-md-inline">
+                        <i class="bi bi-clock"></i> {{ date('d M, H:i', strtotime($row->tgl)) }}
+                    </span>
                 </div>
             </div>
-            <div class="col-md-3">
-                <select name="status" class="form-select form-select-sm rounded-pill px-3">
-                    <option value="">Semua Status</option>
-                    @foreach(['Pending', 'Proses', 'Lunas', 'Menunggu Konfirmasi'] as $st)
-                        <option value="{{ $st }}" {{ $filter_status == $st ? 'selected' : '' }}>{{ $st == 'Menunggu Konfirmasi' ? 'Konfirmasi' : $st }}</option>
-                    @endforeach
-                </select>
+            <div class="zasha-row-amount">
+                <div class="zasha-row-amount-main">Rp {{ number_format($row->total_biaya, 0, ',', '.') }}</div>
+                <form action="{{ route('admin.orders.updateStatus') }}" method="POST" class="d-flex gap-1 justify-content-end mt-1">
+                    @csrf
+                    <input type="hidden" name="id_pesanan" value="{{ $row->id }}">
+                    <input type="hidden" name="tipe_order" value="{{ $tipe }}">
+                    <select name="status_baru" class="form-select form-select-sm" style="font-size:0.7rem; padding:3px 8px; max-width:100px;">
+                        <option value="Proses">Proses</option>
+                        <option value="Lunas">Lunas</option>
+                        <option value="Selesai">Selesai</option>
+                        <option value="Batal">Batal</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm" style="background:var(--zasha-blue); color:white; padding:3px 10px; border-radius:6px;">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                </form>
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 fw-bold">FILTER</button>
-            </div>
-            <div class="col-md-2">
-                <a href="{{ route('admin.orders.index') }}" class="btn btn-light btn-sm rounded-pill w-100">RESET</a>
-            </div>
-        </form>
-    </div>
-
-    <div class="card card-zasha overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-zasha table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-4">Order Info</th>
-                        <th>Pelanggan</th>
-                        <th>Mitra/Pekerja</th>
-                        <th>Tagihan</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Aksi Cepat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($orders as $row)
-                        @php
-                            $st = $row->status;
-                            $tipe = $row->tipe_order;
-                            $tipe_cls = ($tipe == 'JASA') ? 'text-primary bg-primary' : 'text-purple bg-purple';
-                            $status_cls = match($st) {
-                                'Proses' => 'bg-info',
-                                'Lunas' => 'bg-success',
-                                'Menunggu Konfirmasi' => 'bg-dark',
-                                'Pending' => 'bg-warning',
-                                default => 'bg-secondary'
-                            };
-                        @endphp
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge badge-pill-order bg-opacity-10 {{ $tipe_cls }}">{{ $tipe }}</span>
-                                    <span class="fw-bold text-dark">#{{ $row->id }}</span>
-                                </div>
-                                <div class="text-muted" style="font-size: 11px;"><i class="bi bi-clock me-1"></i>{{ date('d M, H:i', strtotime($row->tgl)) }}</div>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ $row->nama_pelanggan }}</div>
-                                <div class="text-muted small text-truncate" style="max-width: 150px; font-size: 11px;">{{ $row->detail }}</div>
-                            </td>
-                            <td>
-                                <div class="fw-semibold text-secondary"><i class="bi bi-person-badge me-1"></i>{{ $row->nama_pekerja }}</div>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-primary">Rp {{ number_format($row->total_biaya, 0, ',', '.') }}</div>
-                                <div class="text-muted" style="font-size: 10px;">{{ $row->metode }}</div>
-                            </td>
-                            <td>
-                                <span class="badge badge-pill-zasha {{ $status_cls }}">{{ $st }}</span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <form action="{{ route('admin.orders.updateStatus') }}" method="POST" class="d-flex gap-1 justify-content-end align-items-center">
-                                    @csrf
-                                    <input type="hidden" name="id_pesanan" value="{{ $row->id }}">
-                                    <input type="hidden" name="tipe_order" value="{{ $tipe }}">
-                                    <select name="status_baru" class="form-select form-select-sm py-1 px-2 select-quick-action">
-                                        <option value="Proses" {{ $st == 'Proses' ? 'disabled' : '' }}>Proses</option>
-                                        <option value="Lunas" {{ $st == 'Lunas' ? 'disabled' : '' }}>Lunas</option>
-                                        <option value="Selesai">Selesai</option>
-                                        <option value="Batal">Batal</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-primary rounded-3 px-2 shadow-sm"><i class="bi bi-check-lg"></i></button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <i class="bi bi-clipboard-x text-muted fs-1 d-block mb-2"></i>
-                                <div class="text-muted mb-1"><strong>Tidak ada pesanan aktif.</strong></div>
-                                <div class="text-muted small">
-                                    Pesanan yang sudah Selesai atau Dibatalkan ada di
-                                    <a href="{{ route('admin.orders.arsip') }}">Arsip Pesanan</a>.
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
-    </div>
+    @empty
+        <div class="zasha-empty">
+            <i class="bi bi-clipboard-x"></i>
+            <div class="zasha-empty-title">Tidak ada pesanan aktif</div>
+            <div class="zasha-empty-sub">
+                Pesanan Selesai/Batal ada di <a href="{{ route('admin.orders.arsip') }}">Arsip Pesanan</a>.
+            </div>
+        </div>
+    @endforelse
 </div>
 @endsection
