@@ -191,8 +191,10 @@
             ['order-jastip',  'mitra.jastip.index',  'bi-motorcycle',      'Jastip',    'Order antar',   'var(--mitra-blue-soft)', 'var(--mitra-blue)'],
             ['order-wfh',     'mitra.wfh.index',     'bi-laptop',          'WFH',       'Order digital', 'var(--mitra-blue-tint)', 'var(--mitra-blue-mid)'],
             ['order-tenaga',  'mitra.tenaga.index',  'bi-people-fill',     'Tenaga',    'Order tenaga',  'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
-            ['order-service', 'mitra.service.index', 'bi-tools',           'Service',   'Order teknisi', 'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
-            ['tarif',         'mitra.tarif.index',   'bi-cash-coin',       'Tarif',     'Atur harga',    'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
+            ['order-service',   'mitra.service.index',   'bi-tools',           'Service',   'Order teknisi', 'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
+            ['tarif',           'mitra.tarif.index',     'bi-cash-coin',       'Tarif',     'Atur harga',    'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
+            ['laporan-harian',  'mitra.laporan.harian',  'bi-calendar-day',    'Harian',    'Cuan hari ini', 'var(--mitra-blue-tint)', 'var(--mitra-blue-dark)'],
+            ['laporan-bulanan', 'mitra.laporan.bulanan', 'bi-bar-chart-fill',  'Bulanan',   'Cuan bulan ini','var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
         ];
 
         $activeTiles = collect($featureTiles)->filter(function ($t) use ($mitra) {

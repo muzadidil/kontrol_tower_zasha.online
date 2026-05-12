@@ -24,6 +24,7 @@ use App\Http\Controllers\Mitra\MitraDashboardController;
 use App\Http\Controllers\Mitra\MitraOrderController;
 use App\Http\Controllers\Mitra\MitraVerifikasiController;
 use App\Http\Controllers\Mitra\MitraTarifController;
+use App\Http\Controllers\Mitra\MitraLaporanController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -172,6 +173,14 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::prefix('verifikasi')->name('verifikasi.')->group(function () {
         Route::get('/status', [MitraVerifikasiController::class, 'status'])->name('status');
         Route::post('/upload', [MitraVerifikasiController::class, 'upload'])->name('upload');
+    });
+
+    // Laporan Penghasilan (butuh verified + fitur laporan-*)
+    Route::prefix('laporan')->name('laporan.')->middleware('verified.mitra')->group(function () {
+        Route::get('/harian', [MitraLaporanController::class, 'harian'])
+            ->middleware('feature:laporan-harian')->name('harian');
+        Route::get('/bulanan', [MitraLaporanController::class, 'bulanan'])
+            ->middleware('feature:laporan-bulanan')->name('bulanan');
     });
 
     // Tarif Layanan (butuh fitur 'tarif')
