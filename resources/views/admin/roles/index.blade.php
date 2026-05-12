@@ -51,6 +51,38 @@
     </a>
 </div>
 
+{{-- Bulk Action Bar --}}
+@php
+    $draftCount  = $roles->where('is_active', false)->count();
+    $activeCount = $roles->where('is_active', true)->where('is_default', false)->count();
+@endphp
+@if($roles->count() > 1)
+<div class="d-flex justify-content-end gap-2 mb-3 flex-wrap">
+    @if($draftCount > 0)
+    <form method="POST" action="{{ route('admin.roles.bulkAction') }}"
+          onsubmit="return confirm('Rilis & aktifkan {{ $draftCount }} role yang masih DRAFT?')">
+        @csrf
+        <input type="hidden" name="action" value="rilis-semua">
+        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold">
+            <i class="bi bi-rocket-takeoff me-1"></i>
+            Rilis Semua Draft ({{ $draftCount }})
+        </button>
+    </form>
+    @endif
+    @if($activeCount > 0)
+    <form method="POST" action="{{ route('admin.roles.bulkAction') }}"
+          onsubmit="return confirm('Set {{ $activeCount }} role aktif (kecuali default) menjadi DRAFT? Mitra dengan role tersebut tidak akan bisa pakai fitur sampai diaktifkan kembali.')">
+        @csrf
+        <input type="hidden" name="action" value="draft-semua">
+        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+            <i class="bi bi-pause-circle me-1"></i>
+            Draftkan Semua ({{ $activeCount }})
+        </button>
+    </form>
+    @endif
+</div>
+@endif
+
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show rounded-3 small" role="alert">
         <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}

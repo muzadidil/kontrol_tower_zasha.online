@@ -110,6 +110,25 @@ class RoleController extends Controller
         return back()->with('success', "Role '{$role->name}' kini {$status}.");
     }
 
+    /** Bulk action: rilis semua / draft semua role sekaligus. */
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => 'required|in:rilis-semua,draft-semua',
+        ]);
+
+        if ($request->action === 'rilis-semua') {
+            $count = Role::where('is_active', false)->update(['is_active' => true]);
+            return back()->with('success', "{$count} role berhasil dirilis & diaktifkan.");
+        }
+
+        // draft-semua: kecuali role default agar tidak melumpuhkan sistem
+        $count = Role::where('is_active', true)
+            ->where('is_default', false)
+            ->update(['is_active' => false]);
+        return back()->with('success', "{$count} role di-set sebagai DRAFT (role default tidak diubah).");
+    }
+
     public function destroy(Role $role)
     {
         if ($role->is_default) {

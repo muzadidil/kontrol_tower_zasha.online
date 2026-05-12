@@ -317,6 +317,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Toggle aktif/draft role
     Route::post('/roles/{role}/toggle-active', [\App\Http\Controllers\Admin\RoleController::class, 'toggleActive'])
         ->name('admin.roles.toggleActive');
+    // Bulk action role (rilis-semua / draft-semua)
+    Route::post('/roles/bulk-action', [\App\Http\Controllers\Admin\RoleController::class, 'bulkAction'])
+        ->name('admin.roles.bulkAction');
 
     // WFH Admin
     Route::prefix('wfh')->name('admin.wfh.')->group(function () {
