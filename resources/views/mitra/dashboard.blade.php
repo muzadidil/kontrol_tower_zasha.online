@@ -398,15 +398,15 @@ function showToast(message, type = 'success') {
 
 // ─ Polling Functions ─
 function startPolling() {
-    if (pollingInterval) return;
-    pollingInterval = setInterval(fetchPendingOrder, 10000); // Poll setiap 10 detik
+    if (window.pollingInterval) return;
+    window.pollingInterval = setInterval(fetchPendingOrder, 10000); // Poll setiap 10 detik
     fetchPendingOrder(); // Fetch langsung saat mulai
 }
 
 function stopPolling() {
-    if (pollingInterval) {
-        clearInterval(pollingInterval);
-        pollingInterval = null;
+    if (window.pollingInterval) {
+        clearInterval(window.pollingInterval);
+        window.pollingInterval = null;
     }
 }
 
@@ -424,8 +424,8 @@ async function fetchPendingOrder() {
 }
 
 function showIncomingOrder(order) {
-    currentOrderId = order.id;
-    currentOrderData = order;
+    window.currentOrderId = order.id;
+    window.currentOrderData = order;
 
     document.getElementById('order-nama').textContent = order.pelanggan?.nama || 'Pelanggan';
     document.getElementById('order-jenis').textContent = order.order_type || 'Order';
@@ -437,9 +437,9 @@ function showIncomingOrder(order) {
     }
 }
 
-// ─ Accept/Reject Functions ─
-async function acceptOrder() {
-    if (!currentOrderId) {
+// ─ Accept/Reject Functions (pakai window.* untuk global access dari onclick) ─
+window.acceptOrder = async function() {
+    if (!window.currentOrderId) {
         showToast('Tidak ada order untuk diterima', 'warning');
         return;
     }
@@ -455,9 +455,10 @@ async function acceptOrder() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ tracking_id: currentOrderId })
+            body: JSON.stringify({ tracking_id: window.currentOrderId })
         });
 
         const data = await response.json();
@@ -479,7 +480,7 @@ async function acceptOrder() {
             stopPolling();
 
             // Tampilkan active order section
-            showActiveOrder(currentOrderId);
+            showActiveOrder(window.currentOrderId);
             resetProgress();
 
             // Tampilkan tombol WA pelanggan
@@ -493,7 +494,7 @@ async function acceptOrder() {
         console.error('Accept order failed:', err);
         showToast('Gagal menerima order, coba lagi', 'error');
     }
-}
+};
 
 // Update UI status ke sibuk tanpa reload halaman
 function updateStatusToBusy() {
@@ -520,7 +521,7 @@ function updateStatusToBusy() {
     }
 }
 
-function showRejectOptions() {
+window.showRejectOptions = function() {
     // Sembunyikan incoming-order overlay agar tidak menghalangi click ke reject-panel
     const incoming = document.getElementById('incoming-order');
     if (incoming) {
@@ -530,26 +531,26 @@ function showRejectOptions() {
     if (rejectPanel) {
         rejectPanel.style.display = 'block';
     }
-}
+};
 
-function hideRejectPanel() {
+window.hideRejectPanel = function() {
     const rejectPanel = document.getElementById('reject-panel');
     if (rejectPanel) {
         rejectPanel.style.display = 'none';
     }
     // Munculkan kembali incoming-order kalau order masih ada (user cancel reject)
-    if (currentOrderId) {
+    if (window.currentOrderId) {
         const incoming = document.getElementById('incoming-order');
         if (incoming) {
             incoming.style.display = 'flex';
         }
     }
-}
+};
 
-async function rejectOrder(alasan) {
+window.rejectOrder = async function(alasan) {
     const trimmedAlasan = alasan ? alasan.trim() : '';
 
-    if (!currentOrderId || !trimmedAlasan) {
+    if (!window.currentOrderId || !trimmedAlasan) {
         showToast('Silakan pilih atau masukkan alasan penolakan', 'warning');
         return;
     }
@@ -559,10 +560,11 @@ async function rejectOrder(alasan) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
-                tracking_id: currentOrderId,
+                tracking_id: window.currentOrderId,
                 pesan: trimmedAlasan
             })
         });
@@ -583,8 +585,8 @@ async function rejectOrder(alasan) {
             document.getElementById('custom-reject').value = '';
 
             // Reset state
-            currentOrderId = null;
-            currentOrderData = null;
+            window.currentOrderId = null;
+            window.currentOrderData = null;
 
             showToast('Order berhasil ditolak', 'info');
 
@@ -597,15 +599,15 @@ async function rejectOrder(alasan) {
         console.error('Reject order failed:', err);
         showToast('Terjadi kesalahan, silakan coba lagi', 'error');
     }
-}
+};
 
 function showWhatsAppButton() {
-    if (!currentOrderData || !currentOrderData.pelanggan) return;
+    if (!window.currentOrderData || !window.currentOrderData.pelanggan) return;
 
     const activeOrder = document.getElementById('active-order');
     if (!activeOrder) return;
 
-    const noWa = currentOrderData.pelanggan.no_wa || '';
+    const noWa = window.currentOrderData.pelanggan.no_wa || '';
     if (!noWa) return;
 
     let waButton = document.getElementById('btn-wa-pelanggan');
@@ -702,8 +704,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Restore active order section dari server-side data
     @isset($activeTracking)
         @if($activeTracking)
-            currentOrderId = {{ $activeTracking->id }};
-            currentOrderData = {
+            window.currentOrderId = {{ $activeTracking->id }};
+            window.currentOrderData = {
                 id: {{ $activeTracking->id }},
                 order_type: '{{ $activeTracking->order_type }}',
                 status: '{{ $activeTracking->status }}',
@@ -777,17 +779,18 @@ function resetProgress() {
 
 // Update Progress - only on dashboard
 async function updateProgress(status) {
-    if (!currentOrderId) return;
+    if (!window.currentOrderId) return;
 
     try {
         const resp = await fetch('{{ route("mitra.order.progress") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
-                tracking_id: currentOrderId,
+                tracking_id: window.currentOrderId,
                 status: status
             })
         });
@@ -814,7 +817,7 @@ async function updateProgress(status) {
 
 // Mitra menandai perbaikan selesai (setelah pelanggan klik "Belum Selesai")
 async function markPerbaikanSelesai() {
-    if (!currentOrderId) {
+    if (!window.currentOrderId) {
         showToast('Tidak ada order aktif', 'warning');
         return;
     }
@@ -827,10 +830,11 @@ async function markPerbaikanSelesai() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
-                tracking_id: currentOrderId,
+                tracking_id: window.currentOrderId,
                 status: 'selesai_mitra'
             })
         });
@@ -868,13 +872,13 @@ function stopActiveOrderPolling() {
 }
 
 async function checkActiveOrderStatus() {
-    if (!currentOrderId) {
+    if (!window.currentOrderId) {
         stopActiveOrderPolling();
         return;
     }
 
     try {
-        const resp = await fetch(`/order-tracking/${currentOrderId}/status`);
+        const resp = await fetch(`/order-tracking/${window.currentOrderId}/status`);
         if (!resp.ok) return;
         const data = await resp.json();
 

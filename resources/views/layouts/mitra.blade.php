@@ -683,10 +683,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// ─ Global State ─
-let pollingInterval = null;
-let currentOrderId = null;
-let currentOrderData = null;
+// ─ Global State (pakai window.* agar accessible dari semua script block,
+//   termasuk @push('scripts') yang di-inject setelah ini) ─
+window.pollingInterval = null;
+window.currentOrderId = null;
+window.currentOrderData = null;
 
 // ─── Push Notification Setup ───
 if ('serviceWorker' in navigator && 'PushManager' in window) {
