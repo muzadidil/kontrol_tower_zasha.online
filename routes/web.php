@@ -22,6 +22,7 @@ use App\Http\Controllers\Auth\MitraLoginController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Mitra\MitraDashboardController;
 use App\Http\Controllers\Mitra\MitraOrderController;
+use App\Http\Controllers\Mitra\MitraVerifikasiController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -165,6 +166,12 @@ Route::match(['get','post'], '/mitra/logout', [MitraLoginController::class, 'log
 Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/dashboard', [MitraDashboardController::class, 'dashboard'])->name('dashboard');
     Route::post('/toggle-status', [MitraDashboardController::class, 'toggleStatus'])->name('toggle-status');
+
+    // Verifikasi (untuk mitra yang belum verified — JANGAN kena middleware verified.mitra)
+    Route::prefix('verifikasi')->name('verifikasi.')->group(function () {
+        Route::get('/status', [MitraVerifikasiController::class, 'status'])->name('status');
+        Route::post('/upload', [MitraVerifikasiController::class, 'upload'])->name('upload');
+    });
 
     // Order Tracking API (polling untuk notifikasi)
     Route::get('/api/notifikasi', [MitraOrderController::class, 'getNotifikasi'])->name('api.notifikasi');
