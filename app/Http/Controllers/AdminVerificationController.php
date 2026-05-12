@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mitra;
+use App\Models\MitraVerifikasi;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +31,101 @@ class AdminVerificationController extends Controller
             })
             ->get();
 
-        return view('admin.verification.index', compact('list_driver', 'list_mitra'));
+        // Mitra dengan dokumen pending di mitra_verifikasi (sistem role-based)
+        $list_dokumen = Mitra::whereHas('verifikasiDokumens', function ($q) {
+                $q->where('status', MitraVerifikasi::STATUS_PENDING);
+            })
+            ->with(['role:id,name,icon,icon_color', 'verifikasiDokumens'])
+            ->orderByDesc('updated_at')
+            ->get()
+            ->map(function ($mitra) {
+                $mitra->pending_count = $mitra->verifikasiDokumens
+                    ->where('status', MitraVerifikasi::STATUS_PENDING)
+                    ->count();
+                return $mitra;
+            });
+
+        return view('admin.verification.index', compact('list_driver', 'list_mitra', 'list_dokumen'));
+    }
+
+    /**
+     * Halaman review semua dokumen verifikasi untuk satu mitra.
+     */
+    public function reviewDokumen(Mitra $mitra)
+    {
+        $mitra->load(['role.verifikasiKeys', 'verifikasiDokumens']);
+
+        $requiredKeys = $mitra->role
+            ? $mitra->role->verifikasiKeys
+            : collect();
+
+        $uploaded = $mitra->verifikasiDokumens->keyBy('verifikasi_key');
+
+        return view('admin.verification.review', compact('mitra', 'requiredKeys', 'uploaded'));
+    }
+
+    /**
+     * Approve atau tolak satu dokumen verifikasi mitra.
+     */
+    public function actionDokumen(Request $request, MitraVerifikasi $dokumen)
+    {
+        $data = $request->validate([
+            'action'  => 'required|in:approve,tolak',
+            'catatan' => 'nullable|string|max:500',
+        ]);
+
+        $dokumen->update([
+            'status'  => $data['action'] === 'approve'
+                ? MitraVerifikasi::STATUS_APPROVED
+                : MitraVerifikasi::STATUS_DITOLAK,
+            'catatan' => $data['catatan'] ?? null,
+        ]);
+
+        // Cek apakah semua dokumen wajib mitra sudah approved → aktifkan mitra
+        $this->autoActivateIfReady($dokumen->mitra);
+
+        $label = Role::ALL_VERIFIKASI[$dokumen->verifikasi_key] ?? $dokumen->verifikasi_key;
+        $msg = $data['action'] === 'approve'
+            ? "Dokumen {$label} disetujui."
+            : "Dokumen {$label} ditolak.";
+
+        return back()->with('notif_verif', $msg);
+    }
+
+    /**
+     * Auto-aktivasi mitra bila semua dokumen wajib sudah disetujui.
+     */
+    private function autoActivateIfReady(Mitra $mitra): void
+    {
+        $mitra->load(['role.verifikasiKeys', 'verifikasiDokumens']);
+
+        if (!$mitra->role) {
+            return;
+        }
+
+        $wajibKeys = $mitra->role->verifikasiKeys
+            ->where('wajib', true)
+            ->pluck('verifikasi_key');
+
+        if ($wajibKeys->isEmpty()) {
+            return;
+        }
+
+        $approved = $mitra->verifikasiDokumens
+            ->where('status', MitraVerifikasi::STATUS_APPROVED)
+            ->pluck('verifikasi_key');
+
+        $allApproved = $wajibKeys->every(fn($k) => $approved->contains($k));
+
+        if ($allApproved) {
+            $current = $mitra->status_verifikasi;
+            $isAlreadyActive = ($current instanceof \App\Enums\MitraStatus && $current->isActive())
+                || (is_string($current) && in_array($current, ['active', 'verified'], true));
+
+            if (!$isAlreadyActive) {
+                $mitra->update(['status_verifikasi' => 'active']);
+            }
+        }
     }
 
     public function approve(Request $request)

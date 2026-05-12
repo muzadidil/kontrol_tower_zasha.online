@@ -61,9 +61,52 @@
     <strong>Double-check:</strong> Cocokkan data baru (warna hijau) dengan dokumen yang dikirim mitra di WhatsApp sebelum klik approve.
 </div>
 
+{{-- ── DOKUMEN VERIFIKASI (sistem role-based) ────────── --}}
+@if(($list_dokumen ?? collect())->isNotEmpty())
+<div class="zasha-card mb-3">
+    <div class="zasha-list-header">
+        <h6><i class="bi bi-file-earmark-check-fill"></i> Dokumen Verifikasi Pending</h6>
+        <span class="badge-count">{{ $list_dokumen->sum('pending_count') }}</span>
+    </div>
+
+    @foreach($list_dokumen as $d)
+        <div class="zasha-row">
+            <div class="zasha-row-icon" style="background:{{ ($d->role->icon_color ?? '#005aa9') . '15' }};
+                                                color:{{ $d->role->icon_color ?? '#005aa9' }};">
+                <i class="bi {{ $d->role->icon ?? 'bi-shield-fill' }}"></i>
+            </div>
+            <div class="zasha-row-body">
+                <div class="zasha-row-title">
+                    {{ $d->nama_panggilan }}
+                    @if($d->role)
+                        <span class="zasha-status-badge ms-1"
+                              style="font-size:0.6rem;background:{{ ($d->role->icon_color ?? '#005aa9') . '20' }};
+                                     color:{{ $d->role->icon_color ?? '#005aa9' }};">
+                            {{ $d->role->name }}
+                        </span>
+                    @endif
+                </div>
+                <div class="zasha-row-meta">
+                    <span><i class="bi bi-file-earmark-text"></i> {{ $d->pending_count }} dokumen menunggu review</span>
+                    @if($d->no_wa)
+                        <span><i class="bi bi-whatsapp text-success"></i> {{ $d->no_wa }}</span>
+                    @endif
+                </div>
+            </div>
+            <div class="d-flex gap-1 flex-shrink-0">
+                <a href="{{ route('admin.verification.review', $d->id_mitra) }}"
+                   class="btn-status-action process">
+                    <i class="bi bi-eye-fill"></i> Review
+                </a>
+            </div>
+        </div>
+    @endforeach
+</div>
+@endif
+
 <div class="zasha-card">
     <div class="zasha-list-header">
-        <h6><i class="bi bi-hourglass-split"></i> Antrian Verifikasi</h6>
+        <h6><i class="bi bi-hourglass-split"></i> Antrian Verifikasi Profil</h6>
         <span class="badge-count">{{ $list_driver->count() + $list_mitra->count() }}</span>
     </div>
 

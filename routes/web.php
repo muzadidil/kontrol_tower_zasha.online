@@ -279,6 +279,11 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Verifikasi
     Route::get('/verification', [AdminVerificationController::class, 'index'])->name('admin.verification.index');
     Route::post('/verification/approve', [AdminVerificationController::class, 'approve'])->name('admin.verification.approve');
+    // Review dokumen verifikasi role-based
+    Route::get('/verification/review/{mitra}', [AdminVerificationController::class, 'reviewDokumen'])
+        ->name('admin.verification.review');
+    Route::post('/verification/dokumen/{dokumen}', [AdminVerificationController::class, 'actionDokumen'])
+        ->name('admin.verification.actionDokumen');
     // Master Kategori (LEGACY - REMOVED): digantikan oleh Roles
 
     // Finance Management
