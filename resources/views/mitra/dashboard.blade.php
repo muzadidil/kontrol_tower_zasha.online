@@ -213,7 +213,7 @@
 {{-- Incoming Order Popup --}}
 <div id="incoming-order" style="display: none; position: fixed; inset: 0; z-index: 9999;
      background: linear-gradient(180deg, #002d72 0%, #001d4d 100%);
-     display: flex; flex-direction: column; align-items: center; justify-content: center;
+     flex-direction: column; align-items: center; justify-content: center;
      left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;">
 
     <div style="text-align: center; margin-bottom: var(--fib-5);">
