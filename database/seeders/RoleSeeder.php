@@ -18,7 +18,7 @@ class RoleSeeder extends Seeder
                 'features' => [
                     'order-tenaga', 'order-inden',
                     'maps',
-                    'saldo', 'topup', 'profil', 'pesanan-list',
+                    'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],
             [
@@ -29,7 +29,7 @@ class RoleSeeder extends Seeder
                 'features' => [
                     'order-jastip', 'order-inden',
                     'maps',
-                    'saldo', 'topup', 'profil', 'pesanan-list',
+                    'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],
             [
@@ -40,7 +40,7 @@ class RoleSeeder extends Seeder
                 'features' => [
                     'order-wfh', 'order-inden',
                     'portfolio',
-                    'saldo', 'topup', 'profil', 'pesanan-list',
+                    'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],
             [
@@ -51,7 +51,7 @@ class RoleSeeder extends Seeder
                 'features' => [
                     'order-service', 'order-inden',
                     'sparepart', 'maps',
-                    'saldo', 'topup', 'profil', 'pesanan-list',
+                    'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],
         ];

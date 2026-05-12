@@ -197,6 +197,7 @@
             ['order-inden',     'mitra.inden.index',     'bi-calendar-event',  'Inden',     'Order booking',   'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
             ['tarif',           'mitra.tarif.index',     'bi-cash-coin',       'Tarif',     'Atur harga',      'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
             ['topup',           'mitra.topup.form',      'bi-plus-circle-fill','Topup',     'Isi saldo',       'var(--mitra-blue-tint)', 'var(--mitra-blue)'],
+            ['withdraw',        'mitra.withdrawal',      'bi-bank',            'Tarik',     'Tarik dana',      'var(--mitra-blue-soft)', 'var(--mitra-blue-dark)'],
             ['laporan-harian',  'mitra.laporan.harian',  'bi-calendar-day',    'Harian',    'Cuan hari ini',   'var(--mitra-blue-tint)', 'var(--mitra-blue-dark)'],
             ['laporan-bulanan', 'mitra.laporan.bulanan', 'bi-bar-chart-fill',  'Bulanan',   'Cuan bulan ini',  'var(--mitra-blue-soft)', 'var(--mitra-blue-mid)'],
             ['rating',          'mitra.rating.index',    'bi-star-fill',       'Ulasan',    'Rating pelanggan','var(--mitra-blue-tint)', 'var(--mitra-blue)'],

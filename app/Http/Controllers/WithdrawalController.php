@@ -13,7 +13,7 @@ class WithdrawalController extends Controller
     public function index()
     {
         $withdrawals = Withdrawal::where('mitra_id', auth('mitra')->id())->latest()->get();
-        return view('admin.finance.withdrawal', compact('withdrawals'));
+        return view('mitra.withdrawal.index', compact('withdrawals'));
     }
 
     public function request(Request $request)

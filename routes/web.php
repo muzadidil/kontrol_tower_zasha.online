@@ -266,6 +266,12 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::get('/riwayat', [TopupController::class, 'mitraIndex'])->name('index');
     });
 
+    // Withdrawal mitra (butuh verified + fitur withdraw)
+    Route::middleware(['verified.mitra', 'feature:withdraw'])->group(function () {
+        Route::get('/withdrawal', [WithdrawalController::class, 'index'])->name('withdrawal');
+        Route::post('/withdrawal', [WithdrawalController::class, 'request'])->name('withdrawal.request');
+    });
+
     // Tenaga (butuh verified + fitur order-tenaga)
     Route::prefix('tenaga')->name('tenaga.')->middleware(['verified.mitra', 'feature:order-tenaga'])->group(function () {
         Route::get('/', [MitraTenagaController::class, 'index'])->name('index');
@@ -427,8 +433,6 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
 Route::post('/ppob/transaction', [PpobController::class, 'createTransaction'])->name('ppob.transaction');
 Route::post('/mitra/transfer', [WalletTransferController::class, 'transfer'])->name('mitra.transfer');
-Route::get('/mitra/withdrawal', [WithdrawalController::class, 'index'])->name('mitra.withdrawal');
-Route::post('/mitra/withdrawal', [WithdrawalController::class, 'request'])->name('mitra.withdrawal.request');
 
 // Webhooks (public, no auth)
 Route::post('/webhook/tokopay', [TopupController::class, 'webhook'])->name('webhook.tokopay');
