@@ -181,8 +181,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::get('/profil', [MitraDashboardController::class, 'profil'])->name('profil');
     Route::post('/profil/foto', [MitraDashboardController::class, 'uploadFoto'])->name('profil.foto');
 
-    // WFH Orders
-    Route::prefix('wfh')->name('wfh.')->group(function () {
+    // WFH Orders (butuh fitur order-wfh)
+    Route::prefix('wfh')->name('wfh.')->middleware('feature:order-wfh')->group(function () {
         Route::get('/', [MitraWfhController::class, 'index'])->name('index');
         Route::get('/{wfhOrder}', [MitraWfhController::class, 'show'])->name('show');
         Route::post('/{wfhOrder}/terima', [MitraWfhController::class, 'terima'])->name('terima');
@@ -190,8 +190,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{wfhOrder}/kirim-file', [MitraWfhController::class, 'kirimFile'])->name('kirim-file');
     });
 
-    // Jastip Orders
-    Route::prefix('jastip')->name('jastip.')->group(function () {
+    // Jastip Orders (butuh fitur order-jastip)
+    Route::prefix('jastip')->name('jastip.')->middleware('feature:order-jastip')->group(function () {
         Route::get('/', [MitraJastipController::class, 'index'])->name('index');
         Route::get('/{jastipOrder}', [MitraJastipController::class, 'show'])->name('show');
         Route::post('/{jastipOrder}/terima', [MitraJastipController::class, 'terima'])->name('terima');
@@ -209,8 +209,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::get('/riwayat', [TopupController::class, 'mitraIndex'])->name('index');
     });
 
-    // Tenaga
-    Route::prefix('tenaga')->name('tenaga.')->group(function () {
+    // Tenaga (butuh fitur order-tenaga)
+    Route::prefix('tenaga')->name('tenaga.')->middleware('feature:order-tenaga')->group(function () {
         Route::get('/', [MitraTenagaController::class, 'index'])->name('index');
         Route::get('/{tenagaOrder}', [MitraTenagaController::class, 'show'])->name('show');
         Route::post('/{tenagaOrder}/terima', [MitraTenagaController::class, 'terima'])->name('terima');
@@ -219,8 +219,8 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::post('/{tenagaOrder}/selesai-kerja', [MitraTenagaController::class, 'selesaiKerja'])->name('selesai-kerja');
     });
 
-    // Service
-    Route::prefix('service')->name('service.')->group(function () {
+    // Service (butuh fitur order-service)
+    Route::prefix('service')->name('service.')->middleware('feature:order-service')->group(function () {
         Route::get('/', [MitraServiceController::class, 'index'])->name('index');
         Route::get('/{serviceOrder}', [MitraServiceController::class, 'show'])->name('show');
         Route::post('/{serviceOrder}/terima', [MitraServiceController::class, 'terima'])->name('terima');
