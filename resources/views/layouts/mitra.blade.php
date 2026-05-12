@@ -452,6 +452,15 @@
             border: 1px solid #475569;
         }
 
+        /* ─── Sibuk Mode (sedang mengerjakan order) ─── */
+        body.mitra-busy #status-card {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe) !important;
+            border: 1.5px solid #c4b5fd;
+        }
+        body.mitra-busy .text-purple {
+            color: #9333ea !important;
+        }
+
         /* ──── Progress Tracker Styles ──── */
         .progress-step {
             display: flex;
@@ -622,7 +631,18 @@
 
     @stack('styles')
 </head>
-<body class="{{ Auth::guard('mitra')->user() && Auth::guard('mitra')->user()->status_online !== 'online' ? 'mitra-offline' : '' }}">
+@php
+    $mitraUser = Auth::guard('mitra')->user();
+    $bodyStatusClass = '';
+    if ($mitraUser) {
+        if ($mitraUser->status_online === 'offline' || $mitraUser->status_online === 'suspended') {
+            $bodyStatusClass = 'mitra-offline';
+        } elseif ($mitraUser->status_online === 'sibuk') {
+            $bodyStatusClass = 'mitra-busy';
+        }
+    }
+@endphp
+<body class="{{ $bodyStatusClass }}">
 <div class="app-container">
     @yield('content')
 </div>

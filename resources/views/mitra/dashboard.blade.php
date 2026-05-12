@@ -20,25 +20,38 @@
     </div>
 
     {{-- Status Online/Offline Toggle --}}
+    @php
+        $statusOnline = $mitra->status_online;
+        $statusLabelClass = match($statusOnline) {
+            'online' => 'text-success',
+            'sibuk'  => 'text-purple',
+            default  => 'text-secondary',
+        };
+        $isToggleChecked = in_array($statusOnline, ['online', 'sibuk']);
+        $isToggleDisabled = $statusOnline === 'sibuk';
+    @endphp
     <div id="status-card" class="card-custom" style="padding: var(--fib-3); display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
             <div class="label-up" style="margin-bottom: 2px;">Status Kamu</div>
-            <div id="status-label" style="font-size: var(--t-xs); font-weight: 700; margin-top: var(--fib-1);"
-                 class="{{ $mitra->status_online === 'online' ? 'text-success' : 'text-secondary' }}">
-                @if($mitra->status_online === 'online')
+            <div id="status-label" style="font-size: var(--t-xs); font-weight: 700; margin-top: var(--fib-1); color: {{ $statusOnline === 'sibuk' ? '#9333ea' : '' }};"
+                 class="{{ $statusLabelClass }}">
+                @if($statusOnline === 'online')
                     🟢 Online — Siap terima order
-                @elseif($mitra->status_online === 'sibuk')
-                    🟣 Sibuk — Sedang mengerjakan
+                @elseif($statusOnline === 'sibuk')
+                    🟣 Sibuk — Sedang mengerjakan order
                 @else
                     ⚫ Offline — Tidak menerima order
                 @endif
             </div>
         </div>
-        <div class="form-check form-switch" style="padding-left: 0; margin-left: var(--fib-3);">
+        <div class="form-check form-switch" style="padding-left: 0; margin-left: var(--fib-3);"
+             title="{{ $isToggleDisabled ? 'Selesaikan order aktif terlebih dahulu' : '' }}">
             <input class="form-check-input" type="checkbox" role="switch"
                    id="toggleStatus"
-                   {{ $mitra->status_online === 'online' ? 'checked' : '' }}
-                   style="width: 48px; height: 24px; cursor: pointer;">
+                   {{ $isToggleChecked ? 'checked' : '' }}
+                   {{ $isToggleDisabled ? 'disabled' : '' }}
+                   data-current-status="{{ $statusOnline }}"
+                   style="width: 48px; height: 24px; cursor: {{ $isToggleDisabled ? 'not-allowed' : 'pointer' }}; {{ $statusOnline === 'sibuk' ? 'background-color: #9333ea; border-color: #9333ea;' : '' }}">
         </div>
     </div>
 
@@ -381,7 +394,16 @@ function showIncomingOrder(order) {
 
 // ─ Accept/Reject Functions ─
 async function acceptOrder() {
-    if (!currentOrderId) return;
+    if (!currentOrderId) {
+        showToast('Tidak ada order untuk diterima', 'warning');
+        return;
+    }
+
+    // Konfirmasi sebelum accept untuk cegah accidental
+    const confirmed = confirm('Yakin ingin menerima order ini?');
+    if (!confirmed) {
+        return;
+    }
 
     try {
         const response = await fetch('{{ route("mitra.order.accept") }}', {
@@ -402,6 +424,12 @@ async function acceptOrder() {
                 incomingPopup.style.display = 'none';
             }
 
+            // Update status UI ke sibuk tanpa reload
+            updateStatusToBusy();
+
+            // Stop polling karena sudah accept order
+            stopPolling();
+
             // Tampilkan active order section
             showActiveOrder(currentOrderId);
             resetProgress();
@@ -409,16 +437,38 @@ async function acceptOrder() {
             // Tampilkan tombol WA pelanggan
             showWhatsAppButton();
 
-            // Refresh data order aktif
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+            showToast('Order berhasil diterima!', 'success');
         } else {
             showToast('Gagal menerima order: ' + (data.message || 'Silakan coba lagi'), 'error');
         }
     } catch (err) {
         console.error('Accept order failed:', err);
         showToast('Gagal menerima order, coba lagi', 'error');
+    }
+}
+
+// Update UI status ke sibuk tanpa reload halaman
+function updateStatusToBusy() {
+    const label = document.getElementById('status-label');
+    const toggle = document.getElementById('toggleStatus');
+    const body = document.body;
+
+    if (label) {
+        label.textContent = '🟣 Sibuk — Sedang mengerjakan order';
+        label.className = 'text-purple';
+        label.style.color = '#9333ea';
+    }
+    if (toggle) {
+        toggle.checked = true;
+        toggle.disabled = true;
+        toggle.dataset.currentStatus = 'sibuk';
+        toggle.style.cursor = 'not-allowed';
+        toggle.style.backgroundColor = '#9333ea';
+        toggle.style.borderColor = '#9333ea';
+    }
+    if (body) {
+        body.classList.remove('mitra-offline');
+        body.classList.add('mitra-busy');
     }
 }
 
@@ -514,6 +564,14 @@ function showWhatsAppButton() {
 const toggleEl = document.getElementById('toggleStatus');
 if (toggleEl) {
     toggleEl.addEventListener('change', async function(e) {
+        // Block jika sedang sibuk (mengerjakan order)
+        if (this.dataset.currentStatus === 'sibuk' || this.disabled) {
+            this.checked = true; // Force tetap checked
+            e.stopPropagation();
+            showToast('Selesaikan order aktif terlebih dahulu sebelum mengubah status', 'warning');
+            return;
+        }
+
         // Prevent toggle if user just finished swiping (event propagation issue)
         if (isSwiping) {
             this.checked = !this.checked; // Revert checkbox
@@ -541,13 +599,23 @@ if (toggleEl) {
             if (data.success) {
                 if (isOnline) {
                     body.classList.remove('mitra-offline');
+                    body.classList.remove('mitra-busy');
                     label.className = 'text-success';
+                    label.style.color = '';
                     label.textContent = '🟢 Online — Siap terima order';
+                    this.dataset.currentStatus = 'online';
+                    this.style.backgroundColor = '';
+                    this.style.borderColor = '';
                     startPolling();
                 } else {
                     body.classList.add('mitra-offline');
+                    body.classList.remove('mitra-busy');
                     label.className = 'text-secondary';
+                    label.style.color = '';
                     label.textContent = '⚫ Offline — Tidak menerima order';
+                    this.dataset.currentStatus = 'offline';
+                    this.style.backgroundColor = '';
+                    this.style.borderColor = '';
                     stopPolling();
                 }
             } else {
@@ -562,11 +630,11 @@ if (toggleEl) {
     });
 }
 
-// Init polling jika mitra online
+// Init polling hanya jika mitra benar-benar online (tidak sibuk/offline)
 document.addEventListener('DOMContentLoaded', () => {
-    if ({{ $mitra->status_online === 'online' ? 'true' : 'false' }}) {
+    @if($mitra->status_online === 'online')
         startPolling();
-    }
+    @endif
 });
 
 // Show Active Order Section - only on dashboard
@@ -649,90 +717,142 @@ let isSwiping = false; // Flag to prevent accidental toggle trigger after swipe
     const trackWidth = track.offsetWidth;
     const thumbWidth = thumb.offsetWidth;
     const maxSlide = (trackWidth - thumbWidth) / 2 - 8;
-    const SWIPE_THRESHOLD = maxSlide * 0.75; // 75% threshold (increased from 70%)
+    // Threshold lebih ketat (85%) agar tidak mudah miss-trigger
+    const SWIPE_THRESHOLD = maxSlide * 0.85;
+    // Min waktu drag agar bukan tap accidental (ms)
+    const MIN_SWIPE_DURATION = 200;
 
-    let startX = 0, currentX = 0, isDragging = false;
+    let startX = 0, currentX = 0, maxReachedX = 0, minReachedX = 0;
+    let isDragging = false, dragStartTime = 0;
 
     function getClientX(e) {
         return e.touches ? e.touches[0].clientX : e.clientX;
     }
 
+    function safePreventDefault(e) {
+        if (e && e.cancelable) {
+            e.preventDefault();
+        }
+    }
+
+    function resetThumbPosition() {
+        thumb.style.left = '50%';
+        thumb.style.transform = 'translateX(-50%)';
+        thumb.style.background = 'white';
+        const icon = thumb.querySelector('i');
+        if (icon) icon.style.color = '#64748b';
+    }
+
+    function cancelDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        thumb.style.cursor = 'grab';
+        thumb.style.transition = 'all 0.3s ease';
+        currentX = 0;
+        maxReachedX = 0;
+        minReachedX = 0;
+        resetThumbPosition();
+        setTimeout(() => { isSwiping = false; }, 100);
+    }
+
     thumb.addEventListener('mousedown', startDrag);
-    thumb.addEventListener('touchstart', startDrag);
+    thumb.addEventListener('touchstart', startDrag, { passive: false });
 
     function startDrag(e) {
         isDragging = true;
         isSwiping = true;
         startX = getClientX(e);
-        currentX = 0;  // Reset currentX when drag starts
+        currentX = 0;
+        maxReachedX = 0;
+        minReachedX = 0;
+        dragStartTime = Date.now();
         thumb.style.cursor = 'grabbing';
         thumb.style.transition = 'none';
-        e.preventDefault();
+        safePreventDefault(e);
         e.stopPropagation();
     }
 
     document.addEventListener('mousemove', onDrag);
-    document.addEventListener('touchmove', onDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
 
     function onDrag(e) {
         if (!isDragging) return;
-        e.preventDefault();
+        safePreventDefault(e);
         e.stopPropagation();
 
         const diff = getClientX(e) - startX;
         currentX = Math.max(-maxSlide, Math.min(maxSlide, diff));
+
+        // Track puncak gerakan ke kiri & kanan terpisah
+        if (currentX > maxReachedX) maxReachedX = currentX;
+        if (currentX < minReachedX) minReachedX = currentX;
+
         thumb.style.left = `calc(50% + ${currentX}px)`;
 
         // Visual feedback
+        const icon = thumb.querySelector('i');
         if (currentX > maxSlide * 0.5) {
             thumb.style.background = '#10b981';
-            thumb.querySelector('i').style.color = 'white';
+            if (icon) icon.style.color = 'white';
         } else if (currentX < -maxSlide * 0.5) {
             thumb.style.background = '#ef4444';
-            thumb.querySelector('i').style.color = 'white';
+            if (icon) icon.style.color = 'white';
         } else {
             thumb.style.background = 'white';
-            thumb.querySelector('i').style.color = '#64748b';
+            if (icon) icon.style.color = '#64748b';
         }
     }
 
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchend', endDrag);
+    document.addEventListener('touchcancel', cancelDrag);
+
+    // Cancel drag jika mouse keluar window (cegah stuck state)
+    document.addEventListener('mouseleave', cancelDrag);
+    window.addEventListener('blur', cancelDrag);
 
     function endDrag(e) {
         if (!isDragging) return;
         isDragging = false;
-        e.preventDefault();
+        safePreventDefault(e);
         e.stopPropagation();
 
         thumb.style.cursor = 'grab';
         thumb.style.transition = 'all 0.3s ease';
 
-        console.log(`Swipe distance: ${currentX}px, threshold: ${SWIPE_THRESHOLD}px`);
+        const dragDuration = Date.now() - dragStartTime;
+        const finalX = currentX;
+        const dominantDirection = Math.abs(maxReachedX) > Math.abs(minReachedX) ? maxReachedX : minReachedX;
 
-        if (currentX > SWIPE_THRESHOLD) {
-            // Geser ke KANAN (positive currentX) → TERIMA order
-            console.log('Swipe RIGHT (positive) → Accept Order');
+        console.log(`Swipe end: finalX=${finalX}, maxRight=${maxReachedX}, maxLeft=${minReachedX}, duration=${dragDuration}ms, threshold=${SWIPE_THRESHOLD}`);
+
+        // Reject swipe terlalu cepat (kemungkinan tap accidental)
+        if (dragDuration < MIN_SWIPE_DURATION) {
+            console.log('Swipe rejected: too fast (likely accidental tap)');
+            resetThumbPosition();
+            currentX = 0; maxReachedX = 0; minReachedX = 0;
+            setTimeout(() => { isSwiping = false; }, 100);
+            return;
+        }
+
+        // Trigger berdasarkan POSISI AKHIR (finalX), bukan puncak
+        // User harus benar-benar melepas pada threshold, bukan sekadar lewat
+        if (finalX >= SWIPE_THRESHOLD) {
+            console.log('Swipe RIGHT confirmed → Accept Order');
             acceptOrder();
-        } else if (currentX < -SWIPE_THRESHOLD) {
-            // Geser ke KIRI (negative currentX) → TOLAK order
-            console.log('Swipe LEFT (negative) → Reject Order');
+        } else if (finalX <= -SWIPE_THRESHOLD) {
+            console.log('Swipe LEFT confirmed → Show Reject Options');
             showRejectOptions();
         } else {
             console.log('Swipe not far enough to trigger action');
         }
 
-        // Reset posisi
-        currentX = 0;
-        thumb.style.left = '50%';
-        thumb.style.transform = 'translateX(-50%)';
-        thumb.style.background = 'white';
-        thumb.querySelector('i').style.color = '#64748b';
+        // Reset posisi & state
+        currentX = 0; maxReachedX = 0; minReachedX = 0;
+        resetThumbPosition();
 
         // Clear swipe flag after slight delay to prevent toggle trigger
-        setTimeout(() => {
-            isSwiping = false;
-        }, 100);
+        setTimeout(() => { isSwiping = false; }, 150);
     }
 })();
 
