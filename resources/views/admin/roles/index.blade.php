@@ -114,7 +114,7 @@
                 @endif
             </div>
 
-            {{-- Action buttons --}}
+            {{-- Action buttons (kompak, sebaris dengan tulisan) --}}
             <div class="d-flex gap-1 align-items-center flex-shrink-0">
                 @if(!$role->is_active)
                     <form action="{{ route('admin.roles.toggleActive', $role->id) }}" method="POST" class="d-inline">
@@ -128,23 +128,21 @@
                     <form action="{{ route('admin.roles.toggleActive', $role->id) }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn-zasha outline-warning"
-                                onclick="return confirm('Set role ini sebagai DRAFT?')"
-                                title="Set draft (sembunyikan)">
-                            <i class="bi bi-pause-circle"></i>
+                                onclick="return confirm('Set role ini sebagai DRAFT?')">
+                            <i class="bi bi-pause-circle"></i> Draft
                         </button>
                     </form>
                 @endif
 
-                <a href="{{ route('admin.roles.edit', $role->id) }}" class="btn-zasha outline-primary" title="Edit role">
-                    <i class="bi bi-pencil"></i>
+                <a href="{{ route('admin.roles.edit', $role->id) }}" class="btn-zasha outline-primary">
+                    <i class="bi bi-pencil"></i> Edit
                 </a>
                 @unless($role->is_default)
                     <form action="{{ route('admin.roles.destroy', $role->id) }}" method="POST" class="d-inline">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn-zasha outline-danger"
-                                onclick="return confirm('Hapus role ini? Mitra yg pakai role ini akan kehilangan akses.')"
-                                title="Hapus role">
-                            <i class="bi bi-trash"></i>
+                                onclick="return confirm('Hapus role ini? Mitra yg pakai role ini akan kehilangan akses.')">
+                            <i class="bi bi-trash"></i> Hapus
                         </button>
                     </form>
                 @endunless

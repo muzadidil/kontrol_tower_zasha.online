@@ -9,28 +9,82 @@
 @endphp
 
 <style>
-    .feature-checkbox-card { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
-    .feature-checkbox-card:hover { border-color: #3b82f6; background: #f0f9ff; }
-    .feature-checkbox-card input { width: 18px; height: 18px; cursor: pointer; }
-    .feature-checkbox-card input:checked + .feature-info { color: #1e40af; font-weight: 700; }
-    .feature-info { flex: 1; }
-    .feature-key { font-size: 11px; color: #9ca3af; font-family: monospace; }
+    /* COMPACT chip-style untuk fitur picker (bukan card boros) */
+    .feature-chip-toggle {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 7px 14px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 999px;
+        background: white;
+        cursor: pointer;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748b;
+        transition: all 0.15s;
+        user-select: none;
+        margin: 0;
+    }
+    .feature-chip-toggle:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        color: #1e40af;
+    }
+    .feature-chip-toggle input { display: none; }
+    .feature-chip-toggle.checked {
+        background: #eff6ff;
+        border-color: #1e40af;
+        color: #1e40af;
+        font-weight: 700;
+    }
+    .feature-chip-toggle.checked::before {
+        content: '\F26B'; /* bi-check-lg */
+        font-family: 'bootstrap-icons';
+        font-size: 0.85rem;
+    }
+    .feature-group-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        margin-top: 16px;
+    }
+    .feature-group-label:first-child { margin-top: 0; }
+    .feature-chips-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
 
-    .icon-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    /* Icon picker tetap ada tapi lebih kompak */
+    .icon-picker {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+    }
     .icon-option {
-        cursor: pointer; padding: 14px 8px; border: 1.5px solid #e5e7eb;
-        border-radius: 10px; text-align: center; transition: all 0.15s;
+        cursor: pointer;
+        padding: 10px 4px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 8px;
+        text-align: center;
+        transition: all 0.15s;
         background: white;
     }
     .icon-option:hover { border-color: #3b82f6; }
-    .icon-option.selected { border-color: #1e40af; background: #eff6ff; box-shadow: 0 2px 6px rgba(30,64,175,0.15); }
-    .icon-option i { font-size: 1.6rem; display: block; margin-bottom: 4px; }
-    .icon-option-label { font-size: 10px; color: #64748b; }
+    .icon-option.selected {
+        border-color: #1e40af;
+        background: #eff6ff;
+    }
+    .icon-option i { font-size: 1.25rem; display: block; margin-bottom: 2px; }
+    .icon-option-label { font-size: 9px; color: #64748b; }
 
     .icon-preview {
-        width: 64px; height: 64px; border-radius: 16px;
+        width: 52px; height: 52px;
+        border-radius: 12px;
         display: inline-flex; align-items: center; justify-content: center;
-        font-size: 1.8rem;
+        font-size: 1.4rem;
     }
 </style>
 
@@ -98,9 +152,9 @@
     });
 </script>
 
-<div class="mb-3">
-    <label class="form-label fw-bold">Pilih Fitur yang Bisa Diakses Role Ini</label>
-    <div class="text-muted small mb-3">Centang fitur yang diizinkan. Mitra dengan role ini hanya akan melihat menu sesuai centang.</div>
+<div class="mb-2">
+    <label class="form-label fw-bold mb-1">Pilih Fitur yang Bisa Diakses Role Ini</label>
+    <div class="text-muted small">Klik chip untuk toggle. Mitra hanya bisa akses fitur yang dicentang.</div>
 </div>
 
 @php
@@ -112,17 +166,15 @@
 @endphp
 
 @foreach($grouped as $group => $keys)
-    <div class="mb-3">
-        <div class="text-muted small fw-bold mb-2">{{ strtoupper($group) }}</div>
+    <div class="feature-group-label">{{ $group }}</div>
+    <div class="feature-chips-wrap">
         @foreach($keys as $key)
             @if(isset($allFeatures[$key]))
-                <label class="feature-checkbox-card">
-                    <input type="checkbox" name="features[]" value="{{ $key }}"
+                <label class="feature-chip-toggle {{ in_array($key, $checked) ? 'checked' : '' }}"
+                       onclick="this.classList.toggle('checked'); event.preventDefault(); document.getElementById('feat-{{ $key }}').checked = !document.getElementById('feat-{{ $key }}').checked;">
+                    <input type="checkbox" id="feat-{{ $key }}" name="features[]" value="{{ $key }}"
                            {{ in_array($key, $checked) ? 'checked' : '' }}>
-                    <div class="feature-info">
-                        <div>{{ $allFeatures[$key] }}</div>
-                        <div class="feature-key">{{ $key }}</div>
-                    </div>
+                    {{ $allFeatures[$key] }}
                 </label>
             @endif
         @endforeach
@@ -130,7 +182,7 @@
 @endforeach
 
 <div class="d-flex gap-2 mt-4">
-    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" style="background:var(--zasha-blue);border-color:var(--zasha-blue);">
         <i class="bi bi-check-lg me-1"></i> Simpan
     </button>
     <a href="{{ route('admin.roles.index') }}" class="btn btn-light rounded-pill px-4">Batal</a>
