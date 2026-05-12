@@ -93,13 +93,30 @@ class OrderTrackingService
                     'pesan' => 'Anda telah menerima order. Status Anda berubah menjadi Sibuk.',
                 ]);
 
-                // Notifikasi ke pelanggan
+                // Notifikasi in-app ke pelanggan
                 \App\Helpers\NotifHelper::kirim(
                     $tracking->pelanggan_id,
                     'Order Diterima ✓',
                     'Mitra sedang menuju lokasimu!',
                     'pesanan'
                 );
+
+                // Push notification ke pelanggan (browser/HP)
+                try {
+                    $pushService = new PushNotificationService();
+                    $pushService->sendToPelanggan(
+                        $tracking->pelanggan_id,
+                        'Order Diterima ✓',
+                        'Mitra sedang menuju lokasimu!',
+                        route('order-tracking', $tracking->id),
+                        'order-accepted'
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Push notification (pelanggan) failed on accept', [
+                        'tracking_id' => $tracking->id,
+                        'error'       => $e->getMessage(),
+                    ]);
+                }
             });
         } catch (\Exception $e) {
             Log::error('OrderTrackingService::mitraAccept failed', [
@@ -132,13 +149,30 @@ class OrderTrackingService
                     'pesan' => 'Anda telah menolak order dengan alasan: ' . $pesan,
                 ]);
 
-                // Notifikasi ke pelanggan
+                // Notifikasi in-app ke pelanggan
                 \App\Helpers\NotifHelper::kirim(
                     $tracking->pelanggan_id,
                     'Order Ditolak ✗',
                     'Maaf, mitra tidak bisa mengambil ordermu. Alasan: ' . $pesan,
                     'pesanan'
                 );
+
+                // Push notification ke pelanggan (browser/HP)
+                try {
+                    $pushService = new PushNotificationService();
+                    $pushService->sendToPelanggan(
+                        $tracking->pelanggan_id,
+                        'Order Ditolak ✗',
+                        'Mitra tidak bisa ambil ordermu: ' . $pesan,
+                        route('pelanggan.pesanan'),
+                        'order-rejected'
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Push notification (pelanggan) failed on reject', [
+                        'tracking_id' => $tracking->id,
+                        'error'       => $e->getMessage(),
+                    ]);
+                }
             });
         } catch (\Exception $e) {
             Log::error('OrderTrackingService::mitraReject failed', [
