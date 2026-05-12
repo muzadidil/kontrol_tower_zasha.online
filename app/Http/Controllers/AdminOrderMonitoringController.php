@@ -15,6 +15,7 @@ class AdminOrderMonitoringController extends Controller
 
         // UNION jasa (pesanan) + jastip (jastip_orders modul baru).
         // Kolom yang tidak ada di skema baru di-cast jadi placeholder agar shape kolom sama.
+        // PAKAI 'pelanggans' (plural) -- tabel utama untuk semua data pelanggan.
         $query_text = "
             (SELECT
                 CAST(p.id_pesanan AS CHAR) COLLATE utf8mb4_general_ci as id,
@@ -22,12 +23,12 @@ class AdminOrderMonitoringController extends Controller
                 p.status_pesanan COLLATE utf8mb4_general_ci as status,
                 p.metode_pembayaran COLLATE utf8mb4_general_ci as metode,
                 'JASA' COLLATE utf8mb4_general_ci as tipe_order,
-                plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan,
-                COALESCE(m.nama_asli, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
-                p.kategori_jasa COLLATE utf8mb4_general_ci as detail,
-                (p.biaya_jasa + p.ongkir + p.kode_unik) as total_biaya
+                COALESCE(plg.nama_panggilan, plg.nama_pelanggan, 'Pelanggan') COLLATE utf8mb4_general_ci as nama_pelanggan,
+                COALESCE(m.nama_asli, m.nama_panggilan, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
+                COALESCE(p.kategori_jasa, '-') COLLATE utf8mb4_general_ci as detail,
+                (COALESCE(p.biaya_jasa, 0) + COALESCE(p.ongkir, 0) + COALESCE(p.kode_unik, 0)) as total_biaya
             FROM pesanan p
-            JOIN pelanggan plg ON p.id_pelanggan = plg.id_pelanggan
+            JOIN pelanggans plg ON p.id_pelanggan = plg.id_pelanggan
             LEFT JOIN mitra m ON p.id_mitra = m.id_mitra
             WHERE p.status_pesanan NOT IN ('Selesai', 'Batal'))
 
@@ -39,12 +40,12 @@ class AdminOrderMonitoringController extends Controller
                 jo.status COLLATE utf8mb4_general_ci as status,
                 IF(jo.cod_eligible = 1, 'COD', 'Saldo') COLLATE utf8mb4_general_ci as metode,
                 'JASTIP' COLLATE utf8mb4_general_ci as tipe_order,
-                plg.nama_pelanggan COLLATE utf8mb4_general_ci as nama_pelanggan,
-                COALESCE(m.nama_asli, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
-                jo.delivery_address COLLATE utf8mb4_general_ci as detail,
-                (jo.actual_total_barang + jo.ongkos_jasa) as total_biaya
+                COALESCE(plg.nama_panggilan, plg.nama_pelanggan, 'Pelanggan') COLLATE utf8mb4_general_ci as nama_pelanggan,
+                COALESCE(m.nama_asli, m.nama_panggilan, '-') COLLATE utf8mb4_general_ci as nama_pekerja,
+                COALESCE(jo.delivery_address, '-') COLLATE utf8mb4_general_ci as detail,
+                (COALESCE(jo.actual_total_barang, 0) + COALESCE(jo.ongkos_jasa, 0)) as total_biaya
             FROM jastip_orders jo
-            JOIN pelanggan plg ON jo.pelanggan_id = plg.id_pelanggan
+            JOIN pelanggans plg ON jo.pelanggan_id = plg.id_pelanggan
             LEFT JOIN mitra m ON jo.mitra_id = m.id_mitra
             WHERE jo.status NOT IN ('selesai', 'ditolak'))
         ";
