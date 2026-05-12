@@ -1,21 +1,21 @@
 @extends('layouts.mitra')
 
 @section('content')
-<div style="background: linear-gradient(135deg, var(--mitra-blue, #005aa9) 0%, var(--mitra-blue-light, #0078d4) 100%); padding: var(--fib-5, 24px) var(--fib-4, 16px) var(--fib-6, 32px); color: #fff;">
-    <div class="d-flex align-items-center">
-        <a href="{{ route('mitra.tarif.index') }}" class="text-white me-3" style="font-size: 1.4rem; text-decoration: none;">
-            <i class="bi bi-arrow-left"></i>
-        </a>
+@include('mitra.partials._page-style')
+
+<div class="m-hero">
+    <div class="m-hero-bar">
+        <a href="{{ route('mitra.tarif.index') }}" class="m-hero-back"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <div style="font-size: .75rem; opacity: .8;">TAMBAH BARU</div>
-            <h5 class="fw-bold m-0">Tarif Layanan</h5>
+            <div class="m-hero-eyebrow">Tambah Baru</div>
+            <h1 class="m-hero-title">Tarif Layanan</h1>
         </div>
     </div>
 </div>
 
-<div style="padding: var(--fib-4, 16px); max-width: 720px; margin: 0 auto;">
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4">
+<div class="m-page">
+    <div class="m-card">
+        <div class="m-card-body m-card-pad-lg">
             <form action="{{ route('mitra.tarif.store') }}" method="POST">
                 @csrf
                 @include('mitra.tarif._form')

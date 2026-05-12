@@ -1,74 +1,59 @@
 @extends('layouts.mitra')
 
 @section('content')
-{{-- Hero --}}
-<div style="background: linear-gradient(135deg, var(--mitra-blue, #005aa9) 0%, var(--mitra-blue-light, #0078d4) 100%); padding: var(--fib-5, 24px) var(--fib-4, 16px) var(--fib-6, 32px); color: #fff;">
-    <div class="d-flex align-items-center mb-3">
-        <a href="{{ route('mitra.dashboard') }}" class="text-white me-3" style="font-size:1.4rem;text-decoration:none;">
-            <i class="bi bi-arrow-left"></i>
-        </a>
+@include('mitra.partials._page-style')
+
+<div class="m-hero">
+    <div class="m-hero-bar">
+        <a href="{{ route('mitra.dashboard') }}" class="m-hero-back"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <div style="font-size:.75rem;opacity:.8;">REPUTASI</div>
-            <h5 class="fw-bold m-0">Rating & Ulasan</h5>
+            <div class="m-hero-eyebrow">Reputasi</div>
+            <h1 class="m-hero-title">Rating & Ulasan</h1>
         </div>
     </div>
 
-    {{-- Rating rata-rata besar di tengah --}}
-    <div class="text-center">
-        <div style="font-size:.7rem;opacity:.8;">RATING RATA-RATA</div>
-        <div class="d-flex align-items-center justify-content-center gap-2 my-1">
-            <div style="font-size:2.5rem;font-weight:800;letter-spacing:-.02em;">
-                {{ number_format($stats['rata_rata'], 1) }}
-            </div>
-            <div style="font-size:1.2rem;color:#ffd700;">
+    <div style="text-align:center;">
+        <div class="m-hero-stat-label">RATING RATA-RATA</div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:var(--fib-2); margin-top:var(--fib-1);">
+            <div style="font-size:var(--t-2xl); font-weight:800; letter-spacing:-0.02em;">{{ number_format($stats['rata_rata'], 1) }}</div>
+            <div style="font-size:var(--t-md); color:#fbbf24;">
                 @for($i = 1; $i <= 5; $i++)
                     <i class="bi {{ $i <= round($stats['rata_rata']) ? 'bi-star-fill' : 'bi-star' }}"></i>
                 @endfor
             </div>
         </div>
-        <div style="font-size:.7rem;opacity:.7;">
+        <div class="m-hero-stat-sub">
             dari {{ $stats['total'] }} ulasan
             @if($stats['belum_dibalas'] > 0)
-                · <span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:999px;font-weight:700;">
-                    {{ $stats['belum_dibalas'] }} belum dibalas
-                </span>
+                · <span style="background:#ef4444; color:#fff; padding:2px var(--fib-2); border-radius:var(--r-pill); font-weight:700;">{{ $stats['belum_dibalas'] }} belum dibalas</span>
             @endif
         </div>
     </div>
 </div>
 
-<div style="padding: var(--fib-4, 16px); max-width: 720px; margin: 0 auto;">
-
-    @if(session('success'))
-        <div class="alert alert-success rounded-3 shadow-sm small">
-            <i class="bi bi-check-circle-fill me-1"></i>{{ session('success') }}
-        </div>
-    @endif
+<div class="m-page">
+    @if(session('success'))<div class="m-alert m-alert-success"><i class="bi bi-check-circle-fill"></i>{{ session('success') }}</div>@endif
 
     {{-- Distribusi Bintang --}}
     @if($stats['total'] > 0)
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body p-3">
-            <h6 class="fw-bold mb-3" style="color:#1e293b;font-size:.85rem;">Distribusi Bintang</h6>
+    <div class="m-card">
+        <div class="m-card-body">
+            <h2 class="m-section-title" style="margin-top:0;">Distribusi Bintang</h2>
             @for($b = 5; $b >= 1; $b--)
                 @php
                     $count = $stats['distribusi'][$b] ?? 0;
                     $pct = $stats['total'] > 0 ? round(($count / $stats['total']) * 100) : 0;
                 @endphp
                 <a href="{{ route('mitra.rating.index', array_merge(request()->query(), ['bintang' => $b])) }}"
-                   class="d-flex align-items-center gap-2 text-decoration-none mb-1"
-                   style="color:#1e293b;">
-                    <div style="min-width:42px;">
-                        <span class="fw-bold small">{{ $b }}</span>
-                        <i class="bi bi-star-fill" style="color:#ffd700;font-size:.7rem;"></i>
+                   style="display:flex; align-items:center; gap:var(--fib-2); text-decoration:none; color:var(--ink); margin-bottom:var(--fib-1);">
+                    <div style="min-width:var(--fib-6); display:flex; align-items:center; gap:var(--fib-1);">
+                        <span style="font-weight:700; font-size:var(--t-xs);">{{ $b }}</span>
+                        <i class="bi bi-star-fill" style="color:#fbbf24; font-size:var(--t-xxs);"></i>
                     </div>
-                    <div class="flex-grow-1" style="height:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;">
-                        <div style="height:100%;width:{{ $pct }}%;
-                                    background:linear-gradient(90deg,#fbbf24,#f59e0b);"></div>
+                    <div style="flex-grow:1; height:var(--fib-2); background:var(--line); border-radius:var(--r-pill); overflow:hidden;">
+                        <div style="height:100%; width:{{ $pct }}%; background:linear-gradient(90deg,#fbbf24,#f59e0b);"></div>
                     </div>
-                    <div style="min-width:30px;text-align:right;font-size:.75rem;color:#64748b;">
-                        {{ $count }}
-                    </div>
+                    <div style="min-width:var(--fib-5); text-align:right; font-size:var(--t-xs); color:var(--ink-soft);">{{ $count }}</div>
                 </a>
             @endfor
         </div>
@@ -76,42 +61,35 @@
     @endif
 
     {{-- Filter Bar --}}
-    <div class="d-flex gap-2 mb-3 overflow-auto pb-2" style="scrollbar-width:thin;">
+    <div class="m-chip-bar">
         @php
             $filterOpts = [
-                'all'           => ['Semua',         null,   '#005aa9'],
-                'belum-dibalas' => ['Belum Dibalas', 'ef4444', '#ef4444'],
-                'sudah-dibalas' => ['Sudah Dibalas', null,   '#16a34a'],
+                'all'           => ['Semua',         'var(--mitra-blue)'],
+                'belum-dibalas' => ['Belum Dibalas', '#ef4444'],
+                'sudah-dibalas' => ['Sudah Dibalas', '#16a34a'],
             ];
         @endphp
-        @foreach($filterOpts as $key => [$label, $bg, $color])
+        @foreach($filterOpts as $key => [$label, $color])
             @php $active = $filter === $key; @endphp
             <a href="{{ route('mitra.rating.index', ['filter' => $key, 'bintang' => $bintang]) }}"
-               class="text-decoration-none flex-shrink-0"
-               style="padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:600;
-                      white-space:nowrap;
-                      background:{{ $active ? $color : '#fff' }};
-                      color:{{ $active ? '#fff' : $color }};
-                      border:1px solid {{ $color }};">
+               class="m-chip {{ $active ? 'active' : '' }}"
+               style="{{ $active ? 'background:'.$color.'; border-color:'.$color.';' : 'color:'.$color.'; border-color:'.$color.';' }}">
                 {{ $label }}
             </a>
         @endforeach
         @if($bintang)
-            <a href="{{ route('mitra.rating.index', ['filter' => $filter]) }}"
-               class="text-decoration-none flex-shrink-0"
-               style="padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:600;
-                      background:#f1f5f9;color:#64748b;">
-                <i class="bi bi-x-lg me-1"></i>{{ $bintang }} <i class="bi bi-star-fill" style="color:#ffd700;font-size:.65rem;"></i>
+            <a href="{{ route('mitra.rating.index', ['filter' => $filter]) }}" class="m-chip" style="background:var(--line); color:var(--ink-soft); border-color:var(--line);">
+                <i class="bi bi-x-lg"></i> {{ $bintang }} <i class="bi bi-star-fill" style="color:#fbbf24; font-size:var(--t-xxs);"></i>
             </a>
         @endif
     </div>
 
     {{-- Daftar Ulasan --}}
     @if($ratings->isEmpty())
-        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
-            <i class="bi bi-chat-square-text" style="font-size:2.5rem;color:#cbd5e1;"></i>
-            <h6 class="mt-3 fw-bold">Belum Ada Ulasan</h6>
-            <p class="text-muted small mb-0">
+        <div class="m-empty">
+            <i class="bi bi-chat-square-text m-empty-icon"></i>
+            <h3 class="m-empty-title">Belum Ada Ulasan</h3>
+            <p class="m-empty-text">
                 @if($filter !== 'all' || $bintang)
                     Coba ubah filter di atas.
                 @else
@@ -128,92 +106,67 @@
                     : ($pl->nama_panggilan ?? $pl->nama_pelanggan ?? 'Pelanggan');
                 $orderTypeLabel = ucfirst($r->order_type);
             @endphp
-            <div class="card border-0 shadow-sm rounded-4 mb-3">
-                <div class="card-body p-3">
-                    {{-- Header --}}
-                    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-1">
-                        <div>
-                            <div class="d-flex align-items-center gap-2">
-                                <div style="width:36px;height:36px;border-radius:50%;
-                                            background:#eff6ff;color:#005aa9;
-                                            display:flex;align-items:center;justify-content:center;">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-bold small" style="color:#1e293b;">{{ $nama }}</div>
-                                    <small class="text-muted" style="font-size:.65rem;">
-                                        {{ $orderTypeLabel }} · {{ $r->created_at->diffForHumans() }}
-                                    </small>
-                                </div>
+            <div class="m-card">
+                <div class="m-card-body">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--fib-2); flex-wrap:wrap; gap:var(--fib-1);">
+                        <div style="display:flex; align-items:center; gap:var(--fib-2);">
+                            <div style="width:var(--fib-5); height:var(--fib-5); border-radius:50%; background:var(--mitra-blue-soft); color:var(--mitra-blue); display:flex; align-items:center; justify-content:center;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; font-size:var(--t-xs); color:var(--ink);">{{ $nama }}</div>
+                                <div style="font-size:var(--t-xxs); color:var(--ink-soft);">{{ $orderTypeLabel }} · {{ $r->created_at->diffForHumans() }}</div>
                             </div>
                         </div>
-                        <div style="color:#ffd700;font-size:.85rem;">
+                        <div style="color:#fbbf24; font-size:var(--t-sm);">
                             @for($i = 1; $i <= 5; $i++)
                                 <i class="bi {{ $i <= $r->bintang ? 'bi-star-fill' : 'bi-star' }}"></i>
                             @endfor
                         </div>
                     </div>
 
-                    {{-- Isi ulasan --}}
                     @if($r->ulasan)
-                        <div class="mb-3" style="color:#1e293b;font-size:.85rem;line-height:1.5;">
-                            {{ $r->ulasan }}
-                        </div>
+                        <div style="margin-bottom:var(--fib-3); color:var(--ink); font-size:var(--t-xs); line-height:1.5;">{{ $r->ulasan }}</div>
                     @else
-                        <div class="mb-3 text-muted fst-italic small">
-                            (Tidak ada teks ulasan)
-                        </div>
+                        <div style="margin-bottom:var(--fib-3); color:var(--ink-soft); font-style:italic; font-size:var(--t-xs);">(Tidak ada teks ulasan)</div>
                     @endif
 
                     @if($r->foto_url)
-                        <div class="mb-3">
+                        <div style="margin-bottom:var(--fib-3);">
                             <a href="{{ asset('storage/' . $r->foto_url) }}" target="_blank">
-                                <img src="{{ asset('storage/' . $r->foto_url) }}"
-                                     style="max-height:140px;border-radius:8px;">
+                                <img src="{{ asset('storage/' . $r->foto_url) }}" style="max-height:var(--fib-8); border-radius:var(--r-sm);">
                             </a>
                         </div>
                     @endif
 
-                    {{-- Balasan mitra --}}
                     @if($r->balasan_mitra)
-                        <div class="rounded-3 p-3" style="background:#eff6ff;border-left:3px solid #005aa9;">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <small class="fw-bold" style="color:#005aa9;">
-                                    <i class="bi bi-reply-fill me-1"></i>Balasan Anda
-                                </small>
-                                <small class="text-muted" style="font-size:.65rem;">
-                                    {{ $r->balasan_at?->diffForHumans() }}
-                                </small>
+                        <div style="background:var(--mitra-blue-tint); border-left:3px solid var(--mitra-blue); border-radius:var(--r-sm); padding:var(--fib-2) var(--fib-3);">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--fib-1);">
+                                <span style="font-weight:700; color:var(--mitra-blue); font-size:var(--t-xxs);">
+                                    <i class="bi bi-reply-fill"></i> Balasan Anda
+                                </span>
+                                <span style="font-size:var(--t-xxs); color:var(--ink-soft);">{{ $r->balasan_at?->diffForHumans() }}</span>
                             </div>
-                            <div style="color:#1e293b;font-size:.8rem;line-height:1.5;">
-                                {{ $r->balasan_mitra }}
-                            </div>
+                            <div style="color:var(--ink); font-size:var(--t-xs); line-height:1.5;">{{ $r->balasan_mitra }}</div>
                             @if($mitra->hasFeature('ulasan'))
-                                <form action="{{ route('mitra.rating.hapusBalasan', $r->id) }}" method="POST"
-                                      class="mt-2"
-                                      onsubmit="return confirm('Hapus balasan ini? Anda bisa balas ulang nanti.')">
+                                <form action="{{ route('mitra.rating.hapusBalasan', $r->id) }}" method="POST" style="margin-top:var(--fib-2);"
+                                      onsubmit="return confirm('Hapus balasan ini?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0"
-                                            style="font-size:.7rem;text-decoration:none;">
+                                    <button type="submit" style="background:none; border:none; color:#ef4444; font-size:var(--t-xxs); cursor:pointer; padding:0;">
                                         <i class="bi bi-trash"></i> Hapus balasan
                                     </button>
                                 </form>
                             @endif
                         </div>
                     @elseif($mitra->hasFeature('ulasan'))
-                        {{-- Form balas (hanya kalau punya fitur 'ulasan') --}}
-                        <form action="{{ route('mitra.rating.balas', $r->id) }}" method="POST" class="mt-2">
+                        <form action="{{ route('mitra.rating.balas', $r->id) }}" method="POST" style="margin-top:var(--fib-2);">
                             @csrf
                             <input type="hidden" name="filter" value="{{ $filter }}">
-                            @if($bintang)
-                                <input type="hidden" name="bintang" value="{{ $bintang }}">
-                            @endif
-                            <div class="input-group input-group-sm">
-                                <input type="text" name="balasan"
-                                       class="form-control rounded-start-3"
-                                       placeholder="Tulis balasan..."
-                                       maxlength="500" required>
-                                <button type="submit" class="btn btn-primary rounded-end-3 px-3">
+                            @if($bintang)<input type="hidden" name="bintang" value="{{ $bintang }}">@endif
+                            <div style="display:flex; gap:var(--fib-1);">
+                                <input type="text" name="balasan" class="m-form-input" style="flex-grow:1;"
+                                       placeholder="Tulis balasan..." maxlength="500" required>
+                                <button type="submit" class="m-btn-primary" style="flex-shrink:0; padding:var(--fib-2) var(--fib-3);">
                                     <i class="bi bi-send-fill"></i>
                                 </button>
                             </div>

@@ -1,161 +1,119 @@
 @extends('layouts.mitra')
 
 @section('content')
+@include('mitra.partials._page-style')
+
 @php
     $mitra = Auth::guard('mitra')->user();
     $totalPending = $withdrawals->where('status', 'pending')->sum('nominal');
-    $totalApproved = $withdrawals->where('status', 'approved')->sum('nominal');
 @endphp
 
-{{-- Hero --}}
-<div style="background: linear-gradient(135deg, var(--mitra-blue, #005aa9) 0%, var(--mitra-blue-light, #0078d4) 100%); padding: var(--fib-5, 24px) var(--fib-4, 16px) var(--fib-6, 32px); color: #fff;">
-    <div class="d-flex align-items-center mb-3">
-        <a href="{{ route('mitra.dashboard') }}" class="text-white me-3" style="font-size:1.4rem;text-decoration:none;">
-            <i class="bi bi-arrow-left"></i>
-        </a>
+<div class="m-hero">
+    <div class="m-hero-bar">
+        <a href="{{ route('mitra.dashboard') }}" class="m-hero-back"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <div style="font-size:.75rem;opacity:.8;">KEUANGAN</div>
-            <h5 class="fw-bold m-0">Tarik Saldo</h5>
+            <div class="m-hero-eyebrow">Keuangan</div>
+            <h1 class="m-hero-title">Tarik Saldo</h1>
         </div>
     </div>
 
-    {{-- Saldo aktif --}}
-    <div class="text-center">
-        <div style="font-size:.7rem;opacity:.8;">SALDO TERSEDIA</div>
-        <div style="font-size:1.8rem;font-weight:800;letter-spacing:-.02em;">
-            Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}
-        </div>
+    <div style="text-align:center;">
+        <div class="m-hero-stat-label">SALDO TERSEDIA</div>
+        <div class="m-hero-stat-value">Rp {{ number_format($mitra->saldo ?? 0, 0, ',', '.') }}</div>
         @if($totalPending > 0)
-            <div style="font-size:.7rem;opacity:.7;">
-                Rp {{ number_format($totalPending, 0, ',', '.') }} sedang diproses
-            </div>
+            <div class="m-hero-stat-sub">Rp {{ number_format($totalPending, 0, ',', '.') }} sedang diproses</div>
         @endif
     </div>
 </div>
 
-<div style="padding: var(--fib-4, 16px); max-width: 720px; margin: 0 auto;">
-
-    @if(session('success'))
-        <div class="alert alert-success rounded-3 shadow-sm small">
-            <i class="bi bi-check-circle-fill me-1"></i>{{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger rounded-3 shadow-sm small">
-            <i class="bi bi-x-circle-fill me-1"></i>{{ session('error') }}
-        </div>
-    @endif
+<div class="m-page">
+    @if(session('success'))<div class="m-alert m-alert-success"><i class="bi bi-check-circle-fill"></i>{{ session('success') }}</div>@endif
+    @if(session('error'))<div class="m-alert m-alert-error"><i class="bi bi-x-circle-fill"></i>{{ session('error') }}</div>@endif
     @if($errors->any())
-        <div class="alert alert-danger rounded-3 small">
-            @foreach($errors->all() as $err)
-                <div><i class="bi bi-x-circle-fill me-1"></i>{{ $err }}</div>
-            @endforeach
+        <div class="m-alert m-alert-error" style="flex-direction:column; align-items:flex-start;">
+            @foreach($errors->all() as $err)<div><i class="bi bi-x-circle-fill"></i>{{ $err }}</div>@endforeach
         </div>
     @endif
 
-    {{-- Form Penarikan --}}
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body p-3">
-            <h6 class="fw-bold mb-3" style="color:#1e293b;">
-                <i class="bi bi-bank me-1" style="color:#005aa9;"></i>Permintaan Penarikan Baru
-            </h6>
+    <div class="m-card">
+        <div class="m-card-body">
+            <h2 class="m-section-title" style="margin-top:0;">
+                <i class="bi bi-bank m-section-title-icon"></i> Permintaan Penarikan Baru
+            </h2>
 
             <form action="{{ route('mitra.withdrawal.request') }}" method="POST">
                 @csrf
-                <div class="mb-2">
-                    <label class="form-label small fw-bold mb-1">Nominal</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp</span>
-                        <input type="number" name="nominal"
-                               class="form-control rounded-end-3"
-                               min="50000" max="10000000" step="1000"
-                               placeholder="100000"
+                <div style="margin-bottom:var(--fib-2);">
+                    <label class="m-form-label">Nominal</label>
+                    <div style="display:flex; align-items:stretch; border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden;">
+                        <span style="padding:var(--fib-2) var(--fib-3); background:var(--mitra-blue-tint); color:var(--ink-soft); font-size:var(--t-sm);">Rp</span>
+                        <input type="number" name="nominal" class="m-form-input" style="border:none; border-radius:0;"
+                               min="50000" max="10000000" step="1000" placeholder="100000"
                                value="{{ old('nominal') }}" required>
                     </div>
-                    <small class="text-muted" style="font-size:.7rem;">
-                        Min Rp 50.000 · Max Rp 10.000.000
-                    </small>
+                    <div class="m-form-help">Min Rp 50.000 · Max Rp 10.000.000</div>
                 </div>
 
-                <div class="mb-2">
-                    <label class="form-label small fw-bold mb-1">Bank</label>
-                    <input type="text" name="bank_name"
-                           class="form-control rounded-3"
-                           placeholder="BCA / BRI / DANA / OVO"
-                           value="{{ old('bank_name') }}"
-                           maxlength="100" required>
+                <div style="margin-bottom:var(--fib-2);">
+                    <label class="m-form-label">Bank</label>
+                    <input type="text" name="bank_name" class="m-form-input"
+                           placeholder="BCA / BRI / DANA / OVO" value="{{ old('bank_name') }}" maxlength="100" required>
                 </div>
 
-                <div class="row g-2 mb-3">
-                    <div class="col-7">
-                        <label class="form-label small fw-bold mb-1">No. Rekening</label>
-                        <input type="text" name="account_number"
-                               class="form-control rounded-3"
-                               placeholder="1234567890"
-                               value="{{ old('account_number') }}"
-                               maxlength="50" required>
+                <div style="display:grid; grid-template-columns: 1.618fr 1fr; gap:var(--fib-2); margin-bottom:var(--fib-3);">
+                    <div>
+                        <label class="m-form-label">No. Rekening</label>
+                        <input type="text" name="account_number" class="m-form-input"
+                               placeholder="1234567890" value="{{ old('account_number') }}" maxlength="50" required>
                     </div>
-                    <div class="col-5">
-                        <label class="form-label small fw-bold mb-1">A.N.</label>
-                        <input type="text" name="account_name"
-                               class="form-control rounded-3"
-                               placeholder="Nama"
-                               value="{{ old('account_name') }}"
-                               maxlength="100" required>
+                    <div>
+                        <label class="m-form-label">A.N.</label>
+                        <input type="text" name="account_name" class="m-form-input"
+                               placeholder="Nama" value="{{ old('account_name') }}" maxlength="100" required>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary rounded-pill w-100 py-2 fw-bold">
-                    <i class="bi bi-send-fill me-1"></i>Kirim Permintaan
+                <button type="submit" class="m-btn-primary m-btn-primary-block">
+                    <i class="bi bi-send-fill"></i> Kirim Permintaan
                 </button>
             </form>
         </div>
     </div>
 
-    {{-- Riwayat --}}
-    <h6 class="fw-bold mt-3 mb-2" style="color:#1e293b;">
-        Riwayat Penarikan ({{ $withdrawals->count() }})
-    </h6>
+    <h2 class="m-section-title">Riwayat Penarikan ({{ $withdrawals->count() }})</h2>
 
     @if($withdrawals->isEmpty())
-        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
-            <i class="bi bi-clipboard-x" style="font-size:2.5rem;color:#cbd5e1;"></i>
-            <h6 class="mt-3 fw-bold">Belum Ada Riwayat</h6>
-            <p class="text-muted small mb-0">Permintaan penarikan akan muncul di sini.</p>
+        <div class="m-empty">
+            <i class="bi bi-clipboard-x m-empty-icon"></i>
+            <h3 class="m-empty-title">Belum Ada Riwayat</h3>
+            <p class="m-empty-text">Permintaan penarikan akan muncul di sini.</p>
         </div>
     @else
         @foreach($withdrawals as $w)
             @php
                 $statusColor = match($w->status) {
-                    'pending'  => ['#fef3c7', '#92400e', 'bi-clock-fill',         'Menunggu'],
-                    'approved' => ['#d1fae5', '#065f46', 'bi-check-circle-fill',  'Disetujui'],
-                    'rejected' => ['#fee2e2', '#991b1b', 'bi-x-circle-fill',      'Ditolak'],
-                    default    => ['#f1f5f9', '#475569', 'bi-question-circle',    ucfirst($w->status)],
+                    'pending'  => ['#fef3c7', '#92400e', 'bi-clock-fill', 'Menunggu'],
+                    'approved' => ['#d1fae5', '#065f46', 'bi-check-circle-fill', 'Disetujui'],
+                    'rejected' => ['#fee2e2', '#991b1b', 'bi-x-circle-fill', 'Ditolak'],
+                    default    => ['#f1f5f9', '#475569', 'bi-question-circle', ucfirst($w->status)],
                 };
             @endphp
-            <div class="card border-0 shadow-sm rounded-4 mb-2">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="m-card">
+                <div class="m-card-body">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--fib-2);">
                         <div>
-                            <div class="fw-bold" style="color:#1e293b;">
-                                Rp {{ number_format($w->nominal, 0, ',', '.') }}
-                            </div>
-                            <small class="text-muted" style="font-size:.7rem;">
-                                {{ \Carbon\Carbon::parse($w->created_at)->translatedFormat('d M Y, H:i') }}
-                            </small>
+                            <div style="font-weight:800; color:var(--ink); font-size:var(--t-md);">Rp {{ number_format($w->nominal, 0, ',', '.') }}</div>
+                            <div style="font-size:var(--t-xxs); color:var(--ink-soft);">{{ \Carbon\Carbon::parse($w->created_at)->translatedFormat('d M Y, H:i') }}</div>
                         </div>
-                        <span class="badge rounded-pill px-3 py-1"
-                              style="background:{{ $statusColor[0] }};color:{{ $statusColor[1] }};font-size:.65rem;">
-                            <i class="bi {{ $statusColor[2] }} me-1"></i>{{ $statusColor[3] }}
+                        <span style="background:{{ $statusColor[0] }}; color:{{ $statusColor[1] }}; padding:var(--fib-1) var(--fib-2); border-radius:var(--r-pill); font-size:var(--t-xxs); font-weight:700;">
+                            <i class="bi {{ $statusColor[2] }}"></i> {{ $statusColor[3] }}
                         </span>
                     </div>
-                    <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background:#f8fafc;font-size:.8rem;">
-                        <i class="bi bi-bank" style="color:#005aa9;"></i>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold small" style="color:#1e293b;">{{ $w->bank_name }}</div>
-                            <small class="text-muted" style="font-size:.7rem;">
-                                {{ $w->account_number }} a.n. {{ $w->account_name }}
-                            </small>
+                    <div style="display:flex; align-items:center; gap:var(--fib-2); padding:var(--fib-2); background:var(--mitra-blue-tint); border-radius:var(--r-sm); font-size:var(--t-xs);">
+                        <i class="bi bi-bank" style="color:var(--mitra-blue);"></i>
+                        <div>
+                            <div style="font-weight:700; color:var(--ink); font-size:var(--t-xs);">{{ $w->bank_name }}</div>
+                            <div style="color:var(--ink-soft); font-size:var(--t-xxs);">{{ $w->account_number }} a.n. {{ $w->account_name }}</div>
                         </div>
                     </div>
                 </div>
@@ -163,10 +121,9 @@
         @endforeach
     @endif
 
-    <div class="alert alert-info rounded-3 small mb-0"
-         style="background:#eff6ff;border-color:#bfdbfe;color:#1e40af;">
-        <i class="bi bi-info-circle-fill me-1"></i>
-        Saldo dipotong saat permintaan dikirim. Jika ditolak admin, saldo otomatis dikembalikan.
+    <div class="m-alert m-alert-info" style="margin-top:var(--fib-3);">
+        <i class="bi bi-info-circle-fill"></i>
+        <div>Saldo dipotong saat permintaan dikirim. Jika ditolak admin, saldo otomatis dikembalikan.</div>
     </div>
 </div>
 @endsection

@@ -7,38 +7,36 @@
 @endphp
 
 @if($errors->any())
-    <div class="alert alert-danger rounded-3">
+    <div class="m-alert m-alert-error" style="flex-direction:column; align-items:flex-start;">
         @foreach($errors->all() as $err)
-            <div><i class="bi bi-x-circle-fill me-1"></i>{{ $err }}</div>
+            <div><i class="bi bi-x-circle-fill"></i>{{ $err }}</div>
         @endforeach
     </div>
 @endif
 
-<div class="mb-3">
-    <label class="form-label fw-bold small">Nama Layanan <span class="text-danger">*</span></label>
-    <input type="text" name="keterangan"
-           class="form-control rounded-3"
-           value="{{ $tarifKeterangan }}"
-           placeholder="contoh: Service AC, Bersihkan Rumah, Antar Paket"
-           required maxlength="255">
+<div style="margin-bottom:var(--fib-3);">
+    <label class="m-form-label">Nama Layanan <span style="color:#ef4444;">*</span></label>
+    <input type="text" name="keterangan" class="m-form-input"
+           value="{{ $tarifKeterangan }}" maxlength="255" required
+           placeholder="contoh: Service AC, Bersihkan Rumah, Antar Paket">
 </div>
 
-<div class="row g-2 mb-3">
-    <div class="col-7">
-        <label class="form-label fw-bold small">Tarif Anda <span class="text-danger">*</span></label>
-        <div class="input-group">
-            <span class="input-group-text">Rp</span>
+<div style="display:grid; grid-template-columns: 1.618fr 1fr; gap:var(--fib-2); margin-bottom:var(--fib-3);">
+    <div>
+        <label class="m-form-label">Tarif Anda <span style="color:#ef4444;">*</span></label>
+        <div style="display:flex; align-items:stretch; border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden;">
+            <span style="padding:var(--fib-2) var(--fib-3); background:var(--mitra-blue-tint); color:var(--ink-soft); font-size:var(--t-sm);">Rp</span>
             <input type="number" name="nominal" id="input-nominal"
-                   class="form-control"
+                   class="m-form-input" style="border:none; border-radius:0;"
                    value="{{ $tarifNominal }}"
                    min="1000" max="99999999" step="1000"
                    placeholder="50000" required>
         </div>
-        <div class="form-text" style="font-size: .7rem;">Jumlah yang Anda terima</div>
+        <div class="m-form-help">Jumlah yang Anda terima</div>
     </div>
-    <div class="col-5">
-        <label class="form-label fw-bold small">Satuan <span class="text-danger">*</span></label>
-        <select name="satuan" class="form-select" required>
+    <div>
+        <label class="m-form-label">Satuan <span style="color:#ef4444;">*</span></label>
+        <select name="satuan" class="m-form-select" required>
             @php $satuanOptions = ['per item','per jam','per hari','per kunjungan','per km','per kg']; @endphp
             @foreach($satuanOptions as $opt)
                 <option value="{{ $opt }}" {{ $tarifSatuan === $opt ? 'selected' : '' }}>{{ $opt }}</option>
@@ -48,36 +46,32 @@
 </div>
 
 {{-- Preview harga pelanggan --}}
-<div class="card border-0 rounded-3 mb-3" style="background: #f8fafc;">
-    <div class="card-body p-3">
-        <div class="text-muted small mb-1">Pelanggan akan bayar:</div>
-        <div class="d-flex justify-content-between align-items-end">
-            <div>
-                <span class="fw-bold" style="color: #005aa9; font-size: 1.2rem;" id="preview-harga">
-                    Rp <span id="preview-harga-nominal">0</span>
-                </span>
-            </div>
-            <small class="text-muted">
-                = tarif Anda + {{ number_format($komisiPersen, 1) }}% komisi
-            </small>
-        </div>
+<div style="background:var(--mitra-blue-tint); border-radius:var(--r-md); padding:var(--fib-3); margin-bottom:var(--fib-3);">
+    <div style="font-size:var(--t-xxs); color:var(--ink-soft); margin-bottom:var(--fib-1);">Pelanggan akan bayar:</div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <span style="font-weight:800; color:var(--mitra-blue); font-size:var(--t-lg);">
+            Rp <span id="preview-harga-nominal">0</span>
+        </span>
+        <span style="font-size:var(--t-xxs); color:var(--ink-soft);">
+            = tarif Anda + {{ number_format($komisiPersen, 1) }}% komisi
+        </span>
     </div>
 </div>
 
-<div class="form-check form-switch mb-4">
-    <input class="form-check-input" type="checkbox" name="is_aktif" value="1" id="switchAktif"
-           {{ $tarifAktif ? 'checked' : '' }}>
-    <label class="form-check-label fw-bold" for="switchAktif">
+<div style="display:flex; align-items:center; gap:var(--fib-2); margin-bottom:var(--fib-4);">
+    <label style="display:flex; align-items:center; gap:var(--fib-2); cursor:pointer; font-weight:700; color:var(--ink); font-size:var(--t-sm);">
+        <input type="checkbox" name="is_aktif" value="1" {{ $tarifAktif ? 'checked' : '' }}
+               style="width:var(--fib-3); height:var(--fib-3); accent-color:var(--mitra-blue);">
         Tampilkan tarif ini untuk pelanggan
     </label>
 </div>
 
-<div class="d-grid gap-2">
-    <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">
-        <i class="bi bi-check-circle me-1"></i>
+<div style="display:flex; flex-direction:column; gap:var(--fib-2);">
+    <button type="submit" class="m-btn-primary m-btn-primary-block">
+        <i class="bi bi-check-circle"></i>
         {{ $isEdit ? 'Simpan Perubahan' : 'Tambah Tarif' }}
     </button>
-    <a href="{{ route('mitra.tarif.index') }}" class="btn btn-link text-muted">Batal</a>
+    <a href="{{ route('mitra.tarif.index') }}" style="text-align:center; color:var(--ink-soft); font-size:var(--t-xs); text-decoration:none;">Batal</a>
 </div>
 
 <script>

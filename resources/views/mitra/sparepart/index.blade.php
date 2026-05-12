@@ -1,112 +1,81 @@
 @extends('layouts.mitra')
 
 @section('content')
-{{-- Hero --}}
-<div style="background: linear-gradient(135deg, var(--mitra-blue, #005aa9) 0%, var(--mitra-blue-light, #0078d4) 100%); padding: var(--fib-5, 24px) var(--fib-4, 16px) var(--fib-6, 32px); color: #fff;">
-    <div class="d-flex align-items-center mb-3">
-        <a href="{{ route('mitra.dashboard') }}" class="text-white me-3" style="font-size:1.4rem;text-decoration:none;">
-            <i class="bi bi-arrow-left"></i>
-        </a>
+@include('mitra.partials._page-style')
+
+<div class="m-hero">
+    <div class="m-hero-bar">
+        <a href="{{ route('mitra.dashboard') }}" class="m-hero-back"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <div style="font-size:.75rem;opacity:.8;">INVENTORY</div>
-            <h5 class="fw-bold m-0">Sparepart</h5>
+            <div class="m-hero-eyebrow">Inventory</div>
+            <h1 class="m-hero-title">Sparepart</h1>
         </div>
-        <a href="{{ route('mitra.sparepart.create') }}"
-           class="ms-auto text-white text-decoration-none small fw-bold"
-           style="background:rgba(255,255,255,.18);padding:6px 14px;border-radius:999px;">
-            <i class="bi bi-plus-lg me-1"></i> Tambah
+        <a href="{{ route('mitra.sparepart.create') }}" class="m-hero-action">
+            <i class="bi bi-plus-lg"></i> Tambah
         </a>
     </div>
 
-    {{-- Total nilai inventory --}}
-    <div class="text-center">
-        <div style="font-size:.7rem;opacity:.8;">TOTAL NILAI INVENTORY</div>
-        <div style="font-size:1.8rem;font-weight:800;letter-spacing:-.02em;">
-            Rp {{ number_format($stats['total_nilai'], 0, ',', '.') }}
-        </div>
-        <div style="font-size:.7rem;opacity:.75;">
+    <div style="text-align:center;">
+        <div class="m-hero-stat-label">TOTAL NILAI INVENTORY</div>
+        <div class="m-hero-stat-value">Rp {{ number_format($stats['total_nilai'], 0, ',', '.') }}</div>
+        <div class="m-hero-stat-sub">
             {{ $stats['total_item'] }} item
             @if($stats['menipis'] > 0)
-                · <span style="background:#fbbf24;color:#fff;padding:2px 8px;border-radius:999px;">
-                    {{ $stats['menipis'] }} menipis
-                </span>
+                · <span style="background:#fbbf24; color:#fff; padding:2px var(--fib-2); border-radius:var(--r-pill);">{{ $stats['menipis'] }} menipis</span>
             @endif
             @if($stats['habis'] > 0)
-                · <span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:999px;">
-                    {{ $stats['habis'] }} habis
-                </span>
+                · <span style="background:#ef4444; color:#fff; padding:2px var(--fib-2); border-radius:var(--r-pill);">{{ $stats['habis'] }} habis</span>
             @endif
         </div>
     </div>
 </div>
 
-<div style="padding: var(--fib-4, 16px); max-width: 720px; margin: 0 auto;">
+<div class="m-page">
+    @if(session('success'))<div class="m-alert m-alert-success"><i class="bi bi-check-circle-fill"></i>{{ session('success') }}</div>@endif
+    @if(session('error'))<div class="m-alert m-alert-error"><i class="bi bi-x-circle-fill"></i>{{ session('error') }}</div>@endif
 
-    @if(session('success'))
-        <div class="alert alert-success rounded-3 shadow-sm small">
-            <i class="bi bi-check-circle-fill me-1"></i>{{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger rounded-3 shadow-sm small">
-            <i class="bi bi-x-circle-fill me-1"></i>{{ session('error') }}
-        </div>
-    @endif
-
-    {{-- Filter Search --}}
-    <form method="GET" action="{{ route('mitra.sparepart.index') }}" class="mb-3">
+    {{-- Search --}}
+    <form method="GET" action="{{ route('mitra.sparepart.index') }}" style="margin-bottom:var(--fib-3);">
         <input type="hidden" name="status" value="{{ $filterStatus }}">
-        <div class="input-group input-group-sm">
-            <input type="text" name="q" value="{{ $filterQuery }}"
-                   class="form-control rounded-start-3"
+        <div style="display:flex; gap:var(--fib-1);">
+            <input type="text" name="q" value="{{ $filterQuery }}" class="m-form-input" style="flex-grow:1;"
                    placeholder="Cari nama / kode / kategori...">
-            <button type="submit" class="btn btn-primary rounded-end-3 px-3">
+            <button type="submit" class="m-btn-primary" style="flex-shrink:0; padding:var(--fib-2) var(--fib-3);">
                 <i class="bi bi-search"></i>
             </button>
         </div>
     </form>
 
-    {{-- Filter Tabs --}}
-    <div class="d-flex gap-2 mb-3 overflow-auto pb-2" style="scrollbar-width:thin;">
+    {{-- Filter chips --}}
+    <div class="m-chip-bar">
         @php
             $tabs = [
-                ''         => ['Semua',     null,                   '#005aa9'],
+                ''         => ['Semua',     null,                   'var(--mitra-blue)'],
                 'menipis'  => ['Menipis',   $stats['menipis'] ?? 0, '#f59e0b'],
                 'habis'    => ['Habis',     $stats['habis'] ?? 0,   '#ef4444'],
-                'nonaktif' => ['Non-aktif', null,                   '#64748b'],
+                'nonaktif' => ['Non-aktif', null,                   'var(--ink-soft)'],
             ];
         @endphp
         @foreach($tabs as $key => [$label, $count, $color])
             @php $active = $filterStatus === $key || (!$filterStatus && $key === ''); @endphp
             <a href="{{ route('mitra.sparepart.index', ['status' => $key, 'q' => $filterQuery]) }}"
-               class="text-decoration-none flex-shrink-0 d-flex align-items-center gap-1"
-               style="padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:600;
-                      white-space:nowrap;
-                      background:{{ $active ? $color : '#fff' }};
-                      color:{{ $active ? '#fff' : $color }};
-                      border:1px solid {{ $color }};">
-                <span>{{ $label }}</span>
+               class="m-chip {{ $active ? 'active' : '' }}"
+               style="{{ $active ? 'background:'.$color.'; border-color:'.$color.';' : 'color:'.$color.'; border-color:'.$color.';' }}">
+                {{ $label }}
                 @if($count !== null && $count > 0)
-                    <span style="background:{{ $active ? '#fff' : $color }};
-                                 color:{{ $active ? $color : '#fff' }};
-                                 padding:1px 6px;border-radius:999px;font-size:.65rem;">
-                        {{ $count }}
-                    </span>
+                    <span class="m-chip-count" style="{{ $active ? 'background:rgba(255,255,255,0.25); color:#fff;' : 'background:'.$color.'; color:#fff;' }}">{{ $count }}</span>
                 @endif
             </a>
         @endforeach
     </div>
 
-    {{-- List Spareparts --}}
     @if($spareparts->isEmpty())
-        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
-            <i class="bi bi-box-seam" style="font-size:2.5rem;color:#cbd5e1;"></i>
-            <h6 class="mt-3 fw-bold">Inventory Kosong</h6>
-            <p class="text-muted small">
-                @if($filterQuery || $filterStatus)
-                    Tidak ada hasil untuk filter ini.
-                @else
-                    Tambahkan sparepart untuk lacak stok.
+        <div class="m-empty">
+            <i class="bi bi-box-seam m-empty-icon"></i>
+            <h3 class="m-empty-title">Inventory Kosong</h3>
+            <p class="m-empty-text">
+                @if($filterQuery || $filterStatus)Tidak ada hasil untuk filter ini.
+                @else Tambahkan sparepart untuk lacak stok.
                 @endif
             </p>
         </div>
@@ -118,80 +87,65 @@
                     'habis'   => '#ef4444',
                     'menipis' => '#f59e0b',
                     'aman'    => '#16a34a',
-                    default   => '#64748b',
+                    default   => 'var(--ink-soft)',
                 };
             @endphp
-            <div class="card border-0 shadow-sm rounded-4 mb-2 {{ !$s->is_aktif ? 'opacity-75' : '' }}">
-                <div class="card-body p-3">
-                    <div class="d-flex gap-3">
-                        {{-- Foto/Icon --}}
-                        @if($s->foto_path)
-                            <a href="{{ asset('storage/' . $s->foto_path) }}" target="_blank" class="flex-shrink-0">
-                                <img src="{{ asset('storage/' . $s->foto_path) }}"
-                                     style="width:60px;height:60px;object-fit:cover;border-radius:10px;">
-                            </a>
-                        @else
-                            <div style="width:60px;height:60px;border-radius:10px;background:#eff6ff;
-                                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="bi bi-box-seam" style="color:#005aa9;font-size:1.5rem;"></i>
-                            </div>
-                        @endif
+            <div class="m-card" style="{{ !$s->is_aktif ? 'opacity:0.65;' : '' }}">
+                <div class="m-card-body" style="display:flex; gap:var(--fib-3);">
+                    @if($s->foto_path)
+                        <a href="{{ asset('storage/' . $s->foto_path) }}" target="_blank" style="flex-shrink:0;">
+                            <img src="{{ asset('storage/' . $s->foto_path) }}"
+                                 style="width:var(--fib-6); height:var(--fib-6); object-fit:cover; border-radius:var(--r-md);">
+                        </a>
+                    @else
+                        <div style="width:var(--fib-6); height:var(--fib-6); border-radius:var(--r-md); background:var(--mitra-blue-soft); color:var(--mitra-blue); display:flex; align-items:center; justify-content:center; font-size:var(--t-lg); flex-shrink:0;">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    @endif
 
-                        <div class="flex-grow-1 min-w-0">
-                            <div class="d-flex justify-content-between align-items-start gap-1 flex-wrap mb-1">
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="fw-bold small text-truncate" style="color:#1e293b;">
-                                        {{ $s->nama }}
-                                        @if(!$s->is_aktif)
-                                            <span class="badge bg-secondary ms-1" style="font-size:.55rem;">non-aktif</span>
-                                        @endif
-                                    </div>
-                                    <small class="text-muted" style="font-size:.65rem;">
-                                        @if($s->kode){{ $s->kode }} · @endif
-                                        @if($s->kategori){{ $s->kategori }}@endif
-                                    </small>
-                                </div>
-                                <div class="text-end">
-                                    <div class="fw-bold small" style="color:#005aa9;">
-                                        Rp {{ number_format($s->harga, 0, ',', '.') }}
-                                    </div>
-                                    <small class="text-muted" style="font-size:.6rem;">per {{ $s->satuan }}</small>
-                                </div>
-                            </div>
-
-                            {{-- Stok bar --}}
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <span class="badge rounded-pill px-2"
-                                      style="background:{{ $stokColor }}20;color:{{ $stokColor }};font-size:.65rem;">
-                                    <i class="bi bi-box" style="font-size:.6rem;"></i>
-                                    Stok: {{ $s->stok }} {{ $s->satuan }}
-                                    @if($statusStok === 'menipis')
-                                        (min {{ $s->stok_min }})
+                    <div style="flex-grow:1; min-width:0;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--fib-1); flex-wrap:wrap; margin-bottom:var(--fib-1);">
+                            <div style="flex-grow:1; min-width:0;">
+                                <div style="font-weight:700; color:var(--ink); font-size:var(--t-xs); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    {{ $s->nama }}
+                                    @if(!$s->is_aktif)
+                                        <span style="background:var(--line); color:var(--ink-soft); padding:1px var(--fib-1); border-radius:var(--r-sm); font-size:var(--t-xxs);">non-aktif</span>
                                     @endif
-                                </span>
-                                <div class="d-flex gap-1">
-                                    {{-- Quick stock buttons --}}
-                                    <form action="{{ route('mitra.sparepart.ubahStok', $s->id) }}" method="POST" class="d-flex gap-1">
-                                        @csrf
-                                        <input type="hidden" name="jumlah" value="1">
-                                        <button type="submit" name="aksi" value="kurang"
-                                                class="btn btn-sm btn-outline-danger rounded-circle p-0"
-                                                style="width:24px;height:24px;font-size:.7rem;"
-                                                {{ $s->stok <= 0 ? 'disabled' : '' }}>
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <button type="submit" name="aksi" value="tambah"
-                                                class="btn btn-sm btn-outline-success rounded-circle p-0"
-                                                style="width:24px;height:24px;font-size:.7rem;">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </form>
-                                    <a href="{{ route('mitra.sparepart.edit', $s->id) }}"
-                                       class="btn btn-sm btn-outline-primary rounded-circle p-0"
-                                       style="width:24px;height:24px;font-size:.7rem;">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
                                 </div>
+                                <div style="font-size:var(--t-xxs); color:var(--ink-soft);">
+                                    @if($s->kode){{ $s->kode }} · @endif
+                                    @if($s->kategori){{ $s->kategori }}@endif
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:700; color:var(--mitra-blue); font-size:var(--t-xs);">Rp {{ number_format($s->harga, 0, ',', '.') }}</div>
+                                <div style="font-size:var(--t-xxs); color:var(--ink-soft);">per {{ $s->satuan }}</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--fib-1);">
+                            <span style="background:{{ $stokColor }}20; color:{{ $stokColor }}; padding:2px var(--fib-2); border-radius:var(--r-pill); font-size:var(--t-xxs); font-weight:700;">
+                                <i class="bi bi-box" style="font-size:var(--t-xxs);"></i>
+                                Stok: {{ $s->stok }} {{ $s->satuan }}
+                                @if($statusStok === 'menipis')(min {{ $s->stok_min }})@endif
+                            </span>
+                            <div style="display:flex; gap:var(--fib-1);">
+                                <form action="{{ route('mitra.sparepart.ubahStok', $s->id) }}" method="POST" style="display:flex; gap:var(--fib-1);">
+                                    @csrf
+                                    <input type="hidden" name="jumlah" value="1">
+                                    <button type="submit" name="aksi" value="kurang" {{ $s->stok <= 0 ? 'disabled' : '' }}
+                                            style="width:var(--fib-4); height:var(--fib-4); border-radius:50%; background:#fff; color:#ef4444; border:1px solid #ef4444; cursor:pointer; font-size:var(--t-xxs); display:flex; align-items:center; justify-content:center;">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <button type="submit" name="aksi" value="tambah"
+                                            style="width:var(--fib-4); height:var(--fib-4); border-radius:50%; background:#fff; color:#16a34a; border:1px solid #16a34a; cursor:pointer; font-size:var(--t-xxs); display:flex; align-items:center; justify-content:center;">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </form>
+                                <a href="{{ route('mitra.sparepart.edit', $s->id) }}"
+                                   style="width:var(--fib-4); height:var(--fib-4); border-radius:50%; background:#fff; color:var(--mitra-blue); border:1px solid var(--mitra-blue); text-decoration:none; font-size:var(--t-xxs); display:flex; align-items:center; justify-content:center;">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                             </div>
                         </div>
                     </div>

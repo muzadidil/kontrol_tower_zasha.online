@@ -1,77 +1,52 @@
 @extends('layouts.mitra')
 
 @section('content')
-{{-- Hero --}}
-<div style="background: linear-gradient(135deg, var(--mitra-blue, #005aa9) 0%, var(--mitra-blue-light, #0078d4) 100%); padding: var(--fib-5, 24px) var(--fib-4, 16px) var(--fib-6, 32px); color: #fff;">
-    <div class="d-flex align-items-center mb-3">
-        <a href="{{ route('mitra.dashboard') }}" class="text-white me-3" style="font-size:1.4rem;text-decoration:none;">
-            <i class="bi bi-arrow-left"></i>
-        </a>
+@include('mitra.partials._page-style')
+
+<div class="m-hero">
+    <div class="m-hero-bar">
+        <a href="{{ route('mitra.dashboard') }}" class="m-hero-back"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <div style="font-size:.75rem;opacity:.8;">ORDER INDEN</div>
-            <h5 class="fw-bold m-0">Booking Terjadwal</h5>
+            <div class="m-hero-eyebrow">Order Inden</div>
+            <h1 class="m-hero-title">Booking Terjadwal</h1>
         </div>
     </div>
-    <div class="text-center" style="font-size:.75rem;opacity:.85;">
-        Order yang dibooking pelanggan untuk dikerjakan di tanggal tertentu
-    </div>
+    <div class="m-hero-meta" style="margin-top:var(--fib-3);">Order yang dibooking pelanggan untuk dikerjakan di tanggal tertentu</div>
 </div>
 
-<div style="padding: var(--fib-4, 16px); max-width: 720px; margin: 0 auto;">
+<div class="m-page">
+    @if(session('success'))<div class="m-alert m-alert-success"><i class="bi bi-check-circle-fill"></i>{{ session('success') }}</div>@endif
+    @if(session('error'))<div class="m-alert m-alert-error"><i class="bi bi-x-circle-fill"></i>{{ session('error') }}</div>@endif
 
-    @if(session('success'))
-        <div class="alert alert-success rounded-3 shadow-sm small">
-            <i class="bi bi-check-circle-fill me-1"></i>{{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger rounded-3 shadow-sm small">
-            <i class="bi bi-x-circle-fill me-1"></i>{{ session('error') }}
-        </div>
-    @endif
-
-    {{-- Filter Tabs --}}
-    <div class="d-flex gap-2 mb-3 overflow-auto pb-2" style="scrollbar-width:thin;">
+    <div class="m-chip-bar">
         @php
             $tabs = [
                 'menunggu_mitra' => ['Approval', $counts['menunggu_mitra'] ?? 0, '#f59e0b'],
-                'aktif'          => ['Aktif',    $counts['aktif'] ?? 0,          '#005aa9'],
-                'riwayat'        => ['Riwayat',  null,                            '#64748b'],
+                'aktif'          => ['Aktif',    $counts['aktif'] ?? 0,          'var(--mitra-blue)'],
+                'riwayat'        => ['Riwayat',  null,                            'var(--ink-soft)'],
             ];
         @endphp
         @foreach($tabs as $key => [$label, $count, $color])
             @php $active = $filter === $key; @endphp
             <a href="{{ route('mitra.inden.index', ['status' => $key]) }}"
-               class="text-decoration-none flex-shrink-0 d-flex align-items-center gap-1"
-               style="padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:600;
-                      white-space:nowrap;
-                      background:{{ $active ? $color : '#fff' }};
-                      color:{{ $active ? '#fff' : $color }};
-                      border:1px solid {{ $color }};">
-                <span>{{ $label }}</span>
+               class="m-chip {{ $active ? 'active' : '' }}"
+               style="{{ $active ? 'background:'.$color.'; border-color:'.$color.';' : 'color:'.$color.'; border-color:'.$color.';' }}">
+                {{ $label }}
                 @if($count !== null && $count > 0)
-                    <span style="background:{{ $active ? '#fff' : $color }};
-                                 color:{{ $active ? $color : '#fff' }};
-                                 padding:1px 6px;border-radius:999px;font-size:.65rem;">
-                        {{ $count }}
-                    </span>
+                    <span class="m-chip-count" style="{{ $active ? 'background:rgba(255,255,255,0.25); color:#fff;' : 'background:'.$color.'; color:#fff;' }}">{{ $count }}</span>
                 @endif
             </a>
         @endforeach
     </div>
 
-    {{-- Daftar Order --}}
     @if($orders->isEmpty())
-        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
-            <i class="bi bi-calendar-event" style="font-size:2.5rem;color:#cbd5e1;"></i>
-            <h6 class="mt-3 fw-bold">Belum Ada Order Inden</h6>
-            <p class="text-muted small mb-0">
-                @if($filter === 'menunggu_mitra')
-                    Tidak ada order yang butuh approval.
-                @elseif($filter === 'aktif')
-                    Tidak ada order yang sedang berjalan.
-                @else
-                    Belum ada riwayat order inden.
+        <div class="m-empty">
+            <i class="bi bi-calendar-event m-empty-icon"></i>
+            <h3 class="m-empty-title">Belum Ada Order Inden</h3>
+            <p class="m-empty-text">
+                @if($filter === 'menunggu_mitra')Tidak ada order yang butuh approval.
+                @elseif($filter === 'aktif')Tidak ada order yang sedang berjalan.
+                @else Belum ada riwayat order inden.
                 @endif
             </p>
         </div>
@@ -91,48 +66,40 @@
                 };
                 $nama = $o->pelanggan->nama_panggilan ?? $o->pelanggan->nama_pelanggan ?? 'Pelanggan';
             @endphp
-            <a href="{{ route('mitra.inden.show', $o->id) }}" class="text-decoration-none">
-                <div class="card border-0 shadow-sm rounded-4 mb-2" style="color:#1e293b;">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-1">
+            <a href="{{ route('mitra.inden.show', $o->id) }}" style="text-decoration:none; color:inherit;">
+                <div class="m-card">
+                    <div class="m-card-body">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--fib-2); flex-wrap:wrap; gap:var(--fib-1);">
                             <div>
-                                <div class="fw-bold small">{{ $nama }}</div>
-                                <small class="text-muted" style="font-size:.65rem;">
-                                    #{{ $o->order_code ?? $o->id }}
-                                </small>
+                                <div style="font-weight:700; color:var(--ink); font-size:var(--t-sm);">{{ $nama }}</div>
+                                <div style="font-size:var(--t-xxs); color:var(--ink-soft);">#{{ $o->order_code ?? $o->id }}</div>
                             </div>
-                            <span class="badge rounded-pill px-3 py-1"
-                                  style="background:{{ $statusColor[0] }};color:{{ $statusColor[1] }};font-size:.65rem;">
+                            <span style="background:{{ $statusColor[0] }}; color:{{ $statusColor[1] }}; padding:var(--fib-1) var(--fib-2); border-radius:var(--r-pill); font-size:var(--t-xxs); font-weight:700;">
                                 {{ $statusLabel }}
                             </span>
                         </div>
 
-                        <div class="d-flex align-items-center gap-2 mb-2 p-2 rounded-3" style="background:#f8fafc;">
-                            <i class="bi bi-calendar-event" style="color:#005aa9;"></i>
+                        <div style="display:flex; align-items:center; gap:var(--fib-2); padding:var(--fib-2); background:var(--mitra-blue-tint); border-radius:var(--r-sm); margin-bottom:var(--fib-2);">
+                            <i class="bi bi-calendar-event" style="color:var(--mitra-blue);"></i>
                             <div>
-                                <small class="text-muted" style="font-size:.65rem;">Tanggal Pelaksanaan</small>
-                                <div class="fw-bold small">
+                                <div style="font-size:var(--t-xxs); color:var(--ink-soft);">Tanggal Pelaksanaan</div>
+                                <div style="font-weight:700; color:var(--ink); font-size:var(--t-xs);">
                                     {{ \Carbon\Carbon::parse($o->tanggal_pelaksanaan)->translatedFormat('l, d M Y') }}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-end">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                             <div>
-                                <small class="text-muted" style="font-size:.65rem;">Pendapatan Anda</small>
-                                <div class="fw-bold" style="color:#16a34a;">
-                                    Rp {{ number_format($o->pendapatan_mitra ?? 0, 0, ',', '.') }}
-                                </div>
+                                <div style="font-size:var(--t-xxs); color:var(--ink-soft);">Pendapatan Anda</div>
+                                <div style="font-weight:800; color:#16a34a; font-size:var(--t-sm);">Rp {{ number_format($o->pendapatan_mitra ?? 0, 0, ',', '.') }}</div>
                             </div>
-                            <small class="text-muted" style="font-size:.65rem;">
-                                {{ $o->durasi }} {{ $o->tipe_durasi }}
-                            </small>
+                            <div style="font-size:var(--t-xxs); color:var(--ink-soft);">{{ $o->durasi }} {{ $o->tipe_durasi }}</div>
                         </div>
 
                         @if($o->status === \App\Enums\IndenOrderStatus::MenungguMitra)
-                            <div class="alert alert-warning rounded-3 mt-2 mb-0 py-2 px-3" style="font-size:.75rem;">
-                                <i class="bi bi-exclamation-circle-fill me-1"></i>
-                                Butuh approval Anda
+                            <div class="m-alert m-alert-warn" style="margin-top:var(--fib-2); margin-bottom:0;">
+                                <i class="bi bi-exclamation-circle-fill"></i> Butuh approval Anda
                             </div>
                         @endif
                     </div>

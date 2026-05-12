@@ -1,137 +1,108 @@
 @extends('layouts.mitra')
 
 @section('content')
-{{-- Hero --}}
-<div style="background: linear-gradient(135deg, var(--mitra-blue, #005aa9) 0%, var(--mitra-blue-light, #0078d4) 100%); padding: var(--fib-5, 24px) var(--fib-4, 16px) var(--fib-6, 32px); color: #fff;">
-    <div class="d-flex align-items-center">
-        <a href="{{ route('mitra.dashboard') }}" class="text-white me-3" style="font-size:1.4rem;text-decoration:none;">
-            <i class="bi bi-arrow-left"></i>
-        </a>
+@include('mitra.partials._page-style')
+
+<div class="m-hero">
+    <div class="m-hero-bar">
+        <a href="{{ route('mitra.dashboard') }}" class="m-hero-back"><i class="bi bi-arrow-left"></i></a>
         <div>
-            <div style="font-size:.75rem;opacity:.8;">JADWAL</div>
-            <h5 class="fw-bold m-0">Jam Kerja & Hari Libur</h5>
+            <div class="m-hero-eyebrow">Jadwal</div>
+            <h1 class="m-hero-title">Jam Kerja & Hari Libur</h1>
         </div>
     </div>
-    <div class="mt-3 text-center" style="font-size:.75rem;opacity:.85;">
+    <div class="m-hero-meta" style="margin-top:var(--fib-3);">
         Atur kapan Anda menerima order. Pelanggan akan diberi tahu jam buka Anda.
     </div>
 </div>
 
-<div style="padding: var(--fib-4, 16px); max-width: 720px; margin: 0 auto;">
-
-    @if(session('success'))
-        <div class="alert alert-success rounded-3 shadow-sm small">
-            <i class="bi bi-check-circle-fill me-1"></i>{{ session('success') }}
-        </div>
-    @endif
+<div class="m-page">
+    @if(session('success'))<div class="m-alert m-alert-success"><i class="bi bi-check-circle-fill"></i>{{ session('success') }}</div>@endif
     @if($errors->any())
-        <div class="alert alert-danger rounded-3 small">
-            @foreach($errors->all() as $err)
-                <div><i class="bi bi-x-circle-fill me-1"></i>{{ $err }}</div>
-            @endforeach
+        <div class="m-alert m-alert-error" style="flex-direction:column; align-items:flex-start;">
+            @foreach($errors->all() as $err)<div><i class="bi bi-x-circle-fill"></i>{{ $err }}</div>@endforeach
         </div>
     @endif
 
-    {{-- ── JAM KERJA MINGGUAN ── --}}
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body p-3">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h6 class="fw-bold m-0" style="color:#1e293b;">
-                        <i class="bi bi-calendar-week me-1" style="color:#005aa9;"></i>Jam Kerja Mingguan
-                    </h6>
-                    <small class="text-muted">Default jam buka per hari</small>
-                </div>
-            </div>
+    {{-- JAM KERJA MINGGUAN --}}
+    <div class="m-card">
+        <div class="m-card-body">
+            <h2 class="m-section-title" style="margin-top:0;">
+                <i class="bi bi-calendar-week m-section-title-icon"></i> Jam Kerja Mingguan
+            </h2>
+            <p style="font-size:var(--t-xxs); color:var(--ink-soft); margin:0 0 var(--fib-3);">Default jam buka per hari</p>
 
             <form action="{{ route('mitra.jadwal.updateHarian') }}" method="POST">
                 @csrf
                 @foreach($jadwalHarian as $hari => $j)
                     @php $hariNama = \App\Models\MitraJadwalHarian::HARI[$hari]; @endphp
-                    <div class="border rounded-3 p-2 mb-2"
-                         id="row-hari-{{ $hari }}"
-                         style="background:{{ $j->is_libur ? '#fef2f2' : '#f8fafc' }};">
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <div style="min-width:80px;">
-                                <div class="fw-bold small" style="color:#1e293b;">{{ $hariNama }}</div>
+                    <div id="row-hari-{{ $hari }}"
+                         style="border:1px solid var(--line); border-radius:var(--r-sm); padding:var(--fib-2);
+                                margin-bottom:var(--fib-2);
+                                background:{{ $j->is_libur ? '#fee2e2' : '#f8fbff' }};">
+                        <div style="display:flex; align-items:center; gap:var(--fib-2); flex-wrap:wrap;">
+                            <div style="min-width:var(--fib-7);">
+                                <div style="font-weight:700; color:var(--ink); font-size:var(--t-xs);">{{ $hariNama }}</div>
                             </div>
 
-                            <div class="form-check form-switch">
-                                <input class="form-check-input toggle-libur"
-                                       type="checkbox" role="switch"
-                                       name="hari[{{ $hari }}][is_libur]"
-                                       data-hari="{{ $hari }}"
-                                       value="1"
-                                       id="libur-{{ $hari }}"
-                                       {{ $j->is_libur ? 'checked' : '' }}>
-                                <label class="form-check-label small" for="libur-{{ $hari }}">
-                                    Libur
-                                </label>
-                            </div>
+                            <label style="display:flex; align-items:center; gap:var(--fib-1); font-size:var(--t-xs); cursor:pointer;">
+                                <input class="toggle-libur" type="checkbox" name="hari[{{ $hari }}][is_libur]"
+                                       data-hari="{{ $hari }}" value="1" id="libur-{{ $hari }}"
+                                       {{ $j->is_libur ? 'checked' : '' }}
+                                       style="accent-color:var(--mitra-blue);">
+                                Libur
+                            </label>
 
-                            <div class="ms-auto d-flex gap-1 align-items-center jam-input-group"
-                                 style="{{ $j->is_libur ? 'opacity:.3;pointer-events:none;' : '' }}">
+                            <div class="jam-input-group" style="margin-left:auto; display:flex; gap:var(--fib-1); align-items:center;
+                                                                {{ $j->is_libur ? 'opacity:0.3; pointer-events:none;' : '' }}">
                                 <input type="time" name="hari[{{ $hari }}][jam_buka]"
-                                       class="form-control form-control-sm rounded-2"
-                                       value="{{ $j->jam_buka ? substr($j->jam_buka, 0, 5) : '08:00' }}"
-                                       style="width:90px;">
-                                <span class="text-muted small">—</span>
+                                       class="m-form-input" style="width:var(--fib-8); padding:var(--fib-1) var(--fib-2);"
+                                       value="{{ $j->jam_buka ? substr($j->jam_buka, 0, 5) : '08:00' }}">
+                                <span style="color:var(--ink-soft); font-size:var(--t-xs);">—</span>
                                 <input type="time" name="hari[{{ $hari }}][jam_tutup]"
-                                       class="form-control form-control-sm rounded-2"
-                                       value="{{ $j->jam_tutup ? substr($j->jam_tutup, 0, 5) : '17:00' }}"
-                                       style="width:90px;">
+                                       class="m-form-input" style="width:var(--fib-8); padding:var(--fib-1) var(--fib-2);"
+                                       value="{{ $j->jam_tutup ? substr($j->jam_tutup, 0, 5) : '17:00' }}">
                             </div>
                         </div>
                     </div>
                 @endforeach
 
-                <div class="d-grid mt-3">
-                    <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">
-                        <i class="bi bi-check-circle me-1"></i>Simpan Jam Kerja
-                    </button>
-                </div>
+                <button type="submit" class="m-btn-primary m-btn-primary-block" style="margin-top:var(--fib-3);">
+                    <i class="bi bi-check-circle"></i> Simpan Jam Kerja
+                </button>
             </form>
         </div>
     </div>
 
-    {{-- ── TANGGAL LIBUR KHUSUS ── --}}
-    <div class="card border-0 shadow-sm rounded-4 mb-3">
-        <div class="card-body p-3">
-            <div class="mb-3">
-                <h6 class="fw-bold m-0" style="color:#1e293b;">
-                    <i class="bi bi-calendar-x me-1" style="color:#ef4444;"></i>Tanggal Libur Khusus
-                </h6>
-                <small class="text-muted">Cuti / off-day yang tidak mengikuti jadwal mingguan</small>
-            </div>
+    {{-- TANGGAL LIBUR KHUSUS --}}
+    <div class="m-card">
+        <div class="m-card-body">
+            <h2 class="m-section-title" style="margin-top:0;">
+                <i class="bi bi-calendar-x" style="color:#ef4444;"></i> Tanggal Libur Khusus
+            </h2>
+            <p style="font-size:var(--t-xxs); color:var(--ink-soft); margin:0 0 var(--fib-3);">Cuti / off-day yang tidak mengikuti jadwal mingguan</p>
 
-            <form action="{{ route('mitra.jadwal.storeLibur') }}" method="POST" class="mb-3">
+            <form action="{{ route('mitra.jadwal.storeLibur') }}" method="POST" style="margin-bottom:var(--fib-3);">
                 @csrf
-                <div class="row g-2 align-items-end">
-                    <div class="col-5">
-                        <label class="form-label small mb-1">Tanggal</label>
-                        <input type="date" name="tanggal"
-                               class="form-control form-control-sm rounded-2"
-                               min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
-                               required>
+                <div style="display:grid; grid-template-columns: 1fr 1.618fr auto; gap:var(--fib-1); align-items:flex-end;">
+                    <div>
+                        <label class="m-form-label">Tanggal</label>
+                        <input type="date" name="tanggal" class="m-form-input"
+                               min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" required>
                     </div>
-                    <div class="col-5">
-                        <label class="form-label small mb-1">Keterangan</label>
-                        <input type="text" name="keterangan"
-                               class="form-control form-control-sm rounded-2"
-                               placeholder="cuti / acara keluarga"
-                               maxlength="200">
+                    <div>
+                        <label class="m-form-label">Keterangan</label>
+                        <input type="text" name="keterangan" class="m-form-input" placeholder="cuti / acara keluarga" maxlength="200">
                     </div>
-                    <div class="col-2">
-                        <button type="submit" class="btn btn-sm btn-primary rounded-pill w-100">
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
-                    </div>
+                    <button type="submit" class="m-btn-primary" style="height:38px;">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
                 </div>
             </form>
 
             @if($tanggalLibur->isEmpty())
-                <div class="text-center py-3 text-muted small">
-                    <i class="bi bi-sun-fill me-1" style="color:#fbbf24;"></i>
+                <div style="text-align:center; padding:var(--fib-3); color:var(--ink-soft); font-size:var(--t-xs);">
+                    <i class="bi bi-sun-fill" style="color:#fbbf24;"></i>
                     Tidak ada tanggal libur khusus
                 </div>
             @else
@@ -140,32 +111,30 @@
                         $isPast = $l->tanggal->isPast() && !$l->tanggal->isToday();
                         $isToday = $l->tanggal->isToday();
                     @endphp
-                    <div class="d-flex align-items-center gap-2 p-2 border-bottom {{ $isPast ? 'opacity-50' : '' }}">
-                        <div class="text-center" style="min-width:50px;">
-                            <div class="fw-bold" style="color:{{ $isToday ? '#ef4444' : '#1e293b' }};font-size:1.1rem;">
-                                {{ $l->tanggal->format('d') }}
-                            </div>
-                            <small class="text-muted" style="font-size:.65rem;">
-                                {{ $l->tanggal->translatedFormat('M Y') }}
-                            </small>
+                    <div style="display:flex; align-items:center; gap:var(--fib-2); padding:var(--fib-2);
+                                border-bottom:1px solid var(--line);
+                                {{ $isPast ? 'opacity:0.5;' : '' }}">
+                        <div style="text-align:center; min-width:var(--fib-6);">
+                            <div style="font-weight:800; color:{{ $isToday ? '#ef4444' : 'var(--ink)' }}; font-size:var(--t-md); line-height:1;">{{ $l->tanggal->format('d') }}</div>
+                            <div style="font-size:var(--t-xxs); color:var(--ink-soft);">{{ $l->tanggal->translatedFormat('M Y') }}</div>
                         </div>
-                        <div class="flex-grow-1">
-                            <div class="small fw-semibold" style="color:#1e293b;">
+                        <div style="flex-grow:1;">
+                            <div style="font-weight:700; color:var(--ink); font-size:var(--t-xs);">
                                 {{ $l->tanggal->translatedFormat('l') }}
                                 @if($isToday)
-                                    <span class="badge bg-danger ms-1" style="font-size:.6rem;">Hari ini</span>
+                                    <span style="background:#ef4444; color:#fff; padding:1px var(--fib-1); border-radius:var(--r-sm); font-size:var(--t-xxs);">Hari ini</span>
                                 @elseif($isPast)
-                                    <span class="badge bg-secondary ms-1" style="font-size:.6rem;">Lewat</span>
+                                    <span style="background:var(--line); color:var(--ink-soft); padding:1px var(--fib-1); border-radius:var(--r-sm); font-size:var(--t-xxs);">Lewat</span>
                                 @endif
                             </div>
                             @if($l->keterangan)
-                                <small class="text-muted">{{ $l->keterangan }}</small>
+                                <div style="font-size:var(--t-xxs); color:var(--ink-soft);">{{ $l->keterangan }}</div>
                             @endif
                         </div>
                         <form action="{{ route('mitra.jadwal.destroyLibur', $l->id) }}" method="POST"
                               onsubmit="return confirm('Hapus tanggal libur {{ $l->tanggal->format('d M Y') }}?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-link text-danger p-1">
+                            <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:var(--fib-1);">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
@@ -175,30 +144,29 @@
         </div>
     </div>
 
-    {{-- Info status online --}}
-    <div class="alert alert-info rounded-3 small mb-0"
-         style="background:#eff6ff;border-color:#bfdbfe;color:#1e40af;">
-        <i class="bi bi-info-circle-fill me-1"></i>
-        <strong>Catatan:</strong> Jadwal ini info untuk pelanggan saja.
-        Anda tetap perlu set status <strong>"Online"</strong> dari dashboard untuk benar-benar menerima order.
+    <div class="m-alert m-alert-info">
+        <i class="bi bi-info-circle-fill"></i>
+        <div>
+            <strong>Catatan:</strong> Jadwal ini info untuk pelanggan saja.
+            Anda tetap perlu set status <strong>"Online"</strong> dari dashboard untuk benar-benar menerima order.
+        </div>
     </div>
 </div>
 
 <script>
-// Toggle libur: disable/enable input jam pada baris yang sama
 document.querySelectorAll('.toggle-libur').forEach(function (cb) {
     cb.addEventListener('change', function () {
         const hari = cb.dataset.hari;
         const row = document.getElementById('row-hari-' + hari);
         const jamGroup = row.querySelector('.jam-input-group');
         if (cb.checked) {
-            jamGroup.style.opacity = '.3';
+            jamGroup.style.opacity = '0.3';
             jamGroup.style.pointerEvents = 'none';
-            row.style.background = '#fef2f2';
+            row.style.background = '#fee2e2';
         } else {
             jamGroup.style.opacity = '';
             jamGroup.style.pointerEvents = '';
-            row.style.background = '#f8fafc';
+            row.style.background = '#f8fbff';
         }
     });
 });
