@@ -39,7 +39,7 @@ class RoleSeeder extends Seeder
                 'icon_color' => '#7c3aed',
                 'features' => [
                     'order-wfh', 'order-inden',
-                    'portfolio',
+                    'portfolio', 'dokumen',
                     'saldo', 'topup', 'withdraw', 'profil', 'pesanan-list',
                 ],
             ],

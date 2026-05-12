@@ -31,6 +31,7 @@ use App\Http\Controllers\Mitra\IndenController as MitraIndenController;
 use App\Http\Controllers\Mitra\MitraPortfolioController;
 use App\Http\Controllers\Mitra\MitraSparepartController;
 use App\Http\Controllers\Mitra\MitraFotoBuktiController;
+use App\Http\Controllers\Mitra\MitraDokumenController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -194,6 +195,14 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
         Route::get('/{tracking}', [MitraFotoBuktiController::class, 'index'])->name('index');
         Route::post('/{tracking}/upload', [MitraFotoBuktiController::class, 'upload'])->name('upload');
         Route::delete('/{foto}', [MitraFotoBuktiController::class, 'destroy'])->name('destroy');
+    });
+
+    // Dokumen Kerja per order (butuh verified + fitur dokumen)
+    Route::prefix('dokumen')->name('dokumen.')->middleware(['verified.mitra', 'feature:dokumen'])->group(function () {
+        Route::get('/{tracking}', [MitraDokumenController::class, 'index'])->name('index');
+        Route::post('/{tracking}/upload', [MitraDokumenController::class, 'upload'])->name('upload');
+        Route::post('/{dokumen}/toggle-final', [MitraDokumenController::class, 'toggleFinal'])->name('toggleFinal');
+        Route::delete('/{dokumen}', [MitraDokumenController::class, 'destroy'])->name('destroy');
     });
 
     // Sparepart inventory (butuh verified + fitur sparepart)
