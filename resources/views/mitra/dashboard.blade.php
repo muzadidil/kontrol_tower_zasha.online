@@ -305,11 +305,6 @@
 
 @push('scripts')
 <script>
-// ─ Global State ─
-let currentOrderId = null;
-let currentOrderData = null;
-let pollingInterval = null;
-
 // ─ Polling Functions ─
 function startPolling() {
     if (pollingInterval) return;

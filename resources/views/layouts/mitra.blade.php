@@ -651,6 +651,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+// ─ Global State ─
+let pollingInterval = null;
+let currentOrderId = null;
+let currentOrderData = null;
+
 // ─── Push Notification Setup ───
 if ('serviceWorker' in navigator && 'PushManager' in window) {
     navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -715,9 +720,6 @@ async function setupPushNotifications() {
 // ─────────────────────────────────────────────────────────
 // MITRA ORDER POLLING & MANAGEMENT (runs on ALL pages)
 // ─────────────────────────────────────────────────────────
-
-let pollingInterval = null;
-let currentOrderId = null;
 
 function startPolling() {
     console.log('Polling started');
