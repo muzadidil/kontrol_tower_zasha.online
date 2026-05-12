@@ -116,7 +116,7 @@ Jika pelanggan merasa pekerjaan belum sesuai/belum tuntas:
 1. Pelanggan klik **"Belum Selesai"** di halaman tracking
 2. Sistem:
    - Status tracking: `selesai_mitra` → `belum_selesai`
-   - Status mitra: `sibuk` → `online` **(mitra langsung bebas terima order baru, tidak terjebak)**
+   - Status mitra: **TETAP `sibuk`** (fokus perbaiki order ini, tidak boleh terima order baru)
    - Escrow tetap `held` — dana belum dilepas
    - Notifikasi dikirim ke mitra
 3. Halaman tracking pelanggan menampilkan banner orange **"Mitra Sedang Memperbaiki"**
@@ -128,9 +128,10 @@ Jika pelanggan merasa pekerjaan belum sesuai/belum tuntas:
 7. Siklus dapat berulang sampai pelanggan klik **"Pekerjaan Selesai"** atau membuka **dispute** (lihat BAB 7)
 
 ### 6.3 Aturan Penting Siklus Perbaikan
-- **Mitra TIDAK terjebak status `sibuk`** saat order dalam `belum_selesai` — bebas terima order baru
+- **Mitra TETAP `sibuk`** sepanjang siklus perbaikan — tidak boleh terima order baru
 - **Order `belum_selesai` tetap aktif** di dashboard mitra sampai diselesaikan atau dijadikan dispute
 - **Dana tetap ditahan di Escrow** sampai status `selesai` atau resolusi dispute
+- Mitra hanya kembali ke `online` setelah order benar-benar `selesai` (pelanggan konfirmasi) atau dialihkan ke `dispute`
 - Tidak ada batasan jumlah siklus perbaikan, tapi sebaiknya pelanggan buka dispute jika sudah 2× perbaikan masih bermasalah
 
 ### 6.4 Auto-Konfirmasi (Order Inden)
@@ -181,13 +182,18 @@ Jika pelanggan merasa pekerjaan belum sesuai/belum tuntas:
 | Status | Arti | Bisa Terima Order Baru? |
 |--------|------|------------------------|
 | `online` | Siap terima order | ✅ Ya |
-| `sibuk` | Sedang mengerjakan order aktif (status: accepted s/d dikerjakan) | ❌ Tidak |
+| `sibuk` | Sedang mengerjakan order aktif (accepted s/d belum_selesai) | ❌ Tidak |
 | `offline` | Mitra tidak aktif | ❌ Tidak |
 | `suspended` | Akun dibekukan karena pelanggaran | ❌ Tidak |
 
-**Catatan penting:** Status mitra otomatis kembali ke `online` saat:
-- Order selesai (`selesai`) — pelanggan konfirmasi
-- Order ditandai `belum_selesai` oleh pelanggan — supaya tidak terjebak menunggu
+**Catatan penting:** Status mitra otomatis kembali ke `online` HANYA saat:
+- Order benar-benar `selesai` — pelanggan konfirmasi & dana cair
+- Order ditolak (`ditolak_mitra`) atau dibatalkan (`dibatalkan`)
+- Resolusi dispute selesai
+
+Status `sibuk` mencakup seluruh lifecycle order aktif, termasuk siklus perbaikan
+(`belum_selesai`). Mitra tidak bisa terima order baru sampai order saat ini
+benar-benar selesai — tujuannya agar mitra fokus menyelesaikan komitmen.
 
 ---
 

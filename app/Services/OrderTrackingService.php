@@ -242,10 +242,9 @@ class OrderTrackingService
 
                 $tracking->update(['status' => 'belum_selesai']);
 
-                // Pulihkan mitra ke online agar bisa terima order baru.
-                // Order ini tetap aktif di list mitra, tapi tidak block status_online.
-                Mitra::where('id_mitra', $tracking->mitra_id)
-                    ->update(['status_online' => 'online']);
+                // Mitra TETAP sibuk — fokus perbaiki order ini, jangan terima order baru.
+                // Status hanya kembali ke 'online' setelah order benar-benar selesai
+                // (pelangganConfirmSelesai) atau ditolak/dibatalkan.
 
                 MitraNotifikasi::create([
                     'mitra_id' => $tracking->mitra_id,
