@@ -1,10 +1,31 @@
 @extends('layouts.admin')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('assets/css/admin_riwayat.css') }}">
-<script src="{{ asset('assets/js/admin_riwayat.js') }}" defer></script>
+<style>
+    .badge-arsip {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-selesai { background: #d1fae5; color: #065f46; }
+    .status-batal   { background: #fee2e2; color: #991b1b; }
+    .row-arsip:hover { background: #f9fafb; }
+    .label-arsip { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block; }
+    .small-text { font-size: 11px; }
+    .mitra-tag { font-size: 11px; color: #6b7280; margin-top: 2px; }
+    .detail-jasa { font-size: 12px; }
+    .metode-text { font-size: 11px; }
+    .select-koreksi { max-width: 140px; font-size: 11px; }
+    .card-zasha { border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); background: white; }
+    .table-zasha th { background: #f9fafb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 700; padding: 12px 8px; }
+    .table-zasha td { padding: 14px 8px; font-size: 13px; vertical-align: middle; }
+</style>
 
-<div id="riwayat-wrapper" class="animate-in">
+<div id="riwayat-wrapper">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold m-0"><i class="bi bi-archive-fill text-secondary me-2"></i>Arsip Pesanan</h4>

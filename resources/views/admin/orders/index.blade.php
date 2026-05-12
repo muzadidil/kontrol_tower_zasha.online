@@ -1,18 +1,45 @@
 @extends('layouts.admin')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('assets/css/admin_pesanan.css') }}">
-<script src="{{ asset('assets/js/admin_pesanan.js') }}" defer></script>
+<style>
+    .badge-pill-zasha {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+    }
+    .badge-pill-order {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .text-purple { color: #9333ea !important; }
+    .bg-purple { background-color: #9333ea !important; }
+    .card-zasha { border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); background: white; }
+    .table-zasha th { background: #f9fafb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 700; padding: 12px 8px; }
+    .table-zasha td { padding: 14px 8px; font-size: 13px; vertical-align: middle; }
+    .select-quick-action { max-width: 110px; font-size: 11px; }
+</style>
 
-<div id="order-monitoring-wrapper" class="animate-in">
+<div id="order-monitoring-wrapper">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold m-0"><i class="bi bi-receipt-cutoff text-primary me-2"></i>Global Monitoring</h4>
-            <small class="text-muted">Pantau semua antrian Jasa & Jastip ZASHA.</small>
+            <h4 class="fw-bold m-0"><i class="bi bi-receipt-cutoff text-primary me-2"></i>Pesanan Aktif</h4>
+            <small class="text-muted">Hanya tampilkan pesanan yang sedang berjalan. Untuk pesanan Selesai/Batal, lihat <a href="{{ route('admin.orders.arsip') }}">Arsip Pesanan</a>.</small>
         </div>
-        <a href="{{ route('admin.orders.index') }}" class="btn btn-white shadow-sm rounded-pill px-3 border bg-white">
-            <i class="bi bi-arrow-clockwise"></i>
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.orders.arsip') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-archive me-1"></i> Arsip
+            </a>
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-white shadow-sm rounded-pill px-3 border bg-white">
+                <i class="bi bi-arrow-clockwise"></i>
+            </a>
+        </div>
     </div>
 
     <div class="card card-zasha p-3 mb-4">
@@ -108,7 +135,11 @@
                         <tr>
                             <td colspan="6" class="text-center py-5">
                                 <i class="bi bi-clipboard-x text-muted fs-1 d-block mb-2"></i>
-                                <span class="text-muted">Tidak ada antrian pesanan saat ini.</span>
+                                <div class="text-muted mb-1"><strong>Tidak ada pesanan aktif.</strong></div>
+                                <div class="text-muted small">
+                                    Pesanan yang sudah Selesai atau Dibatalkan ada di
+                                    <a href="{{ route('admin.orders.arsip') }}">Arsip Pesanan</a>.
+                                </div>
                             </td>
                         </tr>
                     @endforelse
