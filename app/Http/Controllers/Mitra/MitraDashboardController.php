@@ -25,7 +25,18 @@ class MitraDashboardController extends Controller
                           ->whereNotIn('status_pesanan', ['Selesai', 'Batal', 'Dibatalkan'])
                           ->count();
 
-        return view('mitra.dashboard', compact('mitra', 'totalPesanan', 'pesananAktif'));
+        // Ambil order aktif (accepted/menuju/dikerjakan/selesai_mitra/belum_selesai)
+        // untuk tampilkan progress section + handle banner "Belum Selesai"
+        $activeTracking = DB::table('order_trackings as ot')
+            ->leftJoin('pelanggans as p', 'ot.pelanggan_id', '=', 'p.id_pelanggan')
+            ->select('ot.id', 'ot.order_type', 'ot.status', 'ot.harga_jual',
+                     'p.nama_pelanggan as pelanggan_nama', 'p.no_wa as pelanggan_wa')
+            ->where('ot.mitra_id', $mitra->id_mitra)
+            ->whereIn('ot.status', ['accepted','menuju_lokasi','di_lokasi','dikerjakan','selesai_mitra','belum_selesai'])
+            ->orderByDesc('ot.id')
+            ->first();
+
+        return view('mitra.dashboard', compact('mitra', 'totalPesanan', 'pesananAktif', 'activeTracking'));
     }
 
     public function pesanan()

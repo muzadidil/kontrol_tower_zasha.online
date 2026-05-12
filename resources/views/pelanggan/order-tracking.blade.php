@@ -86,6 +86,24 @@
         <span id="message-text"></span>
     </div>
 
+    {{-- Section: Belum Selesai (menunggu mitra perbaiki) --}}
+    <div id="section-belum-selesai" style="display:none;margin-bottom:var(--s4);">
+        <div class="z-card" style="padding:var(--s3);text-align:center;background:#fff7ed;border:2px solid #fb923c;">
+            <i class="bi bi-tools" style="color:#ea580c;font-size:34px;"></i>
+            <div style="font-size:16px;font-weight:800;color:var(--text-main);margin-top:var(--s2);">
+                Mitra Sedang Memperbaiki
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:var(--s1);line-height:1.5;">
+                Anda sudah menandai pekerjaan belum selesai. Mitra akan kembali memperbaiki.
+                Tunggu hingga mitra menandai selesai kembali untuk konfirmasi pembayaran.
+            </div>
+            <div style="margin-top:var(--s3);padding:var(--s2);background:white;border-radius:var(--r2);font-size:11px;color:var(--text-muted);">
+                <i class="bi bi-whatsapp text-success me-1"></i>
+                Hubungi mitra langsung jika perlu koordinasi lebih lanjut.
+            </div>
+        </div>
+    </div>
+
 </div>
 
 {{-- Modal Konfirmasi --}}
@@ -282,13 +300,22 @@ function updateProgress(status) {
 
 function updateConfirmationSection(status) {
     const confirmSection = document.getElementById('section-confirm');
+    const belumSelesaiSection = document.getElementById('section-belum-selesai');
+
+    // Reset both sections
+    confirmSection.style.display = 'none';
+    if (belumSelesaiSection) belumSelesaiSection.style.display = 'none';
+
     if (status === 'selesai_mitra') {
         confirmSection.style.display = 'block';
     } else if (status === 'belum_selesai') {
-        confirmSection.style.display = 'none';
-        showStatusMessage('Mitra akan memperbaiki pekerjaannya. Silakan tunggu update selanjutnya.');
+        // Tampilkan info bahwa mitra sedang memperbaiki, jangan tutup info
+        if (belumSelesaiSection) belumSelesaiSection.style.display = 'block';
     } else if (status === 'selesai') {
-        confirmSection.style.display = 'none';
+        // Sudah selesai, redirect ke riwayat untuk rating
+        setTimeout(() => {
+            window.location.href = '{{ route("pelanggan.riwayat.index") }}';
+        }, 2000);
     }
 }
 

@@ -164,6 +164,22 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Section: Pelanggan tandai BELUM SELESAI --}}
+            <div id="belum-selesai-banner" style="display:none;margin-top:var(--fib-4);padding:var(--fib-3);background:#fff7ed;border:2px solid #fb923c;border-radius:var(--r-lg);">
+                <div style="display:flex;align-items:center;gap:var(--fib-2);margin-bottom:var(--fib-2);">
+                    <i class="bi bi-exclamation-triangle-fill" style="color:#ea580c;font-size:21px;"></i>
+                    <div style="font-weight:800;color:var(--ink);font-size:var(--t-sm);">
+                        Pelanggan Tandai Belum Selesai
+                    </div>
+                </div>
+                <div style="font-size:var(--t-xs);color:var(--ink-soft);line-height:1.5;margin-bottom:var(--fib-3);">
+                    Pelanggan menunggu Anda menyelesaikan perbaikan. Klik tombol di bawah setelah selesai memperbaiki.
+                </div>
+                <button onclick="markPerbaikanSelesai()" style="width:100%;background:#10b981;color:white;border:none;border-radius:var(--r-md);padding:var(--fib-3);font-weight:800;font-size:var(--t-xs);cursor:pointer;">
+                    <i class="bi bi-check-circle-fill me-1"></i>Saya Sudah Memperbaiki
+                </button>
+            </div>
         </div>
     </div>
 
@@ -641,7 +657,64 @@ document.addEventListener('DOMContentLoaded', () => {
     @if($mitra->status_online === 'online')
         startPolling();
     @endif
+
+    // Restore active order section dari server-side data
+    @isset($activeTracking)
+        @if($activeTracking)
+            currentOrderId = {{ $activeTracking->id }};
+            currentOrderData = {
+                id: {{ $activeTracking->id }},
+                order_type: '{{ $activeTracking->order_type }}',
+                status: '{{ $activeTracking->status }}',
+                pelanggan: {
+                    nama: '{{ addslashes($activeTracking->pelanggan_nama ?? "Pelanggan") }}',
+                    no_wa: '{{ $activeTracking->pelanggan_wa ?? "" }}'
+                }
+            };
+
+            // Tampilkan active order section
+            const activeEl = document.getElementById('active-order');
+            if (activeEl) activeEl.style.display = 'block';
+
+            // Restore progress steps berdasar status
+            restoreProgressFromStatus('{{ $activeTracking->status }}');
+
+            // Tampilkan banner "Belum Selesai" jika perlu
+            @if($activeTracking->status === 'belum_selesai')
+                const banner = document.getElementById('belum-selesai-banner');
+                if (banner) banner.style.display = 'block';
+            @endif
+
+            // Start polling kalau order sudah selesai_mitra atau belum_selesai
+            @if(in_array($activeTracking->status, ['selesai_mitra', 'belum_selesai']))
+                startActiveOrderPolling();
+            @endif
+        @endif
+    @endisset
 });
+
+// Restore progress steps tampilan dari status active order
+function restoreProgressFromStatus(status) {
+    const orderedSteps = ['menuju_lokasi', 'di_lokasi', 'dikerjakan', 'selesai_mitra'];
+    const statusMap = {
+        'accepted': -1,           // belum mulai progress
+        'menuju_lokasi': 0,
+        'di_lokasi': 1,
+        'dikerjakan': 2,
+        'selesai_mitra': 3,
+        'belum_selesai': 3,       // tetap di selesai_mitra
+    };
+    const currentIdx = statusMap[status] ?? -1;
+
+    document.querySelectorAll('.progress-step').forEach((el, idx) => {
+        el.classList.remove('active', 'completed');
+        if (idx < currentIdx) {
+            el.classList.add('completed');
+        } else if (idx === currentIdx) {
+            el.classList.add(status === 'selesai_mitra' ? 'completed' : 'active');
+        }
+    });
+}
 
 // Show Active Order Section - only on dashboard
 function showActiveOrder(trackingId) {
@@ -683,12 +756,106 @@ async function updateProgress(status) {
         if (data.success) {
             markStepCompleted(status);
             markNextStepActive(status);
+
+            // Setelah klik "Pekerjaan Selesai" → mulai polling apakah pelanggan
+            // konfirmasi atau klik "Belum Selesai"
+            if (status === 'selesai_mitra') {
+                startActiveOrderPolling();
+            }
         } else {
             showToast(data.message || 'Gagal update status', 'error');
         }
     } catch (e) {
         console.error('Update progress failed:', e);
         showToast('Gagal update status, coba lagi', 'error');
+    }
+}
+
+// Mitra menandai perbaikan selesai (setelah pelanggan klik "Belum Selesai")
+async function markPerbaikanSelesai() {
+    if (!currentOrderId) {
+        showToast('Tidak ada order aktif', 'warning');
+        return;
+    }
+
+    const confirmed = confirm('Yakin perbaikan sudah selesai? Pelanggan akan diminta konfirmasi ulang.');
+    if (!confirmed) return;
+
+    try {
+        const resp = await fetch('{{ route("mitra.order.progress") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                tracking_id: currentOrderId,
+                status: 'selesai_mitra'
+            })
+        });
+
+        const data = await resp.json();
+
+        if (data.success) {
+            // Sembunyikan banner belum selesai
+            const banner = document.getElementById('belum-selesai-banner');
+            if (banner) banner.style.display = 'none';
+            showToast('Berhasil! Pelanggan akan diminta konfirmasi ulang.', 'success');
+        } else {
+            showToast(data.message || 'Gagal update status', 'error');
+        }
+    } catch (e) {
+        console.error('markPerbaikanSelesai failed:', e);
+        showToast('Gagal kirim status, coba lagi', 'error');
+    }
+}
+
+// Polling status active order untuk deteksi pelanggan klik "Belum Selesai" / konfirmasi
+let activeOrderPollingInterval = null;
+
+function startActiveOrderPolling() {
+    if (activeOrderPollingInterval) return;
+    activeOrderPollingInterval = setInterval(checkActiveOrderStatus, 5000);
+    checkActiveOrderStatus();
+}
+
+function stopActiveOrderPolling() {
+    if (activeOrderPollingInterval) {
+        clearInterval(activeOrderPollingInterval);
+        activeOrderPollingInterval = null;
+    }
+}
+
+async function checkActiveOrderStatus() {
+    if (!currentOrderId) {
+        stopActiveOrderPolling();
+        return;
+    }
+
+    try {
+        const resp = await fetch(`/order-tracking/${currentOrderId}/status`);
+        if (!resp.ok) return;
+        const data = await resp.json();
+
+        if (!data.success) return;
+
+        const banner = document.getElementById('belum-selesai-banner');
+
+        if (data.status === 'belum_selesai') {
+            // Pelanggan tandai belum selesai → tampilkan banner perbaikan
+            if (banner) banner.style.display = 'block';
+        } else if (data.status === 'selesai') {
+            // Pelanggan konfirmasi selesai → reload untuk update tampilan
+            stopActiveOrderPolling();
+            if (banner) banner.style.display = 'none';
+            showToast('Pelanggan mengonfirmasi selesai! Saldo bertambah.', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else if (data.status === 'selesai_mitra') {
+            // Sembunyikan banner kalau sudah balik ke selesai_mitra
+            if (banner) banner.style.display = 'none';
+        }
+    } catch (e) {
+        console.error('checkActiveOrderStatus failed:', e);
     }
 }
 

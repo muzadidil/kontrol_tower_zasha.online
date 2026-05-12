@@ -77,7 +77,7 @@ class MitraOrderController extends Controller
                 'komisi_zasha' => $pending->komisi_zasha,
                 'pelanggan' => [
                     'id' => $pending->pelanggan->id_pelanggan,
-                    'nama' => $pending->pelanggan->name,
+                    'nama' => $pending->pelanggan->nama_panggilan ?? $pending->pelanggan->nama_pelanggan ?? 'Pelanggan',
                     'no_wa' => $pending->pelanggan->no_wa ?? '-',
                 ],
                 'created_at' => $pending->created_at,
