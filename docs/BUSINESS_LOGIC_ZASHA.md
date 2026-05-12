@@ -96,16 +96,98 @@
 
 ---
 
-## BAB 6 — DISPUTE & KOMPLAIN
+## BAB 6 — KONFIRMASI PEKERJAAN & SIKLUS PERBAIKAN
 
-### 6.1 Alur Dispute
+### 6.1 Alur Normal — Pelanggan Konfirmasi Selesai
+1. Mitra menyelesaikan pekerjaan → klik **"Pekerjaan Selesai"** di dashboard
+2. Status order tracking: `dikerjakan` → `selesai_mitra`
+3. Pelanggan menerima notifikasi + tombol **"Konfirmasi Pekerjaan"** muncul di halaman tracking
+4. Pelanggan cek hasil kerja → klik **"Pekerjaan Selesai"**
+5. Sistem:
+   - Status tracking: `selesai_mitra` → `selesai`
+   - Escrow status: `held` → `released`
+   - Saldo mitra bertambah sebesar `harga_modal` (harga jual − komisi Zasha)
+   - Status mitra: `sibuk` → `online` (otomatis bebas terima order baru)
+6. Pelanggan diarahkan ke halaman riwayat untuk memberi rating
+
+### 6.2 Alur Perbaikan — Pelanggan Tandai "Belum Selesai"
+Jika pelanggan merasa pekerjaan belum sesuai/belum tuntas:
+
+1. Pelanggan klik **"Belum Selesai"** di halaman tracking
+2. Sistem:
+   - Status tracking: `selesai_mitra` → `belum_selesai`
+   - Status mitra: `sibuk` → `online` **(mitra langsung bebas terima order baru, tidak terjebak)**
+   - Escrow tetap `held` — dana belum dilepas
+   - Notifikasi dikirim ke mitra
+3. Halaman tracking pelanggan menampilkan banner orange **"Mitra Sedang Memperbaiki"**
+4. Dashboard mitra menampilkan banner orange **"Pelanggan Tandai Belum Selesai"** + tombol **"Saya Sudah Memperbaiki"**
+5. Mitra perbaiki kerjaan → klik **"Saya Sudah Memperbaiki"**
+6. Sistem:
+   - Status tracking: `belum_selesai` → `selesai_mitra` (siklus ulang)
+   - Pelanggan kembali melihat tombol **"Konfirmasi Pekerjaan"**
+7. Siklus dapat berulang sampai pelanggan klik **"Pekerjaan Selesai"** atau membuka **dispute** (lihat BAB 7)
+
+### 6.3 Aturan Penting Siklus Perbaikan
+- **Mitra TIDAK terjebak status `sibuk`** saat order dalam `belum_selesai` — bebas terima order baru
+- **Order `belum_selesai` tetap aktif** di dashboard mitra sampai diselesaikan atau dijadikan dispute
+- **Dana tetap ditahan di Escrow** sampai status `selesai` atau resolusi dispute
+- Tidak ada batasan jumlah siklus perbaikan, tapi sebaiknya pelanggan buka dispute jika sudah 2× perbaikan masih bermasalah
+
+### 6.4 Auto-Konfirmasi (Order Inden)
+- Berlaku khusus untuk Order Inden
+- Jika pelanggan **tidak konfirmasi dalam 24 jam** setelah jadwal selesai dan tidak menandai "Belum Selesai", sistem otomatis cairkan dana ke mitra
+- Tujuan: mitra tidak menunggu terlalu lama
+
+---
+
+## BAB 7 — DISPUTE & KOMPLAIN
+
+### 7.1 Kapan Dispute Dibuka
 - Pelanggan punya waktu **24 jam** setelah jadwal selesai untuk mengajukan komplain
-- Zasha bertindak sebagai **penengah**
+- Biasanya dibuka setelah siklus perbaikan (BAB 6.2) gagal menghasilkan kepuasan
 - Selama dispute berlangsung, dana tetap ditahan di Escrow
 
-### 6.2 Resolusi
-- Jika terbukti mitra bersalah → dana kembali ke pelanggan
-- Jika tidak terbukti → dana cair ke mitra
+### 7.2 Peran Zasha
+- Zasha bertindak sebagai **penengah** netral
+- Mengumpulkan bukti dari kedua belah pihak (foto, chat, deskripsi keluhan)
+- Memutuskan resolusi berdasarkan bukti
+
+### 7.3 Resolusi
+| Hasil | Konsekuensi |
+|---|---|
+| Mitra terbukti bersalah | Dana kembali ke pelanggan (escrow refunded) |
+| Mitra tidak bersalah | Dana cair ke mitra (escrow released) |
+
+---
+
+## BAB 8 — STATUS ORDER TRACKING (REFERENSI TEKNIS)
+
+### 8.1 Daftar Status & Transisi Valid
+| Status | Arti | Transisi Berikutnya |
+|--------|------|---------------------|
+| `pending` | Menunggu mitra menerima | `accepted`, `ditolak_mitra` |
+| `accepted` | Mitra menerima order | `menuju_lokasi` |
+| `menuju_lokasi` | Mitra dalam perjalanan | `di_lokasi` |
+| `di_lokasi` | Mitra tiba di lokasi | `dikerjakan` |
+| `dikerjakan` | Pekerjaan sedang berlangsung | `selesai_mitra` |
+| `selesai_mitra` | Mitra menandai selesai, menunggu konfirmasi pelanggan | `selesai`, `belum_selesai` |
+| `belum_selesai` | Pelanggan menandai belum selesai, menunggu mitra perbaiki | `dikerjakan`, `selesai_mitra` |
+| `selesai` | Order selesai, dana sudah cair (TERMINAL) | — |
+| `ditolak_mitra` | Mitra menolak order (TERMINAL) | — |
+| `dibatalkan` | Order dibatalkan (TERMINAL) | — |
+| `dispute` | Sedang dalam dispute | `selesai`, `dibatalkan` |
+
+### 8.2 Status Online Mitra
+| Status | Arti | Bisa Terima Order Baru? |
+|--------|------|------------------------|
+| `online` | Siap terima order | ✅ Ya |
+| `sibuk` | Sedang mengerjakan order aktif (status: accepted s/d dikerjakan) | ❌ Tidak |
+| `offline` | Mitra tidak aktif | ❌ Tidak |
+| `suspended` | Akun dibekukan karena pelanggaran | ❌ Tidak |
+
+**Catatan penting:** Status mitra otomatis kembali ke `online` saat:
+- Order selesai (`selesai`) — pelanggan konfirmasi
+- Order ditandai `belum_selesai` oleh pelanggan — supaya tidak terjebak menunggu
 
 ---
 
