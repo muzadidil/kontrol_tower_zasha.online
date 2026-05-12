@@ -23,6 +23,7 @@ use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Mitra\MitraDashboardController;
 use App\Http\Controllers\Mitra\MitraOrderController;
 use App\Http\Controllers\Mitra\MitraVerifikasiController;
+use App\Http\Controllers\Mitra\MitraTarifController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Pelanggan\PelangganOrderTrackingController;
 use App\Http\Controllers\Pelanggan\WfhController as PelangganWfhController;
@@ -171,6 +172,17 @@ Route::middleware('auth:mitra')->prefix('mitra')->name('mitra.')->group(function
     Route::prefix('verifikasi')->name('verifikasi.')->group(function () {
         Route::get('/status', [MitraVerifikasiController::class, 'status'])->name('status');
         Route::post('/upload', [MitraVerifikasiController::class, 'upload'])->name('upload');
+    });
+
+    // Tarif Layanan (butuh fitur 'tarif')
+    Route::prefix('tarif')->name('tarif.')->middleware('feature:tarif')->group(function () {
+        Route::get('/', [MitraTarifController::class, 'index'])->name('index');
+        Route::get('/create', [MitraTarifController::class, 'create'])->name('create');
+        Route::post('/', [MitraTarifController::class, 'store'])->name('store');
+        Route::get('/{tarif}/edit', [MitraTarifController::class, 'edit'])->name('edit');
+        Route::put('/{tarif}', [MitraTarifController::class, 'update'])->name('update');
+        Route::post('/{tarif}/toggle', [MitraTarifController::class, 'toggle'])->name('toggle');
+        Route::delete('/{tarif}', [MitraTarifController::class, 'destroy'])->name('destroy');
     });
 
     // Order Tracking API (polling untuk notifikasi)
