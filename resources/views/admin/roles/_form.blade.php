@@ -159,9 +159,12 @@
 
 @php
     $grouped = [
-        'Order Modules'  => ['order-tenaga', 'order-jastip', 'order-wfh', 'order-service', 'order-inden'],
-        'Tools'          => ['maps', 'sparepart', 'portfolio'],
-        'Common'         => ['saldo', 'profil', 'pesanan-list'],
+        'Order Modules' => ['order-tenaga', 'order-jastip', 'order-wfh', 'order-service', 'order-inden'],
+        'Tools'         => ['maps', 'sparepart', 'portfolio', 'kamera', 'dokumen'],
+        'Keuangan'      => ['saldo', 'topup', 'withdraw', 'tarif'],
+        'Laporan'       => ['laporan-harian', 'laporan-bulanan'],
+        'Reputasi'      => ['rating', 'ulasan'],
+        'Common'        => ['profil', 'pesanan-list', 'jadwal'],
     ];
 @endphp
 

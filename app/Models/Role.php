@@ -38,22 +38,52 @@ class Role extends Model
      * Edit di sini saat menambah fitur baru.
      */
     public const ALL_FEATURES = [
-        // Order modules
-        'order-tenaga'  => 'Terima Order Tenaga',
-        'order-jastip'  => 'Terima Order Jastip',
-        'order-wfh'     => 'Terima Order WFH/Digital',
-        'order-service' => 'Terima Order Service/Teknisi',
-        'order-inden'   => 'Terima Order Inden (Booking)',
+        // ── Order Modules ──
+        'order-tenaga'    => 'Terima Order Tenaga',
+        'order-jastip'    => 'Terima Order Jastip',
+        'order-wfh'       => 'Terima Order WFH/Digital',
+        'order-service'   => 'Terima Order Service/Teknisi',
+        'order-inden'     => 'Terima Order Inden (Booking)',
 
-        // Tools
-        'maps'          => 'Akses Peta & Stops',
-        'sparepart'     => 'Kelola Sparepart',
-        'portfolio'     => 'Upload Portfolio',
+        // ── Tools ──
+        'maps'            => 'Akses Peta & Stops',
+        'sparepart'       => 'Kelola Sparepart',
+        'portfolio'       => 'Upload Portfolio',
+        'kamera'          => 'Foto Bukti Pekerjaan',
+        'dokumen'         => 'Upload Dokumen Kerja',
 
-        // Common
-        'saldo'         => 'Akses Saldo & Withdraw',
-        'profil'        => 'Edit Profil',
-        'pesanan-list'  => 'Lihat Daftar Pesanan',
+        // ── Keuangan ──
+        'saldo'           => 'Lihat Saldo',
+        'topup'           => 'Top Up Saldo',
+        'withdraw'        => 'Tarik Dana',
+        'tarif'           => 'Edit Tarif Layanan',
+
+        // ── Laporan ──
+        'laporan-harian'  => 'Laporan Penghasilan Harian',
+        'laporan-bulanan' => 'Laporan Penghasilan Bulanan',
+
+        // ── Reputasi ──
+        'rating'          => 'Lihat Rating & Ulasan',
+        'ulasan'          => 'Balas Ulasan Pelanggan',
+
+        // ── Common ──
+        'profil'          => 'Edit Profil',
+        'pesanan-list'    => 'Lihat Daftar Pesanan',
+        'jadwal'          => 'Atur Jam Kerja & Availability',
+    ];
+
+    /**
+     * Master daftar semua syarat verifikasi yang bisa di-assign ke role.
+     */
+    public const ALL_VERIFIKASI = [
+        'ktp'        => 'KTP (Kartu Tanda Penduduk)',
+        'foto-wajah' => 'Foto Selfie Verifikasi',
+        'sim'        => 'SIM A / SIM C',
+        'skck'       => 'SKCK (Surat Keterangan Catatan Kepolisian)',
+        'sertifikat' => 'Sertifikat Keahlian',
+        'github'     => 'Link Github / Portfolio Online',
+        'portfolio'  => 'File Portfolio',
+        'ijazah'     => 'Ijazah / Diploma',
     ];
 
     public function features(): HasMany
